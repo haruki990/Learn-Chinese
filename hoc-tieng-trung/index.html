@@ -1,0 +1,3112 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Học tiếng Trung</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--tx:#1d1d1b;--mut:#6b6a64;--ac:#c0392b;--ac2:#2d6a4f;--bd:#e3e1d8;--bad:#b3261e;--gold:#b7791f}
+@media(prefers-color-scheme:dark){:root{--bg:#161614;--card:#222220;--tx:#efeee8;--mut:#9c9a91;--ac:#e8705f;--ac2:#6cc29a;--bd:#38372f;--bad:#f2867d;--gold:#e9b44c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,"Segoe UI","Microsoft YaHei",sans-serif}
+.wrap{max-width:660px;margin:0 auto;padding:16px}
+.top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 12px}
+.top h1{font-size:19px;margin:0;flex:1;min-width:150px}
+.chip{padding:5px 10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:99px;font-size:14px;cursor:pointer;white-space:nowrap}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+nav button{flex:1;min-width:84px;padding:9px 6px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:8px;cursor:pointer;font-size:14px}
+nav button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:22px 18px;text-align:center;margin-bottom:10px}
+.han{font-size:72px;line-height:1.2;font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif}
+.pin{font-size:26px;color:var(--ac)}
+.mean{font-size:20px;margin-top:6px}
+.mut{color:var(--mut);font-size:14px}
+.kb-hint{text-align:center;font-size:12px;margin-top:8px}@media (hover:none){.kb-hint{display:none}}
+.row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.row button,.btn{flex:1;padding:11px 8px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:8px;cursor:pointer;font-size:15px}
+.btn.pri,.row button.pri{background:var(--ac);color:#fff;border-color:var(--ac)}
+.r0{border-color:var(--bad)!important;color:var(--bad)}.r3{border-color:var(--ac2)!important;color:var(--ac2)}
+.opt{display:block;width:100%;margin-top:8px;padding:12px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);cursor:pointer;font-size:16px}
+.kn{display:inline-block;min-width:20px;height:20px;line-height:20px;margin-right:8px;border-radius:5px;background:var(--bd);color:var(--mut);font-size:12px;text-align:center;vertical-align:middle}
+.pyn{font-size:13px;color:var(--ac)}.opt.ok .pyn,.opt.no .pyn,.opt.ok .kn,.opt.no .kn{color:#fff}
+.opt.ok{background:var(--ac2);color:#fff;border-color:var(--ac2)}.opt.no{background:var(--bad);color:#fff;border-color:var(--bad)}
+input,select{width:100%;padding:11px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);font-size:17px;margin-top:8px}
+.sp{font-size:22px;background:none;border:none;cursor:pointer;color:var(--mut)}
+.bar{height:10px;background:var(--bd);border-radius:99px;overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;background:var(--ac2);border-radius:99px;transition:width .3s}
+.bar.g i{background:var(--gold)}
+.lv{display:flex;gap:10px;align-items:center;text-align:left;cursor:pointer;width:100%;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:12px;padding:14px;margin-bottom:10px;font-size:16px}
+.lv b{font-size:26px;color:var(--ac);min-width:62px}
+.les{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;font-size:16px}
+.les .n{width:38px;height:38px;border-radius:50%;background:var(--bd);display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.les.done .n{background:var(--ac2);color:#fff}.les.cur{border-color:var(--ac)}.les.cur .n{background:var(--ac);color:#fff}
+.les.lock{opacity:.5;cursor:not-allowed}
+.les small{display:block;color:var(--mut)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px;text-align:center;font-size:13px;color:var(--mut)}
+.stat b{display:block;font-size:24px;color:var(--ac)}
+.chest{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:12px;padding:12px 14px;margin-bottom:8px;font-size:16px;cursor:pointer}
+.chest .ic{font-size:30px}.chest.ready{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold) inset}.chest.lock{opacity:.5;cursor:default}
+.story p{text-align:left;margin:10px 0}
+.story .hz{font-size:34px;font-family:"Microsoft YaHei","PingFang SC",sans-serif}
+.idiom{background:var(--bg);border-radius:10px;padding:10px;margin-top:12px;text-align:left;font-size:15px}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}
+td,th{padding:7px 4px;border-bottom:1px solid var(--bd);text-align:left}
+.ult-ov{position:fixed;inset:0;z-index:99;background:radial-gradient(circle at 50% 45%,rgba(28,20,48,.86),rgba(4,3,10,.94));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;animation:ultIn .2s ease-out}
+.ult-ov.out{opacity:0;transition:opacity .2s}.ult-ov canvas{display:block;max-width:100%}
+.ult-vd{display:block;max-width:100%;border-radius:16px;box-shadow:0 0 28px rgba(255,255,255,.25)}
+@keyframes ultIn{from{opacity:0}to{opacity:1}}
+.ult-nm{color:#fff;text-align:center;line-height:1.25;text-shadow:0 0 12px var(--uc),0 0 3px #000}.ult-nm .han{display:block;font-size:30px;letter-spacing:4px}.ult-nm small{display:block;opacity:.85}.ult-nm b{font-size:16px}
+.ult-sk{color:rgba(255,255,255,.55);font-size:12px}
+.ult-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}
+.ult-c{display:flex;flex-direction:column;align-items:center;gap:1px;padding:10px 6px;border:2px solid var(--bd);border-left:5px solid var(--uc);text-align:center}
+.ult-c.me{border-color:var(--uc);box-shadow:0 0 0 2px var(--uc) inset}.ult-c .ue{font-size:24px}.ult-c b{font-size:14px}.ult-c small{font-size:11px}
+.hide{display:none}.ok-t{color:var(--ac2)}.bad-t{color:var(--bad)}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
+.pills button{padding:6px 11px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:99px;font-size:13px;cursor:pointer}
+.pills button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.stage{position:relative;margin:auto;border-radius:20px}
+.frm{padding:5px;border-radius:20px}
+.petb{position:absolute;right:-6px;bottom:-6px;font-size:40px;filter:drop-shadow(0 2px 3px #0006)}
+@keyframes glow{0%,100%{box-shadow:0 0 10px 2px var(--gc)}50%{box-shadow:0 0 30px 9px var(--gc)}}
+.gi{display:inline-block;border-radius:10px;padding:2px;flex:none}
+.item{display:flex;align-items:center;gap:12px;border:1px solid var(--bd);background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:8px;text-align:left}
+.item .pv{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:26px;flex:none;border:1px solid var(--bd)}
+.item .nm{flex:1}.item .nm small{display:block;color:var(--mut)}
+.item button{padding:8px 12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:8px;cursor:pointer;font-size:14px;white-space:nowrap}
+.item button.buy{background:var(--gold);color:#fff;border-color:var(--gold)}
+.item button.use{background:var(--ac2);color:#fff;border-color:var(--ac2)}
+.item button:disabled{opacity:.45;cursor:not-allowed}
+.sw{display:inline-block;width:30px;height:30px;border-radius:50%;border:2px solid var(--bd);cursor:pointer;margin:3px}
+.sw.on{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac)}
+.realm{display:flex;align-items:center;gap:10px;padding:6px 4px;border-bottom:1px solid var(--bd);font-size:15px;text-align:left}
+.realm.cur{background:var(--bg);font-weight:700}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:11px 16px;border-radius:12px;font-size:15px;max-width:92vw;text-align:center;opacity:0;pointer-events:none;transition:opacity .3s;z-index:9}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top">
+  <h1>📖 Học tiếng Trung</h1>
+  <button class="chip" id="lvchip"></button>
+  <span class="chip" id="strk"></span>
+  <span class="chip" id="xpc" style="cursor:pointer"></span>
+  <span class="chip" id="lsc"></span>
+  <span class="chip" id="cmb" style="display:none"></span>
+</div>
+<nav id="nav">
+<button data-t="home" class="on">Học</button>
+<button data-t="review">Ôn tập</button>
+<button data-t="practice">Luyện tập</button>
+<button data-t="hero">🧙 Tu tiên</button>
+<button data-t="fight">⚔️ Chiến đấu</button>
+<button data-t="reward">🎁 Thưởng</button>
+<button data-t="words">Từ vựng</button>
+</nav>
+<div id="view"></div>
+</div>
+<div id="toast"></div>
+
+<script src="audio-data.js"></script>
+<script src="avatars-data.js"></script>
+<script src="game-data.js"></script>
+<script src="rpg-data.js"></script>
+<script src="rpg.js"></script>
+<script src="ult-fx.js"></script>
+<script>
+// Báo lỗi dễ hiểu nếu các file đi kèm không tải được (ví dụ xem trước dạng data: trong khung trình duyệt của Claude)
+window.addEventListener("DOMContentLoaded", function () {
+  if (typeof rpgInit !== "function" || !window.GIMG || !window.AVATARS || !window.AUDIO) {
+    document.getElementById("view").innerHTML = "<div class=\"card\" style=\"text-align:left\"><b>⚠️ Không tải được các file dữ liệu đi kèm</b><p>Trang này đang mở ở chế độ không đọc được file cạnh <code>index.html</code> (rpg.js, game-data.js, audio-data.js...).</p><p><b>Cách mở đúng:</b><br>1. Nhấp đúp <code>index.html</code> để mở bằng Chrome/Edge, hoặc<br>2. Chạy <code>start.bat</code> trong thư mục <code>hoc-tieng-trung</code> (cần Python).</p></div>";
+  }
+});
+</script>
+<script>
+// ================= Dữ liệu từ vựng =================
+// Dòng "#N" đánh dấu bắt đầu cấp HSK N. Id từ = s0, s1,... theo thứ tự dòng từ (bỏ dòng #). KHÔNG chèn từ vào giữa, chỉ thêm cuối.
+const SEED = `
+我|wǒ|tôi
+你|nǐ|bạn
+他|tā|anh ấy
+她|tā|cô ấy
+我们|wǒmen|chúng tôi
+你们|nǐmen|các bạn
+他们|tāmen|họ
+这|zhè|này
+那|nà|kia
+谁|shéi|ai
+什么|shénme|cái gì
+哪|nǎ|nào
+哪儿|nǎr|ở đâu
+几|jǐ|mấy
+多少|duōshao|bao nhiêu
+怎么|zěnme|thế nào / sao
+怎么样|zěnmeyàng|như thế nào
+为什么|wèishénme|tại sao
+你好|nǐ hǎo|xin chào
+谢谢|xièxie|cảm ơn
+不客气|bú kèqi|đừng khách sáo
+对不起|duìbuqǐ|xin lỗi
+没关系|méi guānxi|không sao
+再见|zàijiàn|tạm biệt
+请|qǐng|xin mời / làm ơn
+是|shì|là
+不|bù|không
+没有|méiyǒu|không có
+有|yǒu|có
+在|zài|ở / đang
+好|hǎo|tốt
+很|hěn|rất
+太|tài|quá
+都|dōu|đều
+也|yě|cũng
+和|hé|và
+的|de|của
+了|le|rồi
+吗|ma|không (trợ từ nghi vấn)
+呢|ne|thế (trợ từ)
+一|yī|một
+二|èr|hai
+三|sān|ba
+四|sì|bốn
+五|wǔ|năm
+六|liù|sáu
+七|qī|bảy
+八|bā|tám
+九|jiǔ|chín
+十|shí|mười
+百|bǎi|trăm
+千|qiān|nghìn
+个|gè|cái (lượng từ)
+岁|suì|tuổi
+年|nián|năm
+月|yuè|tháng
+日|rì|ngày
+号|hào|số / mùng
+星期|xīngqī|tuần / thứ
+今天|jīntiān|hôm nay
+明天|míngtiān|ngày mai
+昨天|zuótiān|hôm qua
+现在|xiànzài|bây giờ
+点|diǎn|giờ / chấm
+分钟|fēnzhōng|phút
+上午|shàngwǔ|buổi sáng
+中午|zhōngwǔ|buổi trưa
+下午|xiàwǔ|buổi chiều
+晚上|wǎnshang|buổi tối
+时候|shíhou|lúc / khi
+人|rén|người
+朋友|péngyou|bạn bè
+老师|lǎoshī|giáo viên
+学生|xuésheng|học sinh
+同学|tóngxué|bạn học
+医生|yīshēng|bác sĩ
+先生|xiānsheng|ông / ngài
+小姐|xiǎojie|cô / quý cô
+爸爸|bàba|bố
+妈妈|māma|mẹ
+儿子|érzi|con trai
+女儿|nǚ'ér|con gái
+哥哥|gēge|anh trai
+姐姐|jiějie|chị gái
+弟弟|dìdi|em trai
+妹妹|mèimei|em gái
+家|jiā|nhà / gia đình
+中国|Zhōngguó|Trung Quốc
+越南|Yuènán|Việt Nam
+北京|Běijīng|Bắc Kinh
+学校|xuéxiào|trường học
+医院|yīyuàn|bệnh viện
+商店|shāngdiàn|cửa hàng
+饭店|fàndiàn|nhà hàng / khách sạn
+家里|jiā lǐ|trong nhà
+上|shàng|trên
+下|xià|dưới
+前面|qiánmiàn|phía trước
+后面|hòumiàn|phía sau
+里|lǐ|trong
+吃|chī|ăn
+喝|hē|uống
+饭|fàn|cơm
+水|shuǐ|nước
+茶|chá|trà
+咖啡|kāfēi|cà phê
+菜|cài|món ăn / rau
+米饭|mǐfàn|cơm trắng
+水果|shuǐguǒ|trái cây
+苹果|píngguǒ|quả táo
+鸡蛋|jīdàn|trứng gà
+牛奶|niúnǎi|sữa bò
+杯子|bēizi|cái cốc
+看|kàn|xem / nhìn
+听|tīng|nghe
+说|shuō|nói
+读|dú|đọc
+写|xiě|viết
+学习|xuéxí|học tập
+工作|gōngzuò|công việc / làm việc
+买|mǎi|mua
+卖|mài|bán
+去|qù|đi
+来|lái|đến
+回|huí|về
+坐|zuò|ngồi / đi (xe)
+开|kāi|mở / lái
+住|zhù|ở / sống
+叫|jiào|gọi / tên là
+喜欢|xǐhuan|thích
+爱|ài|yêu
+想|xiǎng|muốn / nhớ
+会|huì|biết / sẽ
+能|néng|có thể
+知道|zhīdào|biết
+认识|rènshi|quen biết
+觉得|juéde|cảm thấy
+做|zuò|làm
+打电话|dǎ diànhuà|gọi điện thoại
+睡觉|shuìjiào|ngủ
+漂亮|piàoliang|đẹp
+大|dà|to
+小|xiǎo|nhỏ
+多|duō|nhiều
+少|shǎo|ít
+高兴|gāoxìng|vui
+冷|lěng|lạnh
+热|rè|nóng
+新|xīn|mới
+贵|guì|đắt
+便宜|piányi|rẻ
+快|kuài|nhanh
+慢|màn|chậm
+忙|máng|bận
+累|lèi|mệt
+钱|qián|tiền
+块|kuài|đồng (tệ)
+东西|dōngxi|đồ vật
+书|shū|sách
+汉语|Hànyǔ|tiếng Hán
+字|zì|chữ
+电话|diànhuà|điện thoại
+电脑|diànnǎo|máy tính
+电视|diànshì|ti vi
+电影|diànyǐng|phim
+手机|shǒujī|điện thoại di động
+衣服|yīfu|quần áo
+车|chē|xe
+出租车|chūzūchē|taxi
+飞机|fēijī|máy bay
+天气|tiānqì|thời tiết
+下雨|xià yǔ|trời mưa
+狗|gǒu|con chó
+猫|māo|con mèo
+名字|míngzi|tên
+#2
+吧|ba|nhé (trợ từ)
+啊|a|à (trợ từ)
+但是|dànshì|nhưng
+因为|yīnwèi|bởi vì
+所以|suǒyǐ|cho nên
+如果|rúguǒ|nếu
+或者|huòzhě|hoặc
+还|hái|còn / vẫn
+就|jiù|thì / liền
+才|cái|mới (muộn)
+已经|yǐjīng|đã
+正在|zhèngzài|đang
+从|cóng|từ
+到|dào|đến
+对|duì|đúng / đối với
+给|gěi|cho
+跟|gēn|cùng / theo
+比|bǐ|so với
+离|lí|cách
+往|wǎng|hướng về
+让|ràng|để / bảo
+把|bǎ|(giới từ bǎ)
+被|bèi|bị
+过|guò|qua / từng
+着|zhe|(trợ từ trạng thái)
+别|bié|đừng
+一起|yìqǐ|cùng nhau
+一下|yíxià|một chút
+一点儿|yìdiǎnr|một chút
+非常|fēicháng|vô cùng
+最|zuì|nhất
+真|zhēn|thật
+更|gèng|càng
+可以|kěyǐ|có thể / được
+应该|yīnggāi|nên
+需要|xūyào|cần
+希望|xīwàng|hy vọng
+愿意|yuànyì|bằng lòng
+告诉|gàosu|nói cho biết
+问|wèn|hỏi
+回答|huídá|trả lời
+问题|wèntí|câu hỏi / vấn đề
+介绍|jièshào|giới thiệu
+帮助|bāngzhù|giúp đỡ
+欢迎|huānyíng|chào đón
+等|děng|đợi
+找|zhǎo|tìm
+送|sòng|tặng / đưa
+带|dài|mang
+拿|ná|cầm
+穿|chuān|mặc
+玩|wán|chơi
+唱歌|chànggē|hát
+跳舞|tiàowǔ|nhảy múa
+游泳|yóuyǒng|bơi
+跑步|pǎobù|chạy bộ
+踢足球|tī zúqiú|đá bóng
+打篮球|dǎ lánqiú|chơi bóng rổ
+运动|yùndòng|vận động / thể thao
+旅游|lǚyóu|du lịch
+上班|shàngbān|đi làm
+下班|xiàbān|tan làm
+起床|qǐchuáng|thức dậy
+洗|xǐ|rửa / giặt
+休息|xiūxi|nghỉ ngơi
+练习|liànxí|luyện tập
+考试|kǎoshì|thi
+准备|zhǔnbèi|chuẩn bị
+了解|liǎojiě|hiểu rõ
+懂|dǒng|hiểu
+忘|wàng|quên
+笑|xiào|cười
+哭|kū|khóc
+走|zǒu|đi bộ / đi
+跑|pǎo|chạy
+站|zhàn|đứng
+进|jìn|vào
+出|chū|ra
+意思|yìsi|ý nghĩa
+事情|shìqing|sự việc
+课|kè|bài học
+教室|jiàoshì|lớp học
+作业|zuòyè|bài tập
+题|tí|đề / câu hỏi
+外|wài|ngoài
+旁边|pángbiān|bên cạnh
+左边|zuǒbian|bên trái
+右边|yòubian|bên phải
+东|dōng|đông
+南|nán|nam
+西|xī|tây
+北|běi|bắc
+路|lù|đường
+机场|jīchǎng|sân bay
+火车站|huǒchēzhàn|ga tàu
+公共汽车|gōnggòng qìchē|xe buýt
+自行车|zìxíngchē|xe đạp
+地铁|dìtiě|tàu điện ngầm
+公司|gōngsī|công ty
+房间|fángjiān|phòng
+门|mén|cửa
+桌子|zhuōzi|cái bàn
+椅子|yǐzi|cái ghế
+手表|shǒubiǎo|đồng hồ đeo tay
+眼睛|yǎnjing|mắt
+头|tóu|đầu
+身体|shēntǐ|cơ thể
+生病|shēngbìng|bị bệnh
+药|yào|thuốc
+面条|miàntiáo|mì sợi
+羊肉|yángròu|thịt cừu
+鱼|yú|cá
+饮料|yǐnliào|đồ uống
+饿|è|đói
+渴|kě|khát
+好吃|hǎochī|ngon
+好看|hǎokàn|đẹp mắt / hay
+好玩|hǎowán|vui
+远|yuǎn|xa
+近|jìn|gần
+长|cháng|dài
+黑|hēi|đen
+白|bái|trắng
+红|hóng|đỏ
+旧|jiù|cũ
+老|lǎo|già / cũ
+年轻|niánqīng|trẻ
+胖|pàng|béo
+晴|qíng|trời nắng
+阴|yīn|âm u
+雪|xuě|tuyết
+春天|chūntiān|mùa xuân
+夏天|xiàtiān|mùa hè
+秋天|qiūtiān|mùa thu
+冬天|dōngtiān|mùa đông
+生日|shēngrì|sinh nhật
+快乐|kuàilè|vui vẻ
+礼物|lǐwù|quà
+报纸|bàozhǐ|báo
+歌|gē|bài hát
+#3
+阿姨|āyí|dì / cô
+爱好|àihào|sở thích
+安静|ānjìng|yên tĩnh
+班|bān|lớp
+搬|bān|chuyển / dọn
+半|bàn|nửa
+帮忙|bāngmáng|giúp đỡ
+包|bāo|túi / bao
+饱|bǎo|no
+北方|běifāng|phương bắc
+比赛|bǐsài|trận đấu
+笔记本|bǐjìběn|sổ tay / laptop
+必须|bìxū|phải
+变化|biànhuà|biến đổi
+表示|biǎoshì|biểu thị
+表演|biǎoyǎn|biểu diễn
+别人|biéren|người khác
+宾馆|bīnguǎn|khách sạn
+菜单|càidān|thực đơn
+参加|cānjiā|tham gia
+草|cǎo|cỏ
+层|céng|tầng
+差|chà|kém / thiếu
+超市|chāoshì|siêu thị
+成绩|chéngjì|thành tích / điểm
+城市|chéngshì|thành phố
+迟到|chídào|đến muộn
+除了|chúle|ngoài ra
+船|chuán|thuyền
+词典|cídiǎn|từ điển
+聪明|cōngming|thông minh
+打扫|dǎsǎo|quét dọn
+打算|dǎsuàn|dự định
+担心|dānxīn|lo lắng
+蛋糕|dàngāo|bánh kem
+当然|dāngrán|dĩ nhiên
+地方|dìfang|nơi
+地图|dìtú|bản đồ
+电梯|diàntī|thang máy
+电子邮件|diànzǐ yóujiàn|email
+动物|dòngwù|động vật
+短|duǎn|ngắn
+段|duàn|đoạn
+锻炼|duànliàn|rèn luyện
+多么|duōme|biết bao
+发|fā|gửi / phát
+发烧|fāshāo|sốt
+发现|fāxiàn|phát hiện
+方便|fāngbiàn|tiện lợi
+放|fàng|đặt / thả
+放心|fàngxīn|yên tâm
+分|fēn|phân / điểm
+附近|fùjìn|gần đây
+复习|fùxí|ôn tập
+干净|gānjìng|sạch sẽ
+感冒|gǎnmào|cảm lạnh
+刚才|gāngcái|vừa nãy
+根据|gēnjù|căn cứ
+关心|guānxīn|quan tâm
+关系|guānxi|quan hệ
+关于|guānyú|về (vấn đề)
+国家|guójiā|quốc gia
+过去|guòqù|quá khứ / đi qua
+孩子|háizi|đứa trẻ
+害怕|hàipà|sợ
+会议|huìyì|cuộc họp
+记得|jìde|nhớ
+季节|jìjié|mùa
+检查|jiǎnchá|kiểm tra
+简单|jiǎndān|đơn giản
+健康|jiànkāng|sức khỏe
+见面|jiànmiàn|gặp mặt
+讲|jiǎng|kể / giảng
+教|jiāo|dạy
+角|jiǎo|góc / hào
+脚|jiǎo|bàn chân
+接|jiē|đón / nhận
+节目|jiémù|chương trình
+节日|jiérì|ngày lễ
+结婚|jiéhūn|kết hôn
+结束|jiéshù|kết thúc
+解决|jiějué|giải quyết
+借|jiè|mượn
+经常|jīngcháng|thường xuyên
+经过|jīngguò|đi qua / trải qua
+经理|jīnglǐ|giám đốc
+久|jiǔ|lâu
+决定|juédìng|quyết định
+可爱|kě'ài|đáng yêu
+刻|kè|mười lăm phút
+客人|kèrén|khách
+空调|kōngtiáo|điều hòa
+裤子|kùzi|quần
+筷子|kuàizi|đũa
+蓝|lán|xanh dương
+老人|lǎorén|người già
+离开|líkāi|rời đi
+历史|lìshǐ|lịch sử
+脸|liǎn|mặt
+聊天|liáotiān|trò chuyện
+邻居|línjū|hàng xóm
+楼|lóu|tòa nhà / tầng
+绿|lǜ|xanh lá
+马上|mǎshàng|ngay lập tức
+满意|mǎnyì|hài lòng
+帽子|màozi|mũ
+面包|miànbāo|bánh mì
+明白|míngbai|hiểu
+#1
+零|líng|không (số 0)
+两|liǎng|hai (đứng trước lượng từ)
+第|dì|thứ (số thứ tự)
+每|měi|mỗi
+些|xiē|một vài
+位|wèi|vị (lượng từ lịch sự)
+次|cì|lần
+万|wàn|vạn, mười nghìn
+今年|jīnnián|năm nay
+去年|qùnián|năm ngoái
+明年|míngnián|sang năm
+早上|zǎoshang|buổi sáng sớm
+天|tiān|ngày / trời
+周末|zhōumò|cuối tuần
+星期一|xīngqī yī|thứ hai
+星期二|xīngqī èr|thứ ba
+星期三|xīngqī sān|thứ tư
+星期四|xīngqī sì|thứ năm
+星期五|xīngqī wǔ|thứ sáu
+星期六|xīngqī liù|thứ bảy
+星期天|xīngqītiān|chủ nhật
+小时|xiǎoshí|giờ đồng hồ
+以前|yǐqián|trước đây
+以后|yǐhòu|sau này
+刚|gāng|vừa mới
+早|zǎo|sớm
+晚|wǎn|muộn
+常常|chángcháng|thường xuyên
+天天|tiāntiān|hằng ngày
+一会儿|yíhuìr|một lát
+一共|yígòng|tổng cộng
+爷爷|yéye|ông nội
+奶奶|nǎinai|bà nội
+叔叔|shūshu|chú
+男|nán|nam
+女|nǚ|nữ
+男人|nánrén|đàn ông
+女人|nǚrén|phụ nữ
+小孩|xiǎohái|trẻ nhỏ
+丈夫|zhàngfu|chồng
+妻子|qīzi|vợ
+家人|jiārén|người nhà
+老板|lǎobǎn|ông chủ
+大家|dàjiā|mọi người
+自己|zìjǐ|bản thân
+姓|xìng|họ
+房子|fángzi|ngôi nhà
+中国人|Zhōngguórén|người Trung Quốc
+越南人|Yuènánrén|người Việt Nam
+外国|wàiguó|nước ngoài
+早上好|zǎoshang hǎo|chào buổi sáng
+晚安|wǎn'ān|chúc ngủ ngon
+请问|qǐngwèn|xin hỏi
+好的|hǎo de|được rồi
+行|xíng|được, ổn
+不用|búyòng|không cần
+没问题|méi wèntí|không vấn đề gì
+麻烦|máfan|phiền, làm phiền
+抱歉|bàoqiàn|xin lỗi
+这里|zhèlǐ|ở đây
+那里|nàlǐ|ở đó
+这儿|zhèr|đây
+那儿|nàr|đó
+左|zuǒ|trái
+右|yòu|phải
+中间|zhōngjiān|ở giữa
+对面|duìmiàn|đối diện
+外面|wàimiàn|bên ngoài
+里面|lǐmiàn|bên trong
+上面|shàngmiàn|phía trên
+下面|xiàmiàn|phía dưới
+山|shān|núi
+河|hé|sông
+海|hǎi|biển
+树|shù|cây
+花|huā|hoa
+天空|tiānkōng|bầu trời
+地|dì|đất
+云|yún|mây
+风|fēng|gió
+雨|yǔ|mưa
+太阳|tàiyáng|mặt trời
+月亮|yuèliang|mặt trăng
+星星|xīngxing|ngôi sao
+火|huǒ|lửa
+石头|shítou|đá
+窗|chuāng|cửa sổ
+床|chuáng|giường
+公园|gōngyuán|công viên
+银行|yínháng|ngân hàng
+邮局|yóujú|bưu điện
+图书馆|túshūguǎn|thư viện
+厕所|cèsuǒ|nhà vệ sinh
+厨房|chúfáng|nhà bếp
+城|chéng|thành, thành phố
+村|cūn|làng
+肉|ròu|thịt
+牛肉|niúròu|thịt bò
+猪肉|zhūròu|thịt heo
+鸡|jī|gà
+汤|tāng|canh, súp
+饺子|jiǎozi|sủi cảo
+包子|bāozi|bánh bao
+糖|táng|đường, kẹo
+盐|yán|muối
+酒|jiǔ|rượu
+啤酒|píjiǔ|bia
+果汁|guǒzhī|nước ép
+西瓜|xīguā|dưa hấu
+香蕉|xiāngjiāo|chuối
+米|mǐ|gạo
+早饭|zǎofàn|bữa sáng
+午饭|wǔfàn|bữa trưa
+晚饭|wǎnfàn|bữa tối
+甜|tián|ngọt
+酸|suān|chua
+苦|kǔ|đắng
+辣|là|cay
+咸|xián|mặn
+碗|wǎn|bát
+盘子|pánzi|đĩa
+刀|dāo|dao, đao
+瓶|píng|chai, lọ
+鞋|xié|giày
+伞|sǎn|cái ô
+眼镜|yǎnjìng|kính mắt
+手|shǒu|tay
+耳朵|ěrduo|tai
+鼻子|bízi|mũi
+嘴|zuǐ|miệng
+心|xīn|tim, lòng
+牙|yá|răng
+头发|tóufa|tóc
+腿|tuǐ|chân (cẳng)
+笔|bǐ|bút
+纸|zhǐ|giấy
+本子|běnzi|quyển vở
+词|cí|từ
+句子|jùzi|câu
+课本|kèběn|sách giáo khoa
+英语|Yīngyǔ|tiếng Anh
+中文|Zhōngwén|tiếng Trung
+读书|dúshū|đọc sách, đi học
+说话|shuōhuà|nói chuyện
+唱|chàng|hát
+画|huà|vẽ
+学|xué|học
+要|yào|muốn, cần
+用|yòng|dùng
+打|dǎ|đánh
+睡|shuì|ngủ
+怕|pà|sợ
+跳|tiào|nhảy
+飞|fēi|bay
+死|sǐ|chết
+活|huó|sống
+病|bìng|bệnh, ốm
+打开|dǎkāi|mở ra
+关|guān|đóng
+见|jiàn|gặp, thấy
+看见|kànjiàn|nhìn thấy
+听见|tīngjiàn|nghe thấy
+回来|huílái|trở về (về phía này)
+回去|huíqù|quay về (về phía kia)
+出来|chūlái|đi ra
+进去|jìnqù|đi vào
+起来|qǐlái|đứng dậy
+听说|tīngshuō|nghe nói
+喊|hǎn|gọi to, hét
+记|jì|nhớ, ghi
+帮|bāng|giúp
+坏|huài|xấu, hỏng
+错|cuò|sai
+难|nán|khó
+容易|róngyì|dễ
+高|gāo|cao
+矮|ǎi|thấp (người)
+瘦|shòu|gầy
+脏|zāng|bẩn
+重|zhòng|nặng
+轻|qīng|nhẹ
+黄|huáng|màu vàng
+紫|zǐ|màu tím
+颜色|yánsè|màu sắc
+美|měi|đẹp
+帅|shuài|đẹp trai
+笨|bèn|ngốc
+勇敢|yǒnggǎn|dũng cảm
+有名|yǒumíng|nổi tiếng
+有意思|yǒu yìsi|thú vị
+无聊|wúliáo|chán
+下雪|xià xuě|tuyết rơi
+刮风|guā fēng|nổi gió
+车站|chēzhàn|bến xe, ga
+火车|huǒchē|tàu hỏa
+马路|mǎlù|đường phố
+红灯|hóngdēng|đèn đỏ
+票|piào|vé
+机票|jīpiào|vé máy bay
+电影院|diànyǐngyuàn|rạp chiếu phim
+上网|shàngwǎng|lên mạng
+微信|Wēixìn|WeChat
+照片|zhàopiàn|ảnh
+音乐|yīnyuè|âm nhạc
+游戏|yóuxì|trò chơi
+剑|jiàn|kiếm
+仙|xiān|tiên
+魔|mó|ma
+妖|yāo|yêu
+神|shén|thần
+龙|lóng|rồng
+凤|fèng|phượng hoàng
+道|dào|đạo, con đường
+气|qì|khí, hơi
+力|lì|sức lực
+命|mìng|mệnh, mạng sống
+王|wáng|vua
+英雄|yīngxióng|anh hùng
+师父|shīfu|sư phụ
+师兄|shīxiōng|sư huynh
+师姐|shījiě|sư tỷ
+师弟|shīdì|sư đệ
+师妹|shīmèi|sư muội
+弟子|dìzǐ|đệ tử
+功夫|gōngfu|công phu, võ thuật
+强|qiáng|mạnh
+弱|ruò|yếu
+厉害|lìhai|lợi hại, giỏi
+怪物|guàiwù|quái vật
+梦|mèng|giấc mơ
+鬼|guǐ|ma, quỷ
+杀|shā|giết
+白云|báiyún|mây trắng
+#2
+原因|yuányīn|nguyên nhân
+办法|bànfǎ|cách, biện pháp
+机会|jīhuì|cơ hội
+经验|jīngyàn|kinh nghiệm
+感觉|gǎnjué|cảm giác
+习惯|xíguàn|thói quen
+声音|shēngyīn|âm thanh
+世界|shìjiè|thế giới
+地球|dìqiú|trái đất
+自然|zìrán|tự nhiên
+森林|sēnlín|rừng
+湖|hú|hồ
+岛|dǎo|đảo
+桥|qiáo|cầu
+社会|shèhuì|xã hội
+文化|wénhuà|văn hóa
+故事|gùshi|câu chuyện
+传说|chuánshuō|truyền thuyết
+梦想|mèngxiǎng|ước mơ
+生活|shēnghuó|cuộc sống
+生意|shēngyi|buôn bán
+价格|jiàgé|giá cả
+打折|dǎzhé|giảm giá
+付钱|fùqián|trả tiền
+零钱|língqián|tiền lẻ
+礼貌|lǐmào|lịch sự
+方向|fāngxiàng|phương hướng
+位置|wèizhi|vị trí
+速度|sùdù|tốc độ
+重要|zhòngyào|quan trọng
+特别|tèbié|đặc biệt
+一定|yídìng|nhất định
+可能|kěnéng|có thể, khả năng
+本来|běnlái|vốn dĩ
+突然|tūrán|đột nhiên
+终于|zhōngyú|cuối cùng cũng
+一直|yìzhí|luôn luôn, suốt
+总是|zǒngshì|lúc nào cũng
+有时候|yǒu shíhou|đôi khi
+几乎|jīhū|gần như
+差不多|chàbuduō|xấp xỉ, gần như
+其实|qíshí|thật ra
+比较|bǐjiào|khá, tương đối
+一样|yíyàng|giống nhau
+一般|yìbān|thông thường
+以为|yǐwéi|tưởng rằng
+相信|xiāngxìn|tin tưởng
+同意|tóngyì|đồng ý
+举行|jǔxíng|tổ chức
+努力|nǔlì|nỗ lực
+成功|chénggōng|thành công
+失败|shībài|thất bại
+开始|kāishǐ|bắt đầu
+继续|jìxù|tiếp tục
+变|biàn|thay đổi
+变成|biànchéng|biến thành
+发生|fāshēng|xảy ra
+出现|chūxiàn|xuất hiện
+消失|xiāoshī|biến mất
+保护|bǎohù|bảo vệ
+打败|dǎbài|đánh bại
+战斗|zhàndòu|chiến đấu
+战争|zhànzhēng|chiến tranh
+敌人|dírén|kẻ địch
+危险|wēixiǎn|nguy hiểm
+安全|ānquán|an toàn
+自由|zìyóu|tự do
+和平|hépíng|hòa bình
+力气|lìqi|sức lực
+受伤|shòushāng|bị thương
+力量|lìliàng|sức mạnh
+修炼|xiūliàn|tu luyện
+修|xiū|sửa, tu
+炼|liàn|luyện
+灵|líng|linh, thiêng
+灵气|língqì|linh khí
+功法|gōngfǎ|công pháp
+法术|fǎshù|pháp thuật
+法宝|fǎbǎo|pháp bảo
+武器|wǔqì|vũ khí
+飞剑|fēijiàn|phi kiếm
+门派|ménpài|môn phái
+宗门|zōngmén|tông môn
+掌门|zhǎngmén|chưởng môn
+山门|shānmén|sơn môn
+洞府|dòngfǔ|động phủ
+秘密|mìmì|bí mật
+宝物|bǎowù|bảo vật
+宝藏|bǎozàng|kho báu
+魔法|mófǎ|ma pháp
+魔王|mówáng|ma vương
+妖怪|yāoguài|yêu quái
+神仙|shénxiān|thần tiên
+仙人|xiānrén|tiên nhân
+天地|tiāndì|trời đất
+天下|tiānxià|thiên hạ
+江湖|jiānghú|giang hồ
+武林|wǔlín|võ lâm
+大侠|dàxiá|đại hiệp
+剑法|jiànfǎ|kiếm pháp
+武功|wǔgōng|võ công
+天才|tiāncái|thiên tài
+命运|mìngyùn|vận mệnh
+灵魂|línghún|linh hồn
+精神|jīngshén|tinh thần
+爱情|àiqíng|tình yêu
+友谊|yǒuyì|tình bạn
+想念|xiǎngniàn|nhớ nhung
+生气|shēngqì|tức giận
+害羞|hàixiū|xấu hổ
+感动|gǎndòng|cảm động
+紧张|jǐnzhāng|căng thẳng
+放松|fàngsōng|thư giãn
+幸福|xìngfú|hạnh phúc
+伤心|shāngxīn|đau lòng
+奇怪|qíguài|kỳ lạ
+热闹|rènao|náo nhiệt
+舒服|shūfu|dễ chịu, thoải mái
+离婚|líhūn|ly hôn
+同事|tóngshì|đồng nghiệp
+警察|jǐngchá|cảnh sát
+司机|sījī|tài xế
+服务员|fúwùyuán|nhân viên phục vụ
+护士|hùshi|y tá
+工人|gōngrén|công nhân
+农民|nóngmín|nông dân
+记者|jìzhě|phóng viên
+作家|zuòjiā|nhà văn
+画家|huàjiā|họa sĩ
+歌手|gēshǒu|ca sĩ
+演员|yǎnyuán|diễn viên
+运动员|yùndòngyuán|vận động viên
+修理|xiūlǐ|sửa chữa
+洗澡|xǐzǎo|tắm
+刷牙|shuāyá|đánh răng
+做饭|zuòfàn|nấu cơm
+逛街|guàngjiē|đi dạo phố
+聚会|jùhuì|buổi tụ họp
+请客|qǐngkè|mời khách
+放假|fàngjià|nghỉ lễ
+毕业|bìyè|tốt nghiệp
+迷路|mílù|lạc đường
+堵车|dǔchē|kẹt xe
+排队|páiduì|xếp hàng
+预习|yùxí|chuẩn bị bài
+翻译|fānyì|dịch
+邀请|yāoqǐng|mời
+拒绝|jùjué|từ chối
+答应|dāying|đồng ý, nhận lời
+提醒|tíxǐng|nhắc nhở
+注意|zhùyì|chú ý
+小心|xiǎoxīn|cẩn thận
+后悔|hòuhuǐ|hối hận
+原谅|yuánliàng|tha thứ
+道歉|dàoqiàn|xin lỗi
+感谢|gǎnxiè|cảm ơn (trang trọng)
+祝|zhù|chúc
+祝贺|zhùhè|chúc mừng
+头疼|tóuténg|đau đầu
+肚子|dùzi|bụng
+咳嗽|késou|ho
+打针|dǎzhēn|tiêm
+温度|wēndù|nhiệt độ
+度|dù|độ
+春节|Chūnjié|Tết Nguyên Đán
+中秋节|Zhōngqiūjié|Tết Trung Thu
+周|zhōu|tuần
+古代|gǔdài|thời cổ đại
+现代|xiàndài|hiện đại
+将来|jiānglái|tương lai
+最近|zuìjìn|gần đây
+当时|dāngshí|lúc đó
+#3
+境界|jìngjiè|cảnh giới
+修为|xiūwéi|tu vi
+突破|tūpò|đột phá
+闭关|bìguān|bế quan
+渡劫|dùjié|độ kiếp
+天劫|tiānjié|thiên kiếp
+炼丹|liàndān|luyện đan
+丹药|dānyào|đan dược
+炼器|liànqì|luyện khí (rèn pháp khí)
+灵根|línggēn|linh căn
+元神|yuánshén|nguyên thần
+金丹|jīndān|kim đan
+元婴|yuányīng|nguyên anh
+真气|zhēnqì|chân khí
+内力|nèilì|nội lực
+心法|xīnfǎ|tâm pháp
+阵法|zhènfǎ|trận pháp
+符|fú|bùa
+符咒|fúzhòu|bùa chú
+咒语|zhòuyǔ|thần chú
+结界|jiéjiè|kết giới
+法力|fǎlì|pháp lực
+神通|shéntōng|thần thông
+仙术|xiānshù|tiên thuật
+魔道|módào|ma đạo
+正道|zhèngdào|chính đạo
+邪|xié|tà, tà ác
+正义|zhèngyì|chính nghĩa
+善良|shànliáng|lương thiện
+邪恶|xié'è|tà ác
+杀气|shāqì|sát khí
+剑气|jiànqì|kiếm khí
+剑客|jiànkè|kiếm khách
+仙子|xiānzǐ|tiên tử
+仙女|xiānnǚ|tiên nữ
+神兽|shénshòu|thần thú
+灵兽|língshòu|linh thú
+妖兽|yāoshòu|yêu thú
+灵石|língshí|linh thạch
+灵药|língyào|linh dược
+灵山|língshān|linh sơn
+仙境|xiānjìng|tiên cảnh
+凡人|fánrén|phàm nhân
+凡间|fánjiān|phàm gian
+天界|tiānjiè|thiên giới
+地狱|dìyù|địa ngục
+轮回|lúnhuí|luân hồi
+因果|yīnguǒ|nhân quả
+长生|chángshēng|trường sinh
+天命|tiānmìng|thiên mệnh
+机缘|jīyuán|cơ duyên
+缘分|yuánfèn|duyên phận
+传承|chuánchéng|truyền thừa
+拜师|bàishī|bái sư
+收徒|shōutú|thu đồ đệ
+徒弟|túdì|đồ đệ
+同门|tóngmén|đồng môn
+比武|bǐwǔ|tỷ võ
+擂台|lèitái|lôi đài
+挑战|tiǎozhàn|thách đấu
+对手|duìshǒu|đối thủ
+胜利|shènglì|chiến thắng
+报仇|bàochóu|báo thù
+保卫|bǎowèi|bảo vệ, bảo vệ quê hương
+牺牲|xīshēng|hy sinh
+勇气|yǒngqì|dũng khí
+坚持|jiānchí|kiên trì
+放弃|fàngqì|từ bỏ
+经济|jīngjì|kinh tế
+政府|zhèngfǔ|chính phủ
+法律|fǎlǜ|pháp luật
+环境|huánjìng|môi trường
+科学|kēxué|khoa học
+技术|jìshù|kỹ thuật
+网络|wǎngluò|mạng
+信息|xìnxī|thông tin
+新闻|xīnwén|tin tức
+广告|guǎnggào|quảng cáo
+节约|jiéyuē|tiết kiệm
+浪费|làngfèi|lãng phí
+污染|wūrǎn|ô nhiễm
+温暖|wēnnuǎn|ấm áp
+凉快|liángkuai|mát mẻ
+潮湿|cháoshī|ẩm ướt
+干燥|gānzào|khô hanh
+明显|míngxiǎn|rõ ràng, rõ rệt
+清楚|qīngchu|rõ ràng
+准确|zhǔnquè|chính xác
+详细|xiángxì|chi tiết
+普通|pǔtōng|bình thường
+正常|zhèngcháng|bình thường
+特点|tèdiǎn|đặc điểm
+作用|zuòyòng|tác dụng
+影响|yǐngxiǎng|ảnh hưởng
+结果|jiéguǒ|kết quả
+过程|guòchéng|quá trình
+条件|tiáojiàn|điều kiện
+方面|fāngmiàn|mặt, phương diện
+内容|nèiróng|nội dung
+目的|mùdì|mục đích
+目标|mùbiāo|mục tiêu
+计划|jìhuà|kế hoạch
+任务|rènwu|nhiệm vụ
+责任|zérèn|trách nhiệm
+态度|tàidu|thái độ
+性格|xìnggé|tính cách
+印象|yìnxiàng|ấn tượng
+想法|xiǎngfǎ|suy nghĩ
+意见|yìjiàn|ý kiến
+建议|jiànyì|đề nghị
+要求|yāoqiú|yêu cầu
+批评|pīpíng|phê bình
+表扬|biǎoyáng|khen ngợi
+鼓励|gǔlì|khích lệ
+理解|lǐjiě|thấu hiểu
+支持|zhīchí|ủng hộ
+反对|fǎnduì|phản đối
+选择|xuǎnzé|lựa chọn
+改变|gǎibiàn|thay đổi
+提高|tígāo|nâng cao
+增加|zēngjiā|tăng thêm
+减少|jiǎnshǎo|giảm bớt
+发展|fāzhǎn|phát triển
+进步|jìnbù|tiến bộ
+完成|wánchéng|hoàn thành
+获得|huòdé|đạt được
+手续|shǒuxù|thủ tục
+地址|dìzhǐ|địa chỉ
+护照|hùzhào|hộ chiếu
+签证|qiānzhèng|thị thực (visa)
+行李|xíngli|hành lý
+出发|chūfā|xuất phát
+到达|dàodá|đến nơi
+参观|cānguān|tham quan
+景色|jǐngsè|cảnh sắc
+导游|dǎoyóu|hướng dẫn viên
+公斤|gōngjīn|ki-lô-gam
+公里|gōnglǐ|ki-lô-mét
+比如|bǐrú|ví dụ
+例如|lìrú|ví dụ như
+偶尔|ǒu'ěr|thỉnh thoảng
+随便|suíbiàn|tùy ý
+互相|hùxiāng|lẫn nhau
+全部|quánbù|toàn bộ
+部分|bùfen|một phần
+另外|lìngwài|ngoài ra
+并且|bìngqiě|hơn nữa
+而且|érqiě|mà còn
+不但|búdàn|không những
+#4
+安排|ānpái|sắp xếp
+按时|ànshí|đúng giờ
+按照|ànzhào|theo, dựa theo
+保证|bǎozhèng|đảm bảo
+报名|bàomíng|đăng ký
+抱|bào|ôm
+本领|běnlǐng|bản lĩnh, tài năng
+笨蛋|bèndàn|đồ ngốc
+毕竟|bìjìng|dù sao thì, rốt cuộc
+标准|biāozhǔn|tiêu chuẩn
+表格|biǎogé|bảng biểu
+不得不|bùdébù|đành phải, không thể không
+不管|bùguǎn|bất kể, dù
+不过|búguò|có điều, nhưng
+不仅|bùjǐn|không chỉ
+材料|cáiliào|tài liệu, vật liệu
+餐厅|cāntīng|nhà hàng, phòng ăn
+尝|cháng|nếm thử
+长城|Chángchéng|Vạn Lý Trường Thành
+场|chǎng|trận, buổi (lượng từ)
+超过|chāoguò|vượt quá
+吵|chǎo|ồn ào, cãi nhau
+吵架|chǎojià|cãi nhau
+成为|chéngwéi|trở thành
+诚实|chéngshí|thành thật
+乘坐|chéngzuò|đi (xe, máy bay)
+吃惊|chījīng|giật mình, ngạc nhiên
+重新|chóngxīn|làm lại từ đầu
+抽烟|chōuyān|hút thuốc
+出差|chūchāi|đi công tác
+出生|chūshēng|sinh ra
+厨师|chúshī|đầu bếp
+窗户|chuānghu|cửa sổ
+粗心|cūxīn|cẩu thả, sơ ý
+打扮|dǎban|trang điểm, ăn diện
+打扰|dǎrǎo|làm phiền
+打印|dǎyìn|in (tài liệu)
+打招呼|dǎ zhāohu|chào hỏi
+大概|dàgài|đại khái, khoảng
+大使馆|dàshǐguǎn|đại sứ quán
+大约|dàyuē|khoảng chừng
+戴|dài|đeo, đội
+当|dāng|làm, đảm nhiệm
+当地|dāngdì|địa phương
+导致|dǎozhì|dẫn đến
+到处|dàochù|khắp nơi
+到底|dàodǐ|rốt cuộc
+得意|déyì|đắc ý
+登机牌|dēngjīpái|thẻ lên máy bay
+等待|děngdài|chờ đợi
+低|dī|thấp
+底|dǐ|đáy, cuối (tháng, năm)
+地点|dìdiǎn|địa điểm
+调查|diàochá|điều tra
+掉|diào|rơi, mất
+丢|diū|đánh mất
+动作|dòngzuò|động tác
+堵|dǔ|tắc, chặn
+断|duàn|gãy, đứt
+对话|duìhuà|đối thoại
+对于|duìyú|đối với
+儿童|értóng|nhi đồng, trẻ em
+发烧友|fāshāoyǒu|người mê, fan cuồng
+法官|fǎguān|thẩm phán
+翻|fān|lật, lật trang
+烦恼|fánnǎo|phiền não
+反正|fǎnzhèng|dù sao thì
+方法|fāngfǎ|phương pháp
+房东|fángdōng|chủ nhà (cho thuê)
+放暑假|fàng shǔjià|nghỉ hè
+份|fèn|phần, suất
+丰富|fēngfù|phong phú
+否则|fǒuzé|nếu không thì
+符合|fúhé|phù hợp
+父亲|fùqīn|cha, phụ thân
+母亲|mǔqīn|mẹ, mẫu thân
+付款|fùkuǎn|thanh toán
+负责|fùzé|phụ trách
+复印|fùyìn|photo, sao chụp
+复杂|fùzá|phức tạp
+富|fù|giàu
+改变主意|gǎibiàn zhǔyi|đổi ý
+干杯|gānbēi|cạn ly
+赶|gǎn|đuổi kịp, vội
+敢|gǎn|dám
+感情|gǎnqíng|tình cảm
+干活儿|gàn huór|làm việc
+刚刚|gānggāng|vừa mới
+高级|gāojí|cao cấp
+各|gè|mỗi, các
+个子|gèzi|vóc dáng
+工资|gōngzī|tiền lương
+共同|gòngtóng|chung, cùng nhau
+够|gòu|đủ
+购物|gòuwù|mua sắm
+估计|gūjì|ước tính, chắc là
+鼓掌|gǔzhǎng|vỗ tay
+顾客|gùkè|khách hàng
+故意|gùyì|cố ý
+挂|guà|treo
+关键|guānjiàn|then chốt, mấu chốt
+观众|guānzhòng|khán giả
+管理|guǎnlǐ|quản lý
+光|guāng|ánh sáng; hết sạch
+广播|guǎngbō|phát thanh
+逛|guàng|dạo
+规定|guīdìng|quy định
+国际|guójì|quốc tế
+果然|guǒrán|quả nhiên
+海洋|hǎiyáng|đại dương
+寒假|hánjià|kỳ nghỉ đông
+汗|hàn|mồ hôi
+航班|hángbān|chuyến bay
+好处|hǎochù|lợi ích
+好像|hǎoxiàng|hình như
+号码|hàomǎ|số (điện thoại...)
+合格|hégé|đạt chuẩn
+合适|héshì|thích hợp
+盒子|hézi|hộp
+后来|hòulái|sau đó, về sau
+厚|hòu|dày
+忽然|hūrán|bỗng nhiên
+互联网|hùliánwǎng|internet
+怀疑|huáiyí|nghi ngờ
+回忆|huíyì|hồi ức, nhớ lại
+活动|huódòng|hoạt động
+活泼|huópō|hoạt bát
+积极|jījí|tích cực
+积累|jīlěi|tích lũy
+基础|jīchǔ|cơ sở, nền tảng
+激动|jīdòng|xúc động, kích động
+及时|jíshí|kịp thời
+即使|jíshǐ|cho dù
+寄|jì|gửi (thư, đồ)
+既然|jìrán|đã... thì
+技术员|jìshùyuán|kỹ thuật viên
+加班|jiābān|tăng ca
+加油|jiāyóu|cố lên; đổ xăng
+家具|jiājù|đồ nội thất
+假|jiǎ|giả
+价钱|jiàqián|giá cả
+坚强|jiānqiáng|kiên cường
+减肥|jiǎnféi|giảm cân
+奖金|jiǎngjīn|tiền thưởng
+降低|jiàngdī|hạ thấp
+交|jiāo|giao, nộp; kết (bạn)
+交通|jiāotōng|giao thông
+骄傲|jiāo'ào|kiêu ngạo; tự hào
+教育|jiàoyù|giáo dục
+接受|jiēshòu|tiếp nhận
+节|jié|tiết, đốt; lễ
+节省|jiéshěng|tiết kiệm
+解释|jiěshì|giải thích
+尽管|jǐnguǎn|mặc dù; cứ việc
+紧|jǐn|chặt
+禁止|jìnzhǐ|cấm
+精彩|jīngcǎi|đặc sắc
+京剧|jīngjù|kinh kịch
+竞争|jìngzhēng|cạnh tranh
+竟然|jìngrán|vậy mà, không ngờ
+镜子|jìngzi|cái gương
+究竟|jiūjìng|rốt cuộc
+举办|jǔbàn|tổ chức
+聚|jù|tụ tập
+距离|jùlí|khoảng cách
+开玩笑|kāi wánxiào|đùa
+看法|kànfǎ|cách nhìn, quan điểm
+考虑|kǎolǜ|cân nhắc
+棵|kē|cây (lượng từ)
+科学家|kēxuéjiā|nhà khoa học
+可怜|kělián|đáng thương
+可惜|kěxī|đáng tiếc
+肯定|kěndìng|chắc chắn
+空气|kōngqì|không khí
+恐怕|kǒngpà|e rằng
+口|kǒu|miệng; nhân khẩu
+哭笑不得|kū xiào bù dé|dở khóc dở cười
+苦恼|kǔnǎo|khổ não
+困|kùn|buồn ngủ
+扩大|kuòdà|mở rộng
+垃圾|lājī|rác
+拉|lā|kéo
+辣椒|làjiāo|ớt
+来不及|láibují|không kịp
+来得及|láidejí|kịp
+懒|lǎn|lười
+浪漫|làngmàn|lãng mạn
+老实|lǎoshi|thật thà
+冷静|lěngjìng|bình tĩnh
+礼拜天|lǐbàitiān|chủ nhật
+理发|lǐfà|cắt tóc
+理想|lǐxiǎng|lý tưởng
+连|lián|ngay cả
+联系|liánxì|liên lạc
+凉|liáng|mát, nguội
+亮|liàng|sáng
+聊|liáo|tán gẫu
+另一半|lìng yíbàn|nửa kia (người yêu, vợ/chồng)
+流利|liúlì|lưu loát
+流泪|liúlèi|rơi lệ
+留学|liúxué|du học
+乱|luàn|lộn xộn
+律师|lǜshī|luật sư
+马虎|mǎhu|qua loa, cẩu thả
+满|mǎn|đầy
+毛巾|máojīn|khăn mặt
+美丽|měilì|xinh đẹp
+梦见|mèngjiàn|mơ thấy
+秘书|mìshū|thư ký
+密码|mìmǎ|mật khẩu
+免费|miǎnfèi|miễn phí
+民族|mínzú|dân tộc
+目前|mùqián|hiện nay
+耐心|nàixīn|kiên nhẫn
+难道|nándào|lẽ nào
+难受|nánshòu|khó chịu
+内|nèi|bên trong
+能力|nénglì|năng lực
+年龄|niánlíng|tuổi tác
+弄|nòng|làm, nghịch
+暖和|nuǎnhuo|ấm áp
+偶像|ǒuxiàng|thần tượng
+排列|páiliè|sắp xếp
+判断|pànduàn|phán đoán
+陪|péi|đi cùng, ở bên
+骗|piàn|lừa
+骗子|piànzi|kẻ lừa đảo
+破|pò|rách, vỡ
+葡萄|pútao|nho
+其次|qícì|thứ hai là, kế đến
+其中|qízhōng|trong đó
+起飞|qǐfēi|cất cánh
+千万|qiānwàn|nhất định (dặn dò)
+敲|qiāo|gõ
+桥梁|qiáoliáng|cầu nối
+巧克力|qiǎokèlì|sô-cô-la
+亲戚|qīnqi|họ hàng
+轻松|qīngsōng|nhẹ nhõm, thoải mái
+情况|qíngkuàng|tình hình
+穷|qióng|nghèo
+区别|qūbié|khác biệt
+取|qǔ|lấy, rút (tiền)
+全世界|quán shìjiè|cả thế giới
+缺点|quēdiǎn|khuyết điểm
+却|què|lại, nhưng lại
+确实|quèshí|quả thực
+然而|rán'ér|tuy nhiên
+热情|rèqíng|nhiệt tình
+任何|rènhé|bất kỳ
+扔|rēng|ném, vứt
+仍然|réngrán|vẫn
+日记|rìjì|nhật ký
+入口|rùkǒu|lối vào
+散步|sànbù|đi dạo
+沙发|shāfā|ghế sofa
+商量|shāngliang|bàn bạc
+稍微|shāowēi|hơi, một chút
+社会人|shèhuì rén|dân anh chị (tiếng lóng)
+深|shēn|sâu
+申请|shēnqǐng|xin, nộp đơn
+甚至|shènzhì|thậm chí
+生命|shēngmìng|sinh mệnh
+省|shěng|tỉnh; tiết kiệm
+剩|shèng|còn lại, thừa
+失望|shīwàng|thất vọng
+师傅|shīfu|bác tài, thợ cả (cách gọi)
+十分|shífēn|vô cùng
+实际|shíjì|thực tế
+实在|shízài|thật sự
+使用|shǐyòng|sử dụng
+世纪|shìjì|thế kỷ
+是否|shìfǒu|có... hay không
+适合|shìhé|phù hợp
+收|shōu|nhận, thu
+收入|shōurù|thu nhập
+收拾|shōushi|dọn dẹp
+首先|shǒuxiān|trước tiên
+受不了|shòu bu liǎo|chịu không nổi
+受到|shòudào|nhận được, bị
+售货员|shòuhuòyuán|nhân viên bán hàng
+输|shū|thua
+熟悉|shúxī|quen thuộc
+数量|shùliàng|số lượng
+帅哥|shuàigē|anh đẹp trai
+美女|měinǚ|người đẹp
+顺便|shùnbiàn|tiện thể
+顺利|shùnlì|thuận lợi
+说明|shuōmíng|giải thích, thuyết minh
+硕士|shuòshì|thạc sĩ
+死机|sǐjī|treo máy
+酸奶|suānnǎi|sữa chua
+随着|suízhe|cùng với, theo
+孙子|sūnzi|cháu nội
+所有|suǒyǒu|tất cả
+抬|tái|khiêng, nâng
+谈|tán|nói chuyện
+弹钢琴|tán gāngqín|chơi đàn piano
+汤圆|tāngyuán|bánh trôi
+躺|tǎng|nằm
+躺平|tǎngpíng|nằm thẳng (buông xuôi, mặc kệ)
+趟|tàng|chuyến, lượt
+讨论|tǎolùn|thảo luận
+讨厌|tǎoyàn|ghét
+特殊|tèshū|đặc biệt
+提|tí|xách; nhắc đến
+提前|tíqián|trước thời hạn
+提供|tígōng|cung cấp
+填空|tiánkòng|điền vào chỗ trống
+停|tíng|dừng
+挺|tǐng|khá, rất
+通过|tōngguò|thông qua
+通知|tōngzhī|thông báo
+同情|tóngqíng|đồng cảm
+推|tuī|đẩy
+推迟|tuīchí|hoãn lại
+脱|tuō|cởi
+袜子|wàzi|tất, vớ
+完全|wánquán|hoàn toàn
+网球|wǎngqiú|quần vợt
+网站|wǎngzhàn|trang web
+往往|wǎngwǎng|thường thường
+危害|wēihài|nguy hại
+味道|wèidào|mùi vị
+温柔|wēnróu|dịu dàng
+文章|wénzhāng|bài văn
+握手|wòshǒu|bắt tay
+无|wú|không có
+误会|wùhuì|hiểu lầm
+吸引|xīyǐn|thu hút
+咸菜|xiáncài|dưa muối
+现金|xiànjīn|tiền mặt
+羡慕|xiànmù|ngưỡng mộ
+相反|xiāngfǎn|ngược lại
+响|xiǎng|kêu, vang
+橡皮|xiàngpí|cục tẩy
+消息|xiāoxi|tin tức
+小吃|xiǎochī|đồ ăn vặt
+小伙子|xiǎohuǒzi|chàng trai
+笑话|xiàohua|truyện cười
+效果|xiàoguǒ|hiệu quả
+辛苦|xīnkǔ|vất vả
+心情|xīnqíng|tâm trạng
+信封|xìnfēng|phong bì
+信任|xìnrèn|tin tưởng
+信心|xìnxīn|lòng tin
+兴奋|xīngfèn|hưng phấn
+醒|xǐng|tỉnh, thức dậy
+幸福感|xìngfúgǎn|cảm giác hạnh phúc
+性别|xìngbié|giới tính
+修改|xiūgǎi|sửa đổi
+许多|xǔduō|rất nhiều
+学期|xuéqī|học kỳ
+压力|yālì|áp lực
+牙膏|yágāo|kem đánh răng
+严格|yángé|nghiêm khắc
+严重|yánzhòng|nghiêm trọng
+研究|yánjiū|nghiên cứu
+演出|yǎnchū|biểu diễn
+阳光|yángguāng|ánh nắng
+养成|yǎngchéng|hình thành (thói quen)
+样子|yàngzi|dáng vẻ
+邀请函|yāoqǐnghán|thư mời
+钥匙|yàoshi|chìa khóa
+也许|yěxǔ|có lẽ
+页|yè|trang
+一切|yíqiè|tất cả
+以|yǐ|lấy, bằng
+亿|yì|trăm triệu
+意外|yìwài|bất ngờ, tai nạn
+因此|yīncǐ|vì thế
+引起|yǐnqǐ|gây ra
+赢|yíng|thắng
+应聘|yìngpìn|ứng tuyển
+永远|yǒngyuǎn|mãi mãi
+优点|yōudiǎn|ưu điểm
+优秀|yōuxiù|xuất sắc
+幽默|yōumò|hài hước
+尤其|yóuqí|đặc biệt là
+由于|yóuyú|do, bởi vì
+邮件|yóujiàn|thư, email
+友好|yǒuhǎo|hữu hảo, thân thiện
+于是|yúshì|thế là
+与|yǔ|và, với
+语法|yǔfǎ|ngữ pháp
+预订|yùdìng|đặt trước
+原来|yuánlái|hóa ra; vốn dĩ
+约会|yuēhuì|hẹn hò
+阅读|yuèdú|đọc hiểu
+允许|yǔnxǔ|cho phép
+杂志|zázhì|tạp chí
+暂时|zànshí|tạm thời
+脏话|zānghuà|lời thô tục
+责任心|zérènxīn|tinh thần trách nhiệm
+增长|zēngzhǎng|tăng trưởng
+窄|zhǎi|hẹp
+招聘|zhāopìn|tuyển dụng
+真正|zhēnzhèng|thật sự
+整理|zhěnglǐ|sắp xếp, chỉnh lý
+正好|zhènghǎo|vừa đúng
+证明|zhèngmíng|chứng minh
+之|zhī|của (văn viết)
+支付宝|Zhīfùbǎo|Alipay
+知识|zhīshi|kiến thức
+值得|zhídé|đáng giá
+职业|zhíyè|nghề nghiệp
+植物|zhíwù|thực vật
+只好|zhǐhǎo|đành phải
+只要|zhǐyào|chỉ cần
+指|zhǐ|chỉ, trỏ
+至少|zhìshǎo|ít nhất
+质量|zhìliàng|chất lượng
+重点|zhòngdiǎn|trọng điểm
+周围|zhōuwéi|xung quanh
+主动|zhǔdòng|chủ động
+主意|zhǔyi|ý kiến, chủ ý
+祝福|zhùfú|chúc phúc
+著名|zhùmíng|nổi tiếng
+专门|zhuānmén|chuyên môn
+专业|zhuānyè|chuyên ngành
+赚|zhuàn|kiếm (tiền)
+撞|zhuàng|đâm, va
+准时|zhǔnshí|đúng giờ
+仔细|zǐxì|tỉ mỉ
+自信|zìxìn|tự tin
+总结|zǒngjié|tổng kết
+租|zū|thuê
+组成|zǔchéng|tạo thành
+组织|zǔzhī|tổ chức
+最好|zuìhǎo|tốt nhất là
+尊重|zūnzhòng|tôn trọng
+座位|zuòwèi|chỗ ngồi
+作者|zuòzhě|tác giả
+外卖|wàimài|đồ ăn giao tận nơi
+快递|kuàidì|chuyển phát nhanh
+网购|wǎnggòu|mua sắm online
+扫码|sǎomǎ|quét mã
+充电|chōngdiàn|sạc pin
+手机壳|shǒujīké|ốp điện thoại
+点赞|diǎnzàn|bấm like
+朋友圈|péngyouquān|vòng bạn bè (WeChat)
+网红|wǎnghóng|người nổi tiếng trên mạng
+靠谱|kàopǔ|đáng tin cậy
+吃货|chīhuò|tín đồ ăn uống
+单身狗|dānshēngǒu|cẩu độc thân (FA)
+吐槽|tǔcáo|than phiền, cà khịa
+熬夜|áoyè|thức khuya
+颜值|yánzhí|độ đẹp (nhan sắc)
+追剧|zhuījù|cày phim
+剧透|jùtòu|spoil phim
+男主角|nán zhǔjué|nam chính
+女主角|nǚ zhǔjué|nữ chính
+配角|pèijué|vai phụ
+导演|dǎoyǎn|đạo diễn
+主演|zhǔyǎn|diễn viên chính
+大结局|dà jiéjú|tập cuối, kết thúc
+虐心|nüèxīn|ngược tâm (phim buồn)
+甜宠|tiánchǒng|ngọt sủng
+霸道总裁|bàdào zǒngcái|tổng tài bá đạo
+穿越|chuānyuè|xuyên không
+重生|chóngshēng|trọng sinh
+宫斗|gōngdòu|cung đấu
+皇帝|huángdì|hoàng đế
+皇后|huánghòu|hoàng hậu
+公主|gōngzhǔ|công chúa
+王爷|wángye|vương gia
+将军|jiāngjūn|tướng quân
+大人|dàrén|đại nhân
+奴婢|núbì|nô tỳ
+本宫|běngōng|bổn cung
+朕|zhèn|trẫm
+放肆|fàngsì|láo xược
+大胆|dàdǎn|to gan
+来人|láirén|người đâu
+饶命|ráomìng|tha mạng
+遵命|zūnmìng|tuân lệnh
+告辞|gàocí|cáo từ
+在下|zàixià|tại hạ
+姑娘|gūniang|cô nương
+公子|gōngzǐ|công tử
+娘娘|niángniang|nương nương
+陛下|bìxià|bệ hạ
+臣|chén|thần (bề tôi)
+后会有期|hòu huì yǒu qī|hẹn ngày gặp lại
+多谢|duōxiè|đa tạ
+久仰|jiǔyǎng|ngưỡng mộ đã lâu
+#5
+爱护|àihù|yêu quý, bảo vệ
+爱惜|àixī|quý trọng
+安慰|ānwèi|an ủi
+岸|àn|bờ
+把握|bǎwò|nắm chắc
+摆|bǎi|bày, đặt
+办理|bànlǐ|làm (thủ tục)
+傍晚|bàngwǎn|chạng vạng
+包裹|bāoguǒ|bưu kiện
+包含|bāohán|bao hàm
+宝贝|bǎobèi|bảo bối, cục cưng
+宝贵|bǎoguì|quý báu
+保持|bǎochí|duy trì
+保存|bǎocún|lưu giữ
+保险|bǎoxiǎn|bảo hiểm
+报到|bàodào|báo danh, trình diện
+报告|bàogào|báo cáo
+悲观|bēiguān|bi quan
+乐观|lèguān|lạc quan
+背景|bèijǐng|bối cảnh
+被子|bèizi|chăn
+本质|běnzhì|bản chất
+彼此|bǐcǐ|lẫn nhau
+必然|bìrán|tất nhiên
+必要|bìyào|cần thiết
+避免|bìmiǎn|tránh
+编辑|biānjí|biên tập
+鞭炮|biānpào|pháo
+便|biàn|liền, thì
+辩论|biànlùn|tranh luận
+标志|biāozhì|biểu tượng, dấu hiệu
+表达|biǎodá|diễn đạt
+表面|biǎomiàn|bề mặt
+表明|biǎomíng|cho thấy
+表情|biǎoqíng|biểu cảm
+表现|biǎoxiàn|biểu hiện
+病毒|bìngdú|virus
+玻璃|bōli|kính, thủy tinh
+博物馆|bówùguǎn|bảo tàng
+不安|bù'ān|bất an
+不断|búduàn|không ngừng
+不见得|bú jiàn de|chưa chắc
+不耐烦|bú nàifán|mất kiên nhẫn
+不要紧|bú yàojǐn|không sao
+步骤|bùzhòu|bước, trình tự
+财产|cáichǎn|tài sản
+采访|cǎifǎng|phỏng vấn
+彩虹|cǎihóng|cầu vồng
+参考|cānkǎo|tham khảo
+惭愧|cánkuì|hổ thẹn
+操场|cāochǎng|sân vận động (trường)
+曾经|céngjīng|đã từng
+插|chā|cắm
+差距|chājù|khoảng cách, chênh lệch
+产生|chǎnshēng|nảy sinh
+长途|chángtú|đường dài
+常识|chángshí|thường thức
+抄|chāo|chép
+朝|cháo|hướng về
+吵闹|chǎonào|ầm ĩ
+彻底|chèdǐ|triệt để
+沉默|chénmò|im lặng
+趁|chèn|nhân lúc
+称赞|chēngzàn|khen ngợi
+成就|chéngjiù|thành tựu
+成熟|chéngshú|chín chắn, trưởng thành
+成长|chéngzhǎng|trưởng thành
+承认|chéngrèn|thừa nhận
+承受|chéngshòu|chịu đựng
+程度|chéngdù|mức độ
+诚恳|chéngkěn|thành khẩn
+吃亏|chīkuī|chịu thiệt
+持续|chíxù|liên tục
+池塘|chítáng|ao
+尺子|chǐzi|thước
+翅膀|chìbǎng|cánh
+冲|chōng|xông lên, lao tới
+充分|chōngfèn|đầy đủ
+充满|chōngmǎn|tràn đầy
+重复|chóngfù|lặp lại
+宠物|chǒngwù|thú cưng
+抽屉|chōuti|ngăn kéo
+丑|chǒu|xấu
+臭|chòu|thối
+出版|chūbǎn|xuất bản
+出色|chūsè|xuất sắc
+初级|chūjí|sơ cấp
+除非|chúfēi|trừ phi
+处理|chǔlǐ|xử lý
+传播|chuánbō|truyền bá
+传统|chuántǒng|truyền thống
+创造|chuàngzào|sáng tạo
+吹牛|chuīniú|khoác lác
+从此|cóngcǐ|từ đó
+从而|cóng'ér|từ đó, nhờ vậy
+从前|cóngqián|ngày xưa
+从事|cóngshì|làm (nghề)
+促进|cùjìn|thúc đẩy
+催|cuī|giục
+存在|cúnzài|tồn tại
+措施|cuòshī|biện pháp
+达到|dádào|đạt được
+打工|dǎgōng|làm thêm
+打听|dǎting|hỏi thăm
+大方|dàfang|hào phóng
+大象|dàxiàng|con voi
+贷款|dàikuǎn|vay tiền
+单纯|dānchún|đơn thuần
+单调|dāndiào|đơn điệu
+单独|dāndú|một mình
+耽误|dānwu|làm lỡ
+胆小鬼|dǎnxiǎoguǐ|kẻ nhát gan
+淡|dàn|nhạt
+当代|dāngdài|đương đại
+挡|dǎng|chặn, che
+倒霉|dǎoméi|xui xẻo
+岛屿|dǎoyǔ|đảo
+到期|dàoqī|hết hạn
+道德|dàodé|đạo đức
+道理|dàolǐ|đạo lý
+登记|dēngjì|đăng ký
+等于|děngyú|bằng
+滴|dī|giọt
+的确|díquè|đích thực
+地道|dìdao|chính gốc
+地位|dìwèi|địa vị
+地震|dìzhèn|động đất
+递|dì|đưa
+点心|diǎnxin|điểm tâm
+电池|diànchí|pin
+钓鱼|diàoyú|câu cá
+顶|dǐng|đỉnh; đội
+冻|dòng|đông, lạnh cóng
+洞|dòng|hang, lỗ
+豆腐|dòufu|đậu phụ
+独立|dúlì|độc lập
+独特|dútè|độc đáo
+度过|dùguò|trải qua
+对比|duìbǐ|so sánh
+对待|duìdài|đối xử
+对方|duìfāng|đối phương
+对象|duìxiàng|đối tượng; người yêu
+吨|dūn|tấn
+蹲|dūn|ngồi xổm
+多亏|duōkuī|may nhờ
+躲藏|duǒcáng|ẩn nấp
+恶劣|èliè|tồi tệ
+发表|fābiǎo|đăng, công bố
+发愁|fāchóu|lo âu
+发达|fādá|phát triển
+发抖|fādǒu|run rẩy
+发挥|fāhuī|phát huy
+发明|fāmíng|phát minh
+发言|fāyán|phát biểu
+罚款|fákuǎn|phạt tiền
+法院|fǎyuàn|tòa án
+翻身|fānshēn|lật mình, đổi đời
+繁荣|fánróng|phồn vinh
+反而|fǎn'ér|ngược lại
+反复|fǎnfù|lặp đi lặp lại
+反应|fǎnyìng|phản ứng
+反映|fǎnyìng|phản ánh
+范围|fànwéi|phạm vi
+方案|fāng'àn|phương án
+妨碍|fáng'ài|cản trở
+仿佛|fǎngfú|dường như
+非|fēi|không phải
+肥皂|féizào|xà phòng
+分别|fēnbié|chia tay; lần lượt
+分配|fēnpèi|phân phối
+分手|fēnshǒu|chia tay
+奋斗|fèndòu|phấn đấu
+愤怒|fènnù|phẫn nộ
+风格|fēnggé|phong cách
+风险|fēngxiǎn|rủi ro
+疯狂|fēngkuáng|điên cuồng
+讽刺|fěngcì|châm biếm
+否定|fǒudìng|phủ định
+扶|fú|đỡ, dìu
+服装|fúzhuāng|trang phục
+辅导|fǔdǎo|phụ đạo
+妇女|fùnǚ|phụ nữ
+改革|gǎigé|cải cách
+改善|gǎishàn|cải thiện
+盖|gài|đắp, xây, nắp
+概括|gàikuò|khái quát
+干脆|gāncuì|dứt khoát
+感激|gǎnjī|cảm kích
+感受|gǎnshòu|cảm nhận
+干部|gànbù|cán bộ
+刚好|gānghǎo|vừa khéo
+高档|gāodàng|cao cấp
+搞|gǎo|làm
+告别|gàobié|từ biệt
+格外|géwài|đặc biệt, hết sức
+个人|gèrén|cá nhân
+个性|gèxìng|cá tính
+根本|gēnběn|căn bản, hoàn toàn
+工具|gōngjù|công cụ
+公平|gōngpíng|công bằng
+公开|gōngkāi|công khai
+功能|gōngnéng|chức năng
+贡献|gòngxiàn|cống hiến
+沟通|gōutōng|giao tiếp, trao đổi
+构成|gòuchéng|cấu thành
+姑姑|gūgu|cô (em/chị của bố)
+孤单|gūdān|cô đơn
+古典|gǔdiǎn|cổ điển
+固定|gùdìng|cố định
+挂号|guàhào|đăng ký khám bệnh
+乖|guāi|ngoan
+怪不得|guàibude|chẳng trách
+官|guān|quan
+观察|guānchá|quan sát
+观念|guānniàn|quan niệm
+管子|guǎnzi|ống
+冠军|guànjūn|quán quân
+光临|guānglín|ghé thăm (quý khách)
+光滑|guānghuá|trơn nhẵn
+规律|guīlǜ|quy luật
+规模|guīmó|quy mô
+滚|gǔn|lăn; cút đi
+锅|guō|nồi
+过分|guòfèn|quá đáng
+过敏|guòmǐn|dị ứng
+过期|guòqī|quá hạn
+哈|hā|ha (cười)
+海鲜|hǎixiān|hải sản
+行业|hángyè|ngành nghề
+豪华|háohuá|xa hoa
+好客|hàokè|hiếu khách
+好奇|hàoqí|tò mò
+合法|héfǎ|hợp pháp
+合理|hélǐ|hợp lý
+合同|hétong|hợp đồng
+合作|hézuò|hợp tác
+和平相处|hépíng xiāngchǔ|chung sống hòa bình
+核心|héxīn|cốt lõi
+恨|hèn|hận
+猴子|hóuzi|con khỉ
+后背|hòubèi|lưng
+后果|hòuguǒ|hậu quả
+忽视|hūshì|xem nhẹ
+呼吸|hūxī|hô hấp, thở
+胡说|húshuō|nói bậy
+胡同|hútòng|ngõ hẻm
+糊涂|hútu|hồ đồ
+花生|huāshēng|lạc, đậu phộng
+滑|huá|trơn; trượt
+话题|huàtí|chủ đề
+怀念|huáiniàn|hoài niệm
+缓解|huǎnjiě|giảm bớt
+幻想|huànxiǎng|ảo tưởng
+慌张|huāngzhāng|hoảng hốt
+黄金|huángjīn|vàng
+灰心|huīxīn|nản lòng
+恢复|huīfù|hồi phục
+汇率|huìlǜ|tỷ giá
+婚礼|hūnlǐ|đám cưới
+婚姻|hūnyīn|hôn nhân
+活跃|huóyuè|sôi nổi
+伙伴|huǒbàn|bạn đồng hành
+或许|huòxǔ|có lẽ
+机器|jīqì|máy móc
+肌肉|jīròu|cơ bắp
+集合|jíhé|tập hợp
+集体|jítǐ|tập thể
+急忙|jímáng|vội vàng
+记录|jìlù|ghi chép, kỷ lục
+记忆|jìyì|trí nhớ
+纪念|jìniàn|kỷ niệm
+寂寞|jìmò|cô quạnh
+夹子|jiāzi|cái kẹp
+家庭|jiātíng|gia đình
+家务|jiāwù|việc nhà
+假如|jiǎrú|giả như
+嫁|jià|lấy chồng
+娶|qǔ|cưới vợ
+坚决|jiānjué|kiên quyết
+艰巨|jiānjù|gian khổ
+艰苦|jiānkǔ|gian khổ
+肩膀|jiānbǎng|vai
+剪刀|jiǎndāo|kéo
+简直|jiǎnzhí|quả thật là, đơn giản là
+建立|jiànlì|xây dựng, thiết lập
+建设|jiànshè|xây dựng
+健身|jiànshēn|tập gym
+讲究|jiǎngjiu|cầu kỳ, chú trọng
+交流|jiāoliú|giao lưu
+郊区|jiāoqū|ngoại ô
+胶水|jiāoshuǐ|keo dán
+狡猾|jiǎohuá|xảo quyệt
+教训|jiàoxun|bài học; dạy dỗ
+接触|jiēchù|tiếp xúc
+接待|jiēdài|tiếp đón
+接近|jiējìn|tiếp cận
+节奏|jiézòu|nhịp điệu
+结构|jiégòu|kết cấu
+结论|jiélùn|kết luận
+借口|jièkǒu|cái cớ
+金属|jīnshǔ|kim loại
+尽快|jǐnkuài|càng nhanh càng tốt
+尽量|jǐnliàng|cố gắng hết mức
+紧急|jǐnjí|khẩn cấp
+谨慎|jǐnshèn|thận trọng
+近代|jìndài|cận đại
+经典|jīngdiǎn|kinh điển
+精力|jīnglì|tinh lực
+救|jiù|cứu
+救命|jiùmìng|cứu mạng, cứu với
+舅舅|jiùjiu|cậu
+居然|jūrán|vậy mà, lại
+桔子|júzi|quả quýt
+巨大|jùdà|to lớn
+具备|jùbèi|có đủ
+具体|jùtǐ|cụ thể
+俱乐部|jùlèbù|câu lạc bộ
+据说|jùshuō|nghe nói
+捐|juān|quyên góp
+绝对|juéduì|tuyệt đối
+角色|juésè|nhân vật, vai diễn
+军事|jūnshì|quân sự
+开发|kāifā|khai phát
+开放|kāifàng|mở cửa
+开心|kāixīn|vui vẻ
+看不起|kànbuqǐ|coi thường
+砍|kǎn|chặt
+看望|kànwàng|thăm hỏi
+靠|kào|dựa vào
+颗|kē|hạt, viên (lượng từ)
+可见|kějiàn|có thể thấy
+可靠|kěkào|đáng tin
+克服|kèfú|khắc phục
+刻苦|kèkǔ|chịu khó
+客观|kèguān|khách quan
+课程|kèchéng|chương trình học
+空间|kōngjiān|không gian
+恐怖|kǒngbù|kinh dị
+控制|kòngzhì|khống chế
+口味|kǒuwèi|khẩu vị
+夸|kuā|khen
+会计|kuàijì|kế toán
+矿泉水|kuàngquánshuǐ|nước khoáng
+困难|kùnnan|khó khăn
+扩展|kuòzhǎn|mở rộng
+来自|láizì|đến từ
+朗读|lǎngdú|đọc to
+老百姓|lǎobǎixìng|dân thường
+老鼠|lǎoshǔ|con chuột
+姥姥|lǎolao|bà ngoại
+乐趣|lèqù|niềm vui
+雷|léi|sấm
+类型|lèixíng|loại hình
+冷淡|lěngdàn|lạnh nhạt
+梨|lí|quả lê
+离谱|lípǔ|vô lý, quá đáng
+理由|lǐyóu|lý do
+立即|lìjí|lập tức
+利润|lìrùn|lợi nhuận
+利用|lìyòng|lợi dụng, tận dụng
+连续|liánxù|liên tục
+联合|liánhé|liên hợp
+恋爱|liàn'ài|yêu đương
+良好|liánghǎo|tốt đẹp
+粮食|liángshi|lương thực
+了不起|liǎobuqǐ|giỏi giang, phi thường
+临时|línshí|tạm thời
+灵活|línghuó|linh hoạt
+领导|lǐngdǎo|lãnh đạo
+领域|lǐngyù|lĩnh vực
+浏览|liúlǎn|xem lướt
+流传|liúchuán|lưu truyền
+龙卷风|lóngjuǎnfēng|lốc xoáy
+录音|lùyīn|ghi âm
+轮流|lúnliú|luân phiên
+论文|lùnwén|luận văn
+逻辑|luójí|logic
+落后|luòhòu|lạc hậu, tụt lại
+骂|mà|mắng
+麦克风|màikèfēng|micro
+馒头|mántou|bánh bao không nhân
+满足|mǎnzú|thỏa mãn
+毛病|máobìng|tật xấu, lỗi
+矛盾|máodùn|mâu thuẫn
+冒险|màoxiǎn|mạo hiểm
+贸易|màoyì|mậu dịch
+眉毛|méimao|lông mày
+媒体|méitǐ|truyền thông
+魅力|mèilì|sức hút
+迷信|míxìn|mê tín
+密切|mìqiè|mật thiết
+面对|miànduì|đối mặt
+面临|miànlín|đối mặt với
+苗条|miáotiao|thon thả
+描写|miáoxiě|miêu tả
+敏感|mǐngǎn|nhạy cảm
+名牌|míngpái|hàng hiệu
+命令|mìnglìng|mệnh lệnh
+模仿|mófǎng|bắt chước
+模糊|móhu|mơ hồ
+摩托车|mótuōchē|xe máy
+陌生|mòshēng|xa lạ
+某|mǒu|nào đó
+目录|mùlù|mục lục
+哪怕|nǎpà|dù cho
+难怪|nánguài|chẳng trách
+难免|nánmiǎn|khó tránh
+脑袋|nǎodai|cái đầu
+内心|nèixīn|nội tâm
+嫩|nèn|non
+能干|nénggàn|giỏi giang
+念|niàn|đọc; nhớ
+宁可|nìngkě|thà rằng
+浓|nóng|đậm, đặc
+农村|nóngcūn|nông thôn
+女士|nǚshì|quý bà
+偶然|ǒurán|ngẫu nhiên
+拍|pāi|vỗ; quay (phim), chụp
+派|pài|phái, cử
+盼望|pànwàng|mong đợi
+培养|péiyǎng|bồi dưỡng
+赔偿|péicháng|bồi thường
+佩服|pèifú|khâm phục
+配合|pèihé|phối hợp
+批准|pīzhǔn|phê duyệt
+疲劳|píláo|mệt mỏi
+片面|piànmiàn|phiến diện
+飘|piāo|bay phấp phới
+频道|píndào|kênh
+品种|pǐnzhǒng|giống, chủng loại
+平衡|pínghéng|cân bằng
+平静|píngjìng|bình tĩnh
+评价|píngjià|đánh giá
+破产|pòchǎn|phá sản
+迫切|pòqiè|cấp bách
+期待|qīdài|mong đợi
+期间|qījiān|trong thời gian
+奇迹|qíjì|kỳ tích
+企业|qǐyè|doanh nghiệp
+启发|qǐfā|gợi mở
+气氛|qìfēn|bầu không khí
+汽油|qìyóu|xăng
+谦虚|qiānxū|khiêm tốn
+前途|qiántú|tiền đồ
+欠|qiàn|nợ
+抢|qiǎng|cướp, giành
+悄悄|qiāoqiāo|lặng lẽ
+瞧|qiáo|nhìn
+切|qiē|cắt
+亲爱的|qīn'ài de|thân yêu
+亲切|qīnqiè|thân thiết
+青春|qīngchūn|thanh xuân
+青少年|qīngshàonián|thanh thiếu niên
+轻易|qīngyì|dễ dàng, tùy tiện
+情景|qíngjǐng|cảnh tượng
+情绪|qíngxù|cảm xúc
+请求|qǐngqiú|thỉnh cầu
+庆祝|qìngzhù|chúc mừng
+球迷|qiúmí|fan bóng đá
+趋势|qūshì|xu thế
+娶媳妇|qǔ xífù|cưới vợ
+去世|qùshì|qua đời
+权力|quánlì|quyền lực
+劝|quàn|khuyên
+缺乏|quēfá|thiếu
+确定|quèdìng|xác định
+确认|quèrèn|xác nhận
+燃烧|ránshāo|thiêu đốt
+绕|rào|đi vòng
+热爱|rè'ài|yêu tha thiết
+人才|réncái|nhân tài
+人生|rénshēng|đời người
+忍不住|rěn bu zhù|không nhịn được
+忍耐|rěnnài|nhẫn nại
+认可|rènkě|công nhận
+日常|rìcháng|thường ngày
+如何|rúhé|như thế nào
+如今|rújīn|ngày nay
+软|ruǎn|mềm
+弱点|ruòdiǎn|điểm yếu
+洒|sǎ|rắc, vẩy
+嗓子|sǎngzi|cổ họng
+色彩|sècǎi|màu sắc
+杀手|shāshǒu|sát thủ
+傻|shǎ|ngốc
+晒|shài|phơi nắng; khoe
+善于|shànyú|giỏi về
+伤害|shānghài|tổn thương
+上当|shàngdàng|mắc lừa
+设计|shèjì|thiết kế
+射击|shèjī|bắn
+摄影|shèyǐng|nhiếp ảnh
+伸|shēn|duỗi
+身份|shēnfèn|thân phận
+深刻|shēnkè|sâu sắc
+神话|shénhuà|thần thoại
+神秘|shénmì|thần bí
+升|shēng|lên, tăng
+生动|shēngdòng|sinh động
+生存|shēngcún|sinh tồn
+胜负|shèngfù|thắng bại
+失去|shīqù|mất đi
+失眠|shīmián|mất ngủ
+时刻|shíkè|thời khắc
+时髦|shímáo|thời thượng
+实话|shíhuà|lời thật
+实现|shíxiàn|thực hiện
+实验|shíyàn|thí nghiệm
+使劲|shǐjìn|dùng sức
+始终|shǐzhōng|trước sau như một
+士兵|shìbīng|binh lính
+事业|shìyè|sự nghiệp
+似的|shìde|giống như
+手术|shǒushù|phẫu thuật
+手指|shǒuzhǐ|ngón tay
+寿命|shòumìng|tuổi thọ
+书架|shūjià|giá sách
+舒适|shūshì|dễ chịu
+输入|shūrù|nhập vào
+蔬菜|shūcài|rau
+熟练|shúliàn|thành thạo
+属于|shǔyú|thuộc về
+数据|shùjù|dữ liệu
+摔倒|shuāidǎo|ngã
+双方|shuāngfāng|hai bên
+税|shuì|thuế
+说服|shuōfú|thuyết phục
+撕|sī|xé
+思考|sīkǎo|suy nghĩ
+思想|sīxiǎng|tư tưởng
+似乎|sìhū|dường như
+搜索|sōusuǒ|tìm kiếm
+随时|suíshí|bất cứ lúc nào
+碎|suì|vỡ vụn
+损失|sǔnshī|tổn thất
+缩短|suōduǎn|rút ngắn
+台阶|táijiē|bậc thềm; lối thoát
+谈判|tánpàn|đàm phán
+坦率|tǎnshuài|thẳng thắn
+逃|táo|chạy trốn
+逃避|táobì|trốn tránh
+淘气|táoqì|nghịch ngợm
+讨价还价|tǎojià huánjià|mặc cả
+套|tào|bộ
+特意|tèyì|cố ý, đặc biệt
+疼爱|téng'ài|yêu thương
+提倡|tíchàng|đề xướng
+题目|tímù|đề bài
+体会|tǐhuì|thể nghiệm
+体贴|tǐtiē|chu đáo
+天真|tiānzhēn|ngây thơ
+挑战者|tiǎozhànzhě|kẻ thách đấu
+调皮|tiáopí|tinh nghịch
+调整|tiáozhěng|điều chỉnh
+通讯|tōngxùn|thông tin liên lạc
+痛苦|tòngkǔ|đau khổ
+痛快|tòngkuai|sảng khoái
+偷|tōu|ăn trộm
+投资|tóuzī|đầu tư
+透明|tòumíng|trong suốt
+突出|tūchū|nổi bật
+土豆|tǔdòu|khoai tây
+团结|tuánjié|đoàn kết
+推辞|tuīcí|từ chối khéo
+退步|tuìbù|thụt lùi
+退休|tuìxiū|nghỉ hưu
+歪|wāi|lệch
+外交|wàijiāo|ngoại giao
+完美|wánměi|hoàn mỹ
+完善|wánshàn|hoàn thiện
+玩具|wánjù|đồ chơi
+万一|wànyī|lỡ như
+王子|wángzǐ|hoàng tử
+网吧|wǎngbā|quán net
+往返|wǎngfǎn|khứ hồi
+危机|wēijī|nguy cơ
+威胁|wēixié|uy hiếp
+微笑|wēixiào|mỉm cười
+违反|wéifǎn|vi phạm
+围巾|wéijīn|khăn quàng
+唯一|wéiyī|duy nhất
+委屈|wěiqu|tủi thân
+伟大|wěidà|vĩ đại
+未来|wèilái|tương lai
+位于|wèiyú|nằm ở
+胃|wèi|dạ dày
+温度计|wēndùjì|nhiệt kế
+闻|wén|ngửi
+吻|wěn|hôn
+稳定|wěndìng|ổn định
+问候|wènhòu|hỏi thăm
+无奈|wúnài|bất lực, đành chịu
+无数|wúshù|vô số
+无所谓|wúsuǒwèi|không sao cả, thế nào cũng được
+武术|wǔshù|võ thuật
+物质|wùzhì|vật chất
+吸收|xīshōu|hấp thu
+系统|xìtǒng|hệ thống
+细节|xìjié|chi tiết
+瞎|xiā|mù; bừa bãi
+下载|xiàzài|tải về
+吓|xià|dọa, làm sợ
+夏令营|xiàlìngyíng|trại hè
+鲜艳|xiānyàn|tươi tắn
+显得|xiǎnde|tỏ ra
+显然|xiǎnrán|rõ ràng
+显示|xiǎnshì|hiển thị
+现实|xiànshí|hiện thực
+现象|xiànxiàng|hiện tượng
+限制|xiànzhì|hạn chế
+相处|xiāngchǔ|ở cùng, chung sống
+相当|xiāngdāng|khá, tương đương
+相似|xiāngsì|tương tự
+享受|xiǎngshòu|tận hưởng
+想象|xiǎngxiàng|tưởng tượng
+项目|xiàngmù|dự án
+消费|xiāofèi|tiêu dùng
+消化|xiāohuà|tiêu hóa
+小气|xiǎoqi|keo kiệt
+孝顺|xiàoshùn|hiếu thảo
+效率|xiàolǜ|hiệu suất
+心理|xīnlǐ|tâm lý
+欣赏|xīnshǎng|thưởng thức
+信号|xìnhào|tín hiệu
+行动|xíngdòng|hành động
+形成|xíngchéng|hình thành
+形容|xíngróng|hình dung
+形势|xíngshì|tình thế
+幸亏|xìngkuī|may mà
+幸运|xìngyùn|may mắn
+胸|xiōng|ngực
+兄弟|xiōngdì|anh em
+雄伟|xióngwěi|hùng vĩ
+修养|xiūyǎng|tu dưỡng
+虚心|xūxīn|khiêm tốn
+宣传|xuānchuán|tuyên truyền
+学术|xuéshù|học thuật
+寻找|xúnzhǎo|tìm kiếm
+训练|xùnliàn|huấn luyện
+迅速|xùnsù|nhanh chóng
+押金|yājīn|tiền đặt cọc
+牙齿|yáchǐ|răng
+延长|yáncháng|kéo dài
+严肃|yánsù|nghiêm túc
+宴会|yànhuì|yến tiệc
+养|yǎng|nuôi
+腰|yāo|eo
+摇|yáo|lắc
+咬|yǎo|cắn
+要不|yàobù|hay là
+业余|yèyú|nghiệp dư
+夜|yè|đêm
+依然|yīrán|vẫn như cũ
+一辈子|yíbèizi|cả đời
+一旦|yídàn|một khi
+一路平安|yílù píng'ān|thượng lộ bình an
+遗憾|yíhàn|tiếc nuối
+疑问|yíwèn|nghi vấn
+以及|yǐjí|cùng với, và
+以来|yǐlái|từ trước đến nay
+意义|yìyì|ý nghĩa
+因而|yīn'ér|cho nên
+银|yín|bạc
+应付|yìngfu|đối phó
+应用|yìngyòng|ứng dụng
+硬|yìng|cứng
+拥抱|yōngbào|ôm
+拥挤|yōngjǐ|chen chúc
+勇于|yǒngyú|dám
+优势|yōushì|ưu thế
+悠久|yōujiǔ|lâu đời
+犹豫|yóuyù|do dự
+有利|yǒulì|có lợi
+幼儿园|yòu'éryuán|nhà trẻ
+娱乐|yúlè|giải trí
+与其|yǔqí|thà... còn hơn
+预报|yùbào|dự báo
+预防|yùfáng|phòng ngừa
+元旦|Yuándàn|Tết Dương lịch
+员工|yuángōng|nhân viên
+原则|yuánzé|nguyên tắc
+圆|yuán|tròn
+愿望|yuànwàng|nguyện vọng
+晕|yūn|chóng mặt
+运气|yùnqi|vận may
+在乎|zàihu|để ý, quan tâm
+赞成|zànchéng|tán thành
+赞美|zànměi|ca ngợi
+糟糕|zāogāo|hỏng rồi, tệ quá
+造成|zàochéng|gây nên
+责备|zébèi|trách móc
+炸|zhá|chiên, rán
+摘|zhāi|hái
+展开|zhǎnkāi|triển khai
+战胜|zhànshèng|chiến thắng
+掌握|zhǎngwò|nắm vững
+涨|zhǎng|tăng (giá)
+照顾|zhàogù|chăm sóc
+哲学|zhéxué|triết học
+珍惜|zhēnxī|trân trọng
+真实|zhēnshí|chân thực
+争论|zhēnglùn|tranh luận
+争取|zhēngqǔ|tranh thủ, giành lấy
+整个|zhěnggè|toàn bộ
+整齐|zhěngqí|ngăn nắp
+正确|zhèngquè|chính xác
+政治|zhèngzhì|chính trị
+挣钱|zhèngqián|kiếm tiền
+执行|zhíxíng|thi hành
+直播|zhíbō|phát trực tiếp, livestream
+指导|zhǐdǎo|chỉ đạo
+制定|zhìdìng|lập ra
+制造|zhìzào|chế tạo
+智慧|zhìhuì|trí tuệ
+中介|zhōngjiè|môi giới
+中心|zhōngxīn|trung tâm
+种类|zhǒnglèi|chủng loại
+重视|zhòngshì|coi trọng
+周到|zhōudào|chu đáo
+逐渐|zhújiàn|dần dần
+主持|zhǔchí|chủ trì, dẫn chương trình
+主观|zhǔguān|chủ quan
+主人|zhǔrén|chủ nhân
+主题|zhǔtí|chủ đề
+主张|zhǔzhāng|chủ trương
+抓|zhuā|bắt, nắm
+抓紧|zhuājǐn|tranh thủ, nắm chặt
+转|zhuǎn|chuyển
+装|zhuāng|giả vờ; lắp
+状态|zhuàngtài|trạng thái
+追求|zhuīqiú|theo đuổi
+资格|zīgé|tư cách
+资金|zījīn|vốn
+自觉|zìjué|tự giác
+自私|zìsī|ích kỷ
+总共|zǒnggòng|tổng cộng
+总之|zǒngzhī|tóm lại
+阻止|zǔzhǐ|ngăn cản
+醉|zuì|say
+尊敬|zūnjìng|tôn kính
+遵守|zūnshǒu|tuân thủ
+作品|zuòpǐn|tác phẩm
+作为|zuòwéi|với tư cách là
+做梦|zuòmèng|nằm mơ
+内卷|nèijuǎn|cạnh tranh khốc liệt (nội quyển)
+打卡|dǎkǎ|chấm công; check-in
+种草|zhòngcǎo|bị dụ mua (thấy là muốn mua)
+拔草|bácǎo|hết muốn mua; đi trải nghiệm
+社恐|shèkǒng|sợ giao tiếp
+社牛|shèniú|"trâu" giao tiếp, rất mạnh dạn
+摆烂|bǎilàn|buông xuôi, mặc kệ
+破防|pòfáng|bị phá phòng tuyến, xúc động
+上头|shàngtóu|mê mẩn, nghiện
+氛围感|fēnwéigǎn|vibe, cảm giác không khí
+凡尔赛|fán'ěrsài|khoe khéo (Versailles)
+打工人|dǎgōngrén|dân làm công
+躺赢|tǎngyíng|nằm không cũng thắng
+绝绝子|juéjuézǐ|đỉnh của chóp
+吃瓜|chīguā|hóng hớt, hóng drama
+画饼|huàbǐng|hứa suông, vẽ bánh
+翻车|fānchē|toang, thất bại
+甩锅|shuǎiguō|đổ lỗi
+背锅|bēiguō|gánh tội thay
+玻璃心|bōlixīn|tim thủy tinh, dễ tổn thương
+狗粮|gǒuliáng|cơm chó (bị show ân ái)
+套路|tàolù|chiêu trò
+脑洞|nǎodòng|trí tưởng tượng phong phú
+弹幕|dànmù|bình luận chạy trên video
+二次元|èrcìyuán|thế giới anime 2D
+手游|shǒuyóu|game mobile
+氪金|kèjīn|nạp tiền vào game
+开黑|kāihēi|chơi game cùng hội
+大佬|dàlǎo|cao thủ, đại ca
+菜鸟|càiniǎo|gà mờ
+逆袭|nìxí|lội ngược dòng
+主角光环|zhǔjué guānghuán|hào quang nhân vật chính
+反派|fǎnpài|phản diện
+炮灰|pàohuī|bia đỡ đạn
+黑化|hēihuà|hắc hóa
+白月光|báiyuèguāng|ánh trăng sáng (mối tình đầu khó quên)
+青梅竹马|qīngméi zhúmǎ|thanh mai trúc mã
+一见钟情|yíjiàn zhōngqíng|yêu từ cái nhìn đầu tiên
+心动|xīndòng|rung động
+表白|biǎobái|tỏ tình
+暗恋|ànliàn|yêu thầm
+吃醋|chīcù|ghen
+撒娇|sājiāo|làm nũng
+渣男|zhānán|trai tồi
+舔狗|tiǎngǒu|kẻ si tình mù quáng
+复仇|fùchóu|báo thù
+江山|jiāngshān|giang sơn
+太子|tàizǐ|thái tử
+丞相|chéngxiàng|thừa tướng
+侍卫|shìwèi|thị vệ
+刺客|cìkè|thích khách
+圣旨|shèngzhǐ|thánh chỉ
+钦此|qīncǐ|khâm thử (cuối thánh chỉ)
+退下|tuìxià|lui xuống
+平身|píngshēn|bình thân
+请安|qǐng'ān|thỉnh an
+谢主隆恩|xiè zhǔ lóng'ēn|tạ chủ long ân
+万岁|wànsuì|vạn tuế
+千岁|qiānsuì|thiên tuế
+罢了|bàle|thôi vậy
+岂有此理|qǐ yǒu cǐ lǐ|há có lý nào
+有眼不识泰山|yǒu yǎn bù shí Tàishān|có mắt không thấy Thái Sơn
+不自量力|bú zì liàng lì|không biết lượng sức
+天外有天|tiān wài yǒu tiān|núi cao còn có núi cao hơn
+三十年河东三十年河西|sānshí nián hé dōng, sānshí nián hé xī|sông có khúc, người có lúc
+莫欺少年穷|mò qī shàonián qióng|chớ khinh thiếu niên nghèo
+走火入魔|zǒuhuǒ rùmó|tẩu hỏa nhập ma
+道心|dàoxīn|đạo tâm
+飞升|fēishēng|phi thăng
+雷劫|léijié|lôi kiếp
+储物戒|chǔwùjiè|nhẫn trữ vật
+御剑|yùjiàn|ngự kiếm
+丹田|dāntián|đan điền
+经脉|jīngmài|kinh mạch
+神识|shénshí|thần thức
+秘境|mìjìng|bí cảnh
+宗主|zōngzhǔ|tông chủ
+长老|zhǎnglǎo|trưởng lão
+师尊|shīzūn|sư tôn
+道友|dàoyǒu|đạo hữu
+前辈|qiánbèi|tiền bối
+晚辈|wǎnbèi|vãn bối
+`;
+const LEVEL_INFO = {
+  1: { name: 'HSK 1', desc: 'Nhập môn: chào hỏi, số đếm, gia đình, đồ ăn' },
+  2: { name: 'HSK 2', desc: 'Sơ cấp: giới từ, động từ thường dùng, địa điểm' },
+  3: { name: 'HSK 3', desc: 'Trung cấp thấp: giao tiếp đời sống, công việc' },
+  4: { name: 'HSK 4', desc: 'Trung cấp: đời sống, mạng xã hội, phim ảnh, cổ trang' },
+  5: { name: 'HSK 5', desc: 'Trung cao cấp: xã hội, cảm xúc, tiếng lóng mạng, tu tiên' }
+};
+const PER_LESSON = 10, PASS = 0.8, GOAL = 10;
+const MILESTONES = [1, 2, 3, 5, 7, 10, 14, 21, 30, 50];
+
+// ================= Truyện thưởng =================
+const STORIES = [
+ { t: '盘古开天辟地', p: 'Pángǔ kāitiān pìdì', v: 'Bàn Cổ khai thiên lập địa',
+   b: ['Ngày xưa, trời và đất chưa tách nhau, hỗn độn như một quả trứng khổng lồ. Bên trong, thần Bàn Cổ ngủ suốt 18.000 năm.',
+       'Một ngày ông tỉnh dậy, thấy xung quanh tối đen ngột ngạt. Ông vung chiếc rìu lớn bổ mạnh một nhát. Quả trứng vỡ đôi: phần khí nhẹ, trong bay lên thành trời; phần khí nặng, đục chìm xuống thành đất.',
+       'Sợ trời đất lại dính vào nhau, Bàn Cổ đứng giữa, đội trời, đạp đất. Mỗi ngày trời cao thêm một trượng, đất dày thêm một trượng, ông cũng lớn thêm một trượng. Sau 18.000 năm, trời đất vững chắc, Bàn Cổ kiệt sức ngã xuống.',
+       'Thân thể ông hóa thành vũ trụ: hơi thở thành gió và mây, tiếng nói thành sấm, hai mắt thành mặt trời và mặt trăng, tay chân thành núi, máu thành sông, tóc thành những vì sao.'],
+   i: '开天辟地 (kāitiān pìdì): mở trời lập đất, dùng để chỉ việc làm nên chuyện chưa từng có.' },
+ { t: '女娲补天', p: 'Nǚwā bǔ tiān', v: 'Nữ Oa vá trời',
+   b: ['Một lần hai vị thần Cộng Công và Chúc Dung giao chiến. Cộng Công thua trận, tức giận lao đầu vào núi Bất Chu, ngọn núi chống trời. Cột chống gãy, bầu trời nghiêng thủng một lỗ lớn.',
+       'Nước từ trời đổ xuống gây lũ lụt, lửa cháy rừng, thú dữ hoành hành, muôn loài khổ sở. Nữ Oa, người đã nặn ra loài người bằng đất sét, quyết cứu con cháu mình.',
+       'Bà tìm đá năm màu, nung chảy ở đỉnh núi rồi dùng để vá bầu trời. Bà còn chặt bốn chân của một con rùa khổng lồ để dựng lại bốn cột chống trời. Từ đó trời đất yên ổn, muôn loài lại sinh sống bình an.'],
+   i: '女娲补天 (Nǚwā bǔ tiān): dùng để ca ngợi người có công sửa chữa, cứu vãn tình thế lớn.' },
+ { t: '后羿射日', p: 'Hòu Yì shè rì', v: 'Hậu Nghệ bắn mặt trời',
+   b: ['Thuở xưa có mười mặt trời, là mười người con của Đế Tuấn. Bình thường mỗi ngày chỉ một mặt trời đi qua bầu trời. Nhưng một hôm cả mười cùng mọc.',
+       'Đất đai nứt nẻ, sông ngòi cạn khô, mùa màng cháy rụi, con người khổ sở vô cùng. Vị anh hùng bắn cung giỏi nhất là Hậu Nghệ đứng ra giúp dân.',
+       'Ông leo lên đỉnh núi, giương cung bắn rơi từng mặt trời một. Chín mặt trời lần lượt rơi xuống, chỉ chừa lại một. Từ đó mặt trời chỉ mọc một lần mỗi ngày, mang đến ánh sáng và hơi ấm cho muôn loài.'],
+   i: 'Truyện giải thích vì sao chỉ có một mặt trời và ca ngợi tinh thần diệt hại cứu dân.' },
+ { t: '嫦娥奔月', p: 'Cháng\'é bēn yuè', v: 'Hằng Nga bay lên cung trăng',
+   b: ['Hậu Nghệ được Tây Vương Mẫu tặng một viên thuốc trường sinh bất tử. Ông không nỡ rời vợ là Hằng Nga nên nhờ bà cất giữ.',
+       'Ông có một học trò tên Phùng Mông, nhân lúc Hậu Nghệ đi vắng, hắn xông vào ép Hằng Nga đưa thuốc. Không còn cách nào khác, Hằng Nga nuốt viên thuốc vào bụng để không rơi vào tay kẻ xấu.',
+       'Thân thể bà nhẹ dần, bay lên trời và dừng lại ở mặt trăng. Trên cung trăng lạnh lẽo, chỉ có thỏ ngọc làm bạn. Mỗi dịp Tết Trung Thu ngày rằm tháng tám, người Trung Quốc ngắm trăng, ăn bánh trung thu và nhớ về Hằng Nga.'],
+   i: '中秋节 (Zhōngqiū Jié): Tết Trung Thu, ngày đoàn viên của gia đình.' },
+ { t: '牛郎织女', p: 'Niúláng Zhīnǚ', v: 'Ngưu Lang Chức Nữ',
+   b: ['Ngưu Lang là chàng trai nghèo mồ côi, sống cùng một con trâu già. Nhờ lời trâu chỉ, chàng gặp Chức Nữ, cô tiên dệt mây trên trời, khi nàng xuống hồ tắm. Hai người yêu nhau, cưới nhau và có hai đứa con.',
+       'Nhưng Vương Mẫu nương nương nổi giận, bắt Chức Nữ về trời. Ngưu Lang vác con đuổi theo, thì bà rút trâm vạch một đường, thành dòng Ngân Hà mênh mông chia cắt đôi vợ chồng.',
+       'Cảm động trước tình yêu của họ, đàn chim thước đã bay đến, nối đuôi nhau thành một chiếc cầu trên Ngân Hà. Mỗi năm vào đêm mùng 7 tháng 7 âm lịch, hai người được gặp nhau một lần. Đó là lễ Thất Tịch, ngày lễ tình yêu của người Trung Quốc.'],
+   i: '七夕节 (Qīxī Jié): lễ Thất Tịch, ngày 7 tháng 7 âm lịch.' },
+ { t: '精卫填海', p: 'Jīngwèi tián hǎi', v: 'Tinh Vệ lấp biển',
+   b: ['Viêm Đế có một cô con gái nhỏ tên Nữ Oa (khác Nữ Oa vá trời). Một hôm cô ra chơi ở biển Đông, không may bị sóng cuốn đi và chết đuối.',
+       'Linh hồn cô hóa thành một con chim nhỏ, đầu hoa, mỏ trắng, chân đỏ, tên là Tinh Vệ, vì tiếng kêu nghe như "Tinh Vệ, Tinh Vệ". Căm giận biển đã cướp mất mạng mình, chim ngày ngày ngậm cành cây và hòn đá từ núi Phát Cưu bay ra thả xuống biển, mong lấp đầy biển cả.',
+       'Biển cười: "Ngươi nhỏ bé thế, lấp đến đời nào?" Chim đáp: "Dù đến muôn đời ta cũng không bỏ cuộc!" Nó vẫn bay mãi, không ngừng nghỉ.'],
+   i: '精卫填海 (jīngwèi tián hǎi): chỉ ý chí kiên trì, không bao giờ bỏ cuộc dù việc khó đến mấy.' },
+ { t: '愚公移山', p: 'Yúgōng yí shān', v: 'Ngu Công dời núi',
+   b: ['Ông lão Ngu Công gần chín mươi tuổi, nhà ở trước hai ngọn núi lớn là Thái Hàng và Vương Ốc. Núi chắn đường, mỗi lần ra ngoài cả nhà phải đi vòng rất xa.',
+       'Ông họp cả nhà bàn: "Chúng ta cùng dọn hai quả núi này đi nhé!" Mọi người đồng ý, rồi cùng gánh đất đá đổ ra biển. Một chuyến đi về mất cả năm.',
+       'Người hàng xóm Trí Tẩu cười: "Ông già yếu thế, nhổ nổi một ngọn cỏ cũng khó, nói chi núi!" Ngu Công đáp: "Ta chết thì còn con ta, con lại sinh cháu, cháu lại sinh con. Con cháu sinh sôi không dứt, còn núi thì không cao thêm. Lo gì không dọn hết?"',
+       'Thần núi nghe được, sợ hãi tâu lên Ngọc Hoàng. Cảm động trước sự quyết tâm đó, Ngọc Hoàng sai hai thần đến cõng hai ngọn núi đi nơi khác.'],
+   i: '愚公移山 (Yúgōng yí shān): thành ngữ chỉ sự kiên trì bền bỉ thì việc khó mấy cũng làm được.' },
+ { t: '大禹治水', p: 'Dà Yǔ zhì shuǐ', v: 'Đại Vũ trị thủy',
+   b: ['Thời vua Nghiêu, vua Thuấn, nước lũ tràn ngập khắp nơi, dân chúng phải leo lên núi, lên cây để sống. Cha của Vũ là Cổn dùng cách đắp đê ngăn nước suốt chín năm nhưng thất bại, vì nước càng dâng càng cao rồi phá vỡ đê.',
+       'Vũ nối nghiệp cha. Ông khảo sát núi sông và nhận ra: ngăn thì không được, phải khơi thông. Ông cho đào kênh dẫn nước theo chỗ trũng ra biển.',
+       'Ông làm việc suốt mười ba năm, chân tay chai sạn, ba lần đi qua cửa nhà mà không vào. Lần đầu nghe tiếng con trai khóc chào đời, ông vẫn không dừng lại. Nhờ vậy lũ lụt được chế ngự, dân chúng yên ổn làm ăn và tôn ông là Đại Vũ, vị vua sáng lập triều Hạ.'],
+   i: '三过家门而不入 (sān guò jiāmén ér bú rù): ba lần qua cửa nhà không vào, chỉ người hết lòng vì việc chung.' },
+ { t: '年兽', p: 'Nián shòu', v: 'Quái thú Niên và Tết',
+   b: ['Ngày xưa có một con quái thú tên là Niên (年), sống dưới đáy biển. Mỗi đêm cuối năm, nó leo lên bờ, phá làng, ăn gia súc và cả người.',
+       'Dân làng sợ hãi, mỗi năm đến ngày này đều chạy lên núi trốn. Một năm nọ có một ông lão ăn xin đến làng. Ông không sợ mà ở lại, dán giấy đỏ lên cửa, đốt pháo, đốt lửa và mặc áo đỏ.',
+       'Quái thú Niên vừa đến đã sợ hãi, vì nó rất sợ màu đỏ, lửa và tiếng nổ lớn, nên bỏ chạy mất. Từ đó mỗi dịp cuối năm, người Trung Quốc dán câu đối đỏ, đốt pháo, thức đêm giao thừa để đuổi Niên đi. Chữ 过年 (guònián) nghĩa là "qua Niên", tức là đón Tết.'],
+   i: '过年 (guò nián): ăn Tết. 春节 (Chūn Jié) là Tết Nguyên Đán, lễ lớn nhất của người Trung Quốc.' },
+ { t: '大闹天宫', p: 'Dà nào Tiāngōng', v: 'Tôn Ngộ Không đại náo thiên cung',
+   b: ['Trên núi Hoa Quả có một hòn đá thần hấp thụ tinh hoa trời đất. Một ngày đá nứt ra, sinh ra con khỉ đá, đó là Tôn Ngộ Không. Chú khỉ học được 72 phép biến hóa và phép cân đẩu vân bay một vòng mười vạn tám nghìn dặm.',
+       'Khỉ được phong làm "Bật Mã Ôn", chức quan nhỏ coi ngựa trên trời. Biết bị coi thường, Tôn Ngộ Không nổi giận, tự xưng "Tề Thiên Đại Thánh", đánh nhau với cả thiên binh thiên tướng, ăn trộm đào tiên và uống rượu của Ngọc Hoàng.',
+       'Cuối cùng chỉ có Phật Tổ Như Lai trị được: ngài lật bàn tay thành núi Ngũ Chỉ, đè khỉ suốt 500 năm. Sau đó khỉ được Đường Tăng giải thoát và theo thầy đi Tây Thiên thỉnh kinh, cùng Trư Bát Giới và Sa Tăng, trải qua 81 kiếp nạn. Đó là nội dung tiểu thuyết kinh điển "Tây Du Ký".'],
+   i: '西游记 (Xīyóujì): Tây Du Ký, một trong bốn tiểu thuyết cổ điển lớn của Trung Quốc.' }
+];
+
+// ================= Lưu trữ =================
+const KEY = 'zh_app_v1', DAY = 86400000;
+const today = () => new Date().toISOString().slice(0, 10);
+let S;
+function parseSeed() {
+  let lvl = 1, i = 0; const out = [];
+  SEED.trim().split('\n').forEach(l => {
+    l = l.trim(); if (!l) return;
+    if (l[0] === '#') { lvl = +l.slice(1); return; }
+    const [h, p, m] = l.split('|');
+    out.push({ id: 's' + i++, h, p, m, l: lvl });
+  });
+  return out;
+}
+function load() {
+  try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) { S = null; }
+  if (!S || !S.words) S = { words: [], cards: {}, log: {} };
+  S.cards = S.cards || {}; S.log = S.log || {}; S.lessons = S.lessons || {};
+  S.xp = S.xp || 0; S.bestStreak = S.bestStreak || 0; S.opened = S.opened || []; S.deleted = S.deleted || [];
+  if (!('level' in S)) S.level = null;
+  S.hero = S.hero || { name: 'Đạo hữu' };
+  S.hero.char = S.hero.char || 'kiem';
+  S.ls = S.ls || 0; S.inv = S.inv || {}; S.equip = S.equip || {};
+  // Đồ cũ (áo, kiếm, nền, mũ của bản vẽ SVG) đã bỏ: hoàn lại linh thạch
+  const OLD = { robe_azure: 80, robe_purple: 160, robe_gold: 320, robe_red: 450, robe_black: 600, sw_wood: 40, sw_green: 140, sw_purple: 380, sw_fire: 600, bg_valley: 70, bg_snow: 130, bg_cloud: 200, bg_night: 300, hd_band: 50, hd_jade: 150, hd_gold: 320 };
+  Object.keys(OLD).forEach(k => { if (S.inv[k]) { S.ls += OLD[k]; S.refunded = (S.refunded || 0) + OLD[k]; delete S.inv[k]; } });
+  ['robe', 'weapon', 'bg', 'head'].forEach(k => delete S.equip[k]);
+  S.perfect = S.perfect || {}; S.freezes = S.freezes || 0; S.frozen = S.frozen || {};
+  const byId = {}; S.words.forEach(w => byId[w.id] = w);
+  parseSeed().forEach(w => {
+    if (byId[w.id]) byId[w.id].l = w.l;
+    else if (!S.deleted.includes(w.id)) S.words.push(w);
+  });
+  S.words.forEach(w => { if (!w.l) w.l = S.level || 1; });
+  save();
+}
+function save() { if (window.__noSave) return; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+load();
+
+// ================= Tiện ích =================
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pick = a => a[Math.random() * a.length | 0];
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ü/g, 'u').replace(/v/g, 'u').replace(/[\d\s'’\-]/g, '').toLowerCase();
+let _au = null;
+function speak(w) {
+  const t = w.h;
+  if (/^s\d+$/.test(w.id)) {
+    const src = (window.AUDIO && window.AUDIO[w.id]) || ('audio/' + w.id + '.mp3');
+    if (_au) _au.pause();
+    _au = new Audio(src);
+    _au.play().catch(err => { console.warn('Audio lỗi:', err); speakTTS(t); });
+    return;
+  }
+  speakTTS(t);
+}
+function speakTTS(t) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(t);
+  u.lang = 'zh-CN'; u.rate = 0.85;
+  const v = speechSynthesis.getVoices().find(v => /zh[-_]CN|zh-Hans/i.test(v.lang));
+  if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 4200); }
+const dstr = t => new Date(t).toISOString().slice(0, 10);
+function streakEnding(t) {
+  let n = 0;
+  for (let g = 0; g < 4000; g++, t -= DAY) {
+    const d = dstr(t);
+    if ((S.log[d] || 0) >= GOAL) n++;
+    else if (!S.frozen[d]) break;
+  }
+  return n;
+}
+function streak() {
+  const t = Date.now(), d = dstr(t);
+  return streakEnding((S.log[d] || 0) >= GOAL || S.frozen[d] ? t : t - DAY);
+}
+// Hộ Chuỗi Phù: tự dùng để giữ chuỗi nếu hôm qua bỏ lỡ
+function applyFreeze() {
+  const y = dstr(Date.now() - DAY);
+  if (S.freezes > 0 && (S.log[y] || 0) < GOAL && !S.frozen[y] && streakEnding(Date.now() - 2 * DAY) > 0) {
+    S.freezes--; S.frozen[y] = true; save();
+    toast('🧿 Hộ Chuỗi Phù đã giữ chuỗi cho ngày hôm qua!');
+  }
+}
+function logStudy() {
+  const d = today(), was = S.log[d] || 0;
+  S.log[d] = was + 1;
+  if (was + 1 === GOAL) {
+    const st = streak(), prev = S.bestStreak;
+    if (st > S.bestStreak) S.bestStreak = st;
+    const gg = lsGain(10); S.ls += gg;
+    let msg = '🎯 Đạt mục tiêu ngày! Chuỗi ' + st + ' ngày 🔥 · +' + gg + ' 💎';
+    if (MILESTONES.includes(st) && st > prev) msg += ' · 🎁 Có rương mới ở tab Thưởng!';
+    toast(msg);
+  }
+  save(); header();
+}
+// ----- Tu vi / cảnh giới -----
+const ST9 = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => 'Tầng ' + i);
+// c = tu vi cần cho MỖI tầng (9 tầng mỗi đại cảnh giới). Qua tầng 9 phải độ kiếp mới sang cảnh giới mới.
+const REALMS = [
+  { n: 'Luyện Khí', h: '炼气', p: 'liànqì', c: 60 },
+  { n: 'Trúc Cơ', h: '筑基', p: 'zhùjī', c: 120 },
+  { n: 'Kim Đan', h: '金丹', p: 'jīndān', c: 220 },
+  { n: 'Nguyên Anh', h: '元婴', p: 'yuányīng', c: 380 },
+  { n: 'Hóa Thần', h: '化神', p: 'huàshén', c: 620 },
+  { n: 'Luyện Hư', h: '炼虚', p: 'liànxū', c: 950 },
+  { n: 'Hợp Thể', h: '合体', p: 'hétǐ', c: 1400 },
+  { n: 'Đại Thừa', h: '大乘', p: 'dàchéng', c: 2000 },
+  { n: 'Độ Kiếp', h: '渡劫', p: 'dùjié', c: 2800 }
+];
+// Mỗi cảnh giới gắn với 1 trình độ HSK: 2 cảnh giới cho mỗi HSK (cảnh giới đầu kiểm tra nửa đầu, cảnh giới sau kiểm tra toàn bộ).
+// Mỗi cảnh giới cần đúng GCFG.daysPerRealm ngày học đều: mỗi ngày tối đa GCFG.xpDayCap tu vi (xem addXP), nên không thể lên nhanh hơn.
+const RLV = [1, 1, 2, 2, 3, 3, 4, 4, 5];
+REALMS.forEach((r, i) => {
+  r.st = ST9; r.hsk = RLV[i];
+  const pair = RLV.filter(x => x === r.hsk).length, idx = RLV.slice(0, i).filter(x => x === r.hsk).length;
+  r.scope = pair === 1 || idx === 1 ? 'full' : 'half';
+  r.c = Math.round(GCFG.xpDayCap * GCFG.daysPerRealm / 9 / 5) * 5; // tu vi mỗi tầng
+});
+const FLAT = [], REND = []; let TOTAL = 0;
+REALMS.forEach((r, ri) => { r.st.forEach((s, si) => { FLAT.push({ i: FLAT.length, ri, si, cost: r.c, start: TOTAL }); TOTAL += r.c; }); REND[ri] = TOTAL; });
+function realmInfo(xp) {
+  if (xp >= TOTAL) return { flat: FLAT.length, ri: REALMS.length, name: 'Phi Thăng', h: '飞升', p: 'fēishēng', into: 1, need: 1, max: true };
+  const f = FLAT.find(f => xp < f.start + f.cost), r = REALMS[f.ri];
+  return { flat: f.i, ri: f.ri, name: r.n + ' ' + r.st[f.si], h: r.h, p: r.p, into: xp - f.start, need: f.cost, max: false };
+}
+function addXP(n) {
+  if (typeof gExpBonus === 'function') n = Math.round(n * (1 + gExpBonus() / 100));
+  const dd = today(); if (S.xpDay !== dd) { S.xpDay = dd; S.xpToday = 0; S.xpCapToast = false; }
+  const room = Math.max(0, GCFG.xpDayCap - (S.xpToday || 0));
+  if (n > room) { n = room; if (!S.xpCapToast) { S.xpCapToast = true; toast('⏳ Đã đạt giới hạn tu vi hôm nay (' + GCFG.xpDayCap + '). Quay lại ngày mai để tiếp tục tu luyện!'); } }
+  S.xpToday = (S.xpToday || 0) + n;
+  if (n <= 0) { save(); header(); return; }
+  const a = realmInfo(S.xp); let nx = S.xp + n, capped = false;
+  if (a.ri < REALMS.length && !(S.bt || {})[a.ri] && nx >= REND[a.ri]) { nx = REND[a.ri] - 1; capped = true; }
+  S.xp = nx; const b = realmInfo(S.xp);
+  if (b.flat > a.flat) {
+    const big = b.ri > a.ri, gift = lsGain(big ? 60 * b.ri : 5);
+    S.ls += gift;
+    toast((big ? '⚡ ĐỘT PHÁ CẢNH GIỚI! ' : '✨ Đột phá! ') + b.h + ' ' + b.name + ' · +' + gift + ' 💎');
+  } else if (capped && a.into < a.need - 1) toast('⚡ Đã đạt đỉnh ' + a.h + ' ' + a.name + '! Vào tab Tu tiên để độ kiếp.');
+  save(); header();
+}
+function header() {
+  $('#strk').textContent = '🔥 ' + streak() + ' · ' + Math.min(GOAL, S.log[today()] || 0) + '/' + GOAL;
+  $('#xpc').textContent = '🧘 ' + realmInfo(S.xp).name;
+  $('#lsc').textContent = '💎 ' + S.ls;
+  const cb = $('#cmb'); if (cb) { cb.style.display = (S.combo || 0) > 0 ? '' : 'none'; cb.textContent = '⚡ ' + (S.combo || 0); }
+  $('#lvchip').textContent = S.level ? LEVEL_INFO[S.level].name + ' ▾' : 'Chọn cấp độ';
+}
+$('#xpc').onclick = () => go('hero');
+$('#lvchip').onclick = () => { go('home'); vLevelPick(); };
+
+// ================= SRS =================
+function rate(id, q) {
+  const c = S.cards[id] || { ease: 2.5, interval: 0, reps: 0, due: 0 };
+  if (q === 0) { c.reps = 0; c.interval = 0; c.ease = Math.max(1.3, c.ease - 0.2); c.due = Date.now() + 60000; }
+  else {
+    if (q === 1) { c.interval = Math.max(1, Math.round(c.interval * 1.2)); c.ease = Math.max(1.3, c.ease - 0.15); }
+    else if (q === 2) { c.interval = c.reps === 0 ? 1 : c.reps === 1 ? 3 : Math.round(c.interval * c.ease); }
+    else { c.interval = c.reps === 0 ? 3 : Math.round(Math.max(c.interval, 1) * c.ease * 1.3); c.ease += 0.15; }
+    c.reps++; c.due = Date.now() + c.interval * DAY;
+  }
+  S.cards[id] = c; logStudy();
+}
+
+// ================= Điều hướng =================
+const view = $('#view');
+let tab = 'home';
+function go(t) { tab = t; [...$('#nav').children].forEach(x => x.classList.toggle('on', x.dataset.t === t)); render(); }
+$('#nav').onclick = e => { const b = e.target.closest('button'); if (b) go(b.dataset.t); };
+function render() {
+  if (typeof gLeave === 'function') gLeave();
+  view.onclick = null;
+  if (!S.level && (tab === 'home' || tab === 'practice' || tab === 'review')) { vLevelPick(); header(); return; }
+  ({ home: vHome, review: vReview, practice: vPractice, hero: vHero, fight: vFight, reward: vReward, words: vWords })[tab]();
+  header();
+}
+const lw = L => S.words.filter(w => w.l === L);
+const lessonsOf = L => { const a = lw(L), out = []; for (let i = 0; i < a.length; i += PER_LESSON) out.push(a.slice(i, i + PER_LESSON)); return out; };
+const lkey = (L, k) => L + '-' + k;
+const passed = (L, k) => (S.lessons[lkey(L, k)] || 0) >= PASS;
+const unlocked = (L, k) => k === 0 || passed(L, k - 1);
+
+// ================= Chọn cấp độ =================
+function vLevelPick() {
+  view.onclick = null;
+  view.innerHTML = '<h3 style="margin:4px 0 10px">Chọn cấp độ HSK để bắt đầu</h3>' + [1, 2, 3, 4, 5].map(L => {
+    const ls = lessonsOf(L), done = ls.filter((_, k) => passed(L, k)).length;
+    return `<button class="lv" data-l="${L}"><b>${LEVEL_INFO[L].name}</b><span><span>${LEVEL_INFO[L].desc}</span><br><span class="mut">${lw(L).length} từ · ${ls.length} bài · đã xong ${done}/${ls.length}</span></span></button>`;
+  }).join('') + '<p class="mut">Bạn có thể đổi cấp độ bất cứ lúc nào bằng nút ở góc trên. Tiến độ của từng cấp được lưu riêng.</p>';
+  view.onclick = e => { const b = e.target.closest('.lv'); if (!b) return; S.level = +b.dataset.l; save(); go('home'); };
+}
+
+// ================= Trang học (đường bài học) =================
+function vHome() {
+  const L = S.level, ls = lessonsOf(L), done = ls.filter((_, k) => passed(L, k)).length;
+  const dueN = Object.values(S.cards).filter(c => c.due <= Date.now()).length;
+  const todayN = Math.min(GOAL, S.log[today()] || 0);
+  let firstOpen = ls.findIndex((_, k) => !passed(L, k));
+  const ri = realmInfo(S.xp);
+  view.innerHTML = `
+  <div class="card hero-mini" style="display:flex;gap:12px;align-items:center;text-align:left;cursor:pointer;padding:10px 14px">
+    <div style="width:64px;flex:none">${bustImg(64)}</div>
+    <div style="flex:1"><b>${esc(S.hero.name)}</b> <span class="mut">· ${ri.h} ${ri.name}</span>
+      <div class="bar g"><i style="width:${ri.into / ri.need * 100}%"></i></div>
+      <div class="mut">Tu vi ${ri.max ? 'tối đa' : ri.into + '/' + ri.need} · hôm nay ${S.xpDay === today() ? S.xpToday : 0}/${GCFG.xpDayCap} · 💎 ${S.ls}</div></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>${streak()}</b>chuỗi ngày</div>
+    <div class="stat"><b>${done}/${ls.length}</b>bài ${LEVEL_INFO[L].name}</div>
+    <div class="stat"><b>${dueN}</b>từ cần ôn</div>
+  </div>
+  <div class="card" style="text-align:left;padding:12px 16px">
+    <div class="mut">Mục tiêu hôm nay: ${todayN}/${GOAL} câu ${todayN >= GOAL ? '✅' : ''}</div>
+    <div class="bar g"><i style="width:${todayN / GOAL * 100}%"></i></div>
+    <div class="mut">Hoàn thành mục tiêu mỗi ngày để giữ chuỗi và nhận rương truyện 🎁</div>
+  </div>
+  ${ls.map((ws, k) => {
+    const sc = S.lessons[lkey(L, k)], ok = passed(L, k), un = unlocked(L, k);
+    const cls = ok ? 'done' : (k === firstOpen ? 'cur' : (un ? '' : 'lock'));
+    return `<button class="les ${cls}" data-k="${k}" ${un ? '' : 'disabled'}><span class="n">${ok ? '✓' : (un ? k + 1 : '🔒')}</span><span><b>Bài ${k + 1}</b> <span style="font-family:'Microsoft YaHei',sans-serif">${esc(ws.slice(0, 4).map(w => w.h).join(' '))}…</span><small>${sc != null ? 'Điểm cao nhất: ' + Math.round(sc * 100) + '%' : (un ? ws.length + ' từ mới' : 'Hoàn thành bài trước để mở')}</small></span></button>`;
+  }).join('')}`;
+  view.onclick = e => {
+    if (e.target.closest('.hero-mini')) return go('hero');
+    const b = e.target.closest('.les'); if (!b || b.disabled) return; vLesson(L, +b.dataset.k);
+  };
+}
+
+// ================= Bài học: giới thiệu từ → kiểm tra =================
+function vLesson(L, k) {
+  const ws = lessonsOf(L)[k]; let j = 0;
+  view.onclick = null;
+  const intro = () => {
+    const w = ws[j];
+    view.innerHTML = `<div class="mut">Bài ${k + 1} · Từ mới ${j + 1}/${ws.length}</div><div class="bar"><i style="width:${j / ws.length * 100}%"></i></div>
+    <div class="card"><div class="han">${esc(w.h)}</div><button class="sp" id="spk">🔊</button><div class="pin">${esc(w.p)}</div><div class="mean">${esc(w.m)}</div></div>
+    <div class="row"><button id="bk" ${j ? '' : 'disabled'}>← Trước</button><button class="pri" id="nx">${j < ws.length - 1 ? 'Tiếp →' : 'Làm bài kiểm tra →'}</button></div>`;
+    $('#spk').onclick = () => speak(w); speak(w);
+    $('#bk').onclick = () => { j--; intro(); };
+    $('#nx').onclick = () => { if (j < ws.length - 1) { j++; intro(); } else runQuiz({ words: ws, pool: lw(L), onDone: finish }); };
+  };
+  const finish = (ok, total) => {
+    const key = lkey(L, k), sc = ok / total, pass = sc >= PASS, first = !passed(L, k), perfect = ok === total;
+    if (sc > (S.lessons[key] || 0)) S.lessons[key] = sc;
+    let bx = 0, bl = 0; const parts = [];
+    if (pass) {
+      ws.forEach(w => { if (!S.cards[w.id]) S.cards[w.id] = { ease: 2.5, interval: 1, reps: 1, due: Date.now() + DAY }; });
+      if (first) { bx += 20; bl += lsGain(10); parts.push('qua bài +20 tu vi +' + lsGain(10) + ' 💎'); }
+    }
+    if (perfect) {
+      if (!S.perfect[key]) { S.perfect[key] = true; bx += 30; bl += lsGain(25); parts.push('✨ HOÀN HẢO lần đầu +30 tu vi +' + lsGain(25) + ' 💎'); }
+      else { bx += 10; bl += lsGain(5); parts.push('hoàn hảo +10 tu vi +' + lsGain(5) + ' 💎'); }
+    }
+    S.ls += bl; save(); if (bx) addXP(bx); else header();
+    const hasNext = k + 1 < lessonsOf(L).length;
+    view.innerHTML = `<div class="card"><div class="han" style="font-size:56px">${perfect ? '🌟' : pass ? '🎉' : '💪'}</div>
+      <div class="mean"><b>${ok}/${total}</b> câu đúng (${Math.round(sc * 100)}%)</div>
+      <p class="mut">${pass ? 'Bạn đã qua bài ' + (k + 1) + (first ? ', các từ đã thêm vào mục Ôn tập.' : '.') : 'Cần đạt ít nhất ' + PASS * 100 + '% để qua bài. Thử lại nhé!'}</p>
+      ${parts.length ? '<p><b>Thưởng:</b> ' + parts.join(' · ') + '</p>' : ''}
+      <p class="mut">Mỗi câu đúng: +10 tu vi, +${lsGain(1)} 💎</p></div>
+      <div class="row"><button id="again">Làm lại</button>${pass && hasNext ? '<button class="pri" id="nxl">Bài tiếp theo →</button>' : ''}<button id="home">Về danh sách bài</button></div>`;
+    $('#again').onclick = () => vLesson(L, k);
+    $('#home').onclick = () => go('home');
+    const n = $('#nxl'); if (n) n.onclick = () => vLesson(L, k + 1);
+  };
+  intro();
+}
+
+// ================= Bộ câu hỏi trắc nghiệm dùng chung =================
+function runQuiz(o) {
+  const items = shuffle(o.words); let i = 0, ok = 0;
+  view.onclick = null;
+  const next = () => {
+    if (i >= items.length) return o.onDone(ok, items.length);
+    const w = items[i], type = pick(['h2m', 'm2h', 'listen']);
+    let ds = shuffle(o.pool.filter(x => x.id !== w.id && x.m !== w.m && x.h !== w.h && x.p !== w.p)).slice(0, 3);
+    if (ds.length < 3) ds = shuffle(o.pool.filter(x => x.id !== w.id)).slice(0, 3);
+    const opts = shuffle([w].concat(ds));
+    const lab = x => type === 'h2m' ? esc(x.m) : `<span style="font-size:24px">${esc(x.h)}</span><br><span class="pyn">${esc(x.p)}</span>`;
+    const q = type === 'h2m' ? `<div class="mut">Chọn nghĩa đúng</div><div class="han">${esc(w.h)}</div><div class="pin">${esc(w.p)}</div><button class="sp" id="spk">🔊</button>`
+      : type === 'm2h' ? `<div class="mut">Chọn chữ Hán đúng</div><div class="mean" style="font-size:28px;margin:14px 0">${esc(w.m)}</div>`
+      : `<div class="mut">Nghe và chọn chữ Hán đúng</div><button class="sp" id="spk" style="font-size:54px">🔊</button>`;
+    view.innerHTML = `<div class="mut" style="text-align:right">${gComboTxt()} · ${i + 1}/${items.length}</div><div class="bar"><i style="width:${i / items.length * 100}%"></i></div>
+      <div class="card">${q}<div id="opts">${opts.map((x, n) => `<button class="opt" data-id="${x.id}"><span class="kn">${n + 1}</span>${lab(x)}</button>`).join('')}</div><div id="fb" style="margin-top:10px;min-height:24px"></div></div>
+      <div class="row"><button class="pri hide" id="nx">${i + 1 < items.length ? 'Câu tiếp →' : 'Xem kết quả'}</button></div>`;
+    const sp = $('#spk'); if (sp) sp.onclick = () => speak(w);
+    if (type !== 'm2h') speak(w);
+    let done = false;
+    $('#opts').onclick = e => {
+      const b = e.target.closest('.opt'); if (!b || done) return; done = true;
+      const right = b.dataset.id === w.id;
+      b.classList.add(right ? 'ok' : 'no');
+      if (!right) $(`.opt[data-id="${w.id}"]`).classList.add('ok');
+      if (right) { ok++; if (!o.free || gPracOK()) { S.ls += lsGain(1); addXP(10); } }
+      const dr = rpgOnAnswer(right);
+      $('#fb').innerHTML = (dr ? gDropHTML(dr) : '') + `${right ? '<span class="ok-t">✓ Đúng!</span>' : '<span class="bad-t">✗ Chưa đúng.</span>'} <b>${esc(w.h)}</b> ${esc(w.p)} · ${esc(w.m)}`;
+      if (type === 'm2h') speak(w);
+      logStudy();
+      $('#nx').classList.remove('hide');
+    };
+    $('#nx').onclick = () => { i++; next(); };
+  };
+  next();
+}
+// Bộ gõ pinyin dùng chung
+function runType(o) {
+  const items = shuffle(o.words); let i = 0, ok = 0;
+  view.onclick = null;
+  const next = () => {
+    if (i >= items.length) return o.onDone(ok, items.length);
+    const w = items[i];
+    view.innerHTML = `<div class="mut" style="text-align:right">${gComboTxt()} · ${i + 1}/${items.length}</div><div class="bar"><i style="width:${i / items.length * 100}%"></i></div>
+      <div class="card"><div class="mut">Gõ pinyin (không cần dấu, ví dụ: ni hao)</div><div class="han">${esc(w.h)}</div><div class="mean">${esc(w.m)}</div>
+      <button class="sp" id="spk">🔊</button><input id="ans" autocomplete="off" autocapitalize="none" placeholder="pinyin..."><div id="fb" style="margin-top:10px;min-height:28px"></div></div>
+      <div class="row"><button class="pri" id="go">Kiểm tra</button></div>`;
+    $('#spk').onclick = () => speak(w);
+    const inp = $('#ans'); inp.focus();
+    let done = false;
+    const check = () => {
+      if (done) { i++; return next(); }
+      done = true;
+      const right = norm(inp.value) === norm(w.p);
+      if (right) { ok++; if (!o.free || gPracOK()) { S.ls += lsGain(1); addXP(10); } }
+      const dr = rpgOnAnswer(right);
+      $('#fb').innerHTML = (right ? '<span class="ok-t">✓ Đúng!</span> ' : '<span class="bad-t">✗ Sai.</span> ') + `<b>${esc(w.p)}</b>` + (dr ? gDropHTML(dr) : '');
+      $('#go').textContent = i + 1 < items.length ? 'Câu tiếp →' : 'Xem kết quả';
+      speak(w); logStudy();
+    };
+    $('#go').onclick = check;
+    inp.onkeydown = e => { if (e.key === 'Enter') check(); };
+  };
+  next();
+}
+function resultScreen(ok, total, again, label) {
+  const perfect = ok === total && total >= 10;
+  if (perfect) { S.ls += lsGain(5); addXP(20); }
+  view.innerHTML = `<div class="card"><div class="han" style="font-size:56px">${perfect ? '🌟' : ok / total >= PASS ? '🎉' : '💪'}</div><div class="mean"><b>${ok}/${total}</b> câu đúng</div><p class="mut">+10 tu vi · +${lsGain(1)} 💎 mỗi câu đúng${perfect ? ' · ✨ Hoàn hảo: +20 tu vi +' + lsGain(5) + ' 💎' : ''}${S.pracDay === today() && S.pracN >= GCFG.practiceCap ? '<br>Hôm nay đã hết thưởng luyện tập (' + GCFG.practiceCap + ' câu). Hãy học bài mới hoặc đánh quái tuần!' : ''}</p></div>
+    <div class="row"><button class="pri" id="again">${label}</button><button id="home">Về trang học</button></div>`;
+  $('#again').onclick = again; $('#home').onclick = () => go('home');
+}
+
+function vPractice() {
+  view.innerHTML = `<div class="card"><b>Luyện tập tự do</b><p class="mut">Mỗi câu đúng: +10 tu vi, +${lsGain(1)} 💎 (tối đa ${GCFG.practiceCap} câu mỗi ngày). Đúng liên tiếp ${GCFG.comboDrop} câu sẽ rơi 1 trang bị đúng phẩm của cảnh giới hiện tại (combo càng dài càng ít ra phẩm thấp hơn). Phẩm cao hơn chỉ có từ quái tuần, độ kiếp và rương chuỗi ngày cao. Hôm nay đã rơi ${S.dropsDay === today() ? S.dropsToday : 0}/${GCFG.dropsPerDay} món.</p>
+    <div class="row"><button class="pri" id="pq">Trắc nghiệm ${QUIZ_N} câu</button><button id="pt">Gõ pinyin ${TYPE_N} từ</button></div></div>`;
+  $('#pq').onclick = vQuizFree; $('#pt').onclick = vTypeFree;
+}
+// ================= Trắc nghiệm / Gõ pinyin tự do (theo cấp đã chọn) =================
+const QUIZ_N = 20, TYPE_N = 15;
+function vQuizFree() {
+  const pool = lw(S.level);
+  if (pool.length < 4) { view.innerHTML = '<div class="card">Cấp này chưa đủ từ.</div>'; return; }
+  const start = () => runQuiz({ free: true, words: shuffle(pool).slice(0, QUIZ_N), pool, onDone: (ok, t) => resultScreen(ok, t, start, 'Chơi tiếp ' + QUIZ_N + ' câu') });
+  start();
+}
+function vTypeFree() {
+  const pool = lw(S.level);
+  if (!pool.length) { view.innerHTML = '<div class="card">Cấp này chưa có từ.</div>'; return; }
+  const start = () => runType({ free: true, words: shuffle(pool).slice(0, TYPE_N), onDone: (ok, t) => resultScreen(ok, t, start, 'Chơi tiếp ' + TYPE_N + ' từ') });
+  start();
+}
+
+// ================= Ôn tập SRS =================
+let queue = [], cur = null, shown = false, rvHist = [];
+function vReview() {
+  queue = shuffle(S.words.filter(w => S.cards[w.id] && S.cards[w.id].due <= Date.now()));
+  rvHist = [];
+  nextCard();
+}
+// Chấm điểm thẻ hiện tại rồi sang thẻ kế (nhớ lại để phím ← hoàn tác được)
+function rvRate(q) {
+  const old = S.cards[cur.id] ? Object.assign({}, S.cards[cur.id]) : null;
+  rate(cur.id, q);
+  const again = q === 0;
+  if (again) queue.splice(Math.min(3, queue.length), 0, cur);
+  rvHist.push({ w: cur, old, again, day: today() });
+  if (rvHist.length > 200) rvHist.shift();
+  nextCard();
+}
+// Bỏ qua thẻ chưa chấm: đưa xuống cuối hàng đợi
+function rvSkip() {
+  queue.push(cur);
+  rvHist.push({ w: cur, skip: true });
+  nextCard();
+}
+// Quay lại thẻ trước: hoàn tác lượt chấm của thẻ đó
+function rvBack() {
+  const h = rvHist.pop(); if (!h) { toast('Đây là thẻ đầu tiên.'); return; }
+  if (cur) queue.unshift(cur);
+  const i = queue.lastIndexOf(h.w);
+  if ((h.skip || h.again) && i >= 0) queue.splice(i, 1);
+  if (!h.skip) {
+    if (h.old) S.cards[h.w.id] = h.old; else delete S.cards[h.w.id];
+    if (h.day === today() && S.log[h.day] > 0 && S.log[h.day] !== GOAL) S.log[h.day]--;
+    if (typeof save === 'function') save();
+  }
+  cur = h.w; shown = !h.skip; drawCard();
+}
+// Phím tắt ôn tập: Enter/Space hiện nghĩa (đã hiện thì = Tốt), → từ kế, ← từ trước, 1–4 chấm Lại/Khó/Tốt/Dễ
+document.addEventListener('keydown', e => {
+  if (tab !== 'review' || e.ctrlKey || e.metaKey || e.altKey) return;
+  const tg = e.target; if (tg && (/^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName) || tg.isContentEditable)) return;
+  if (document.querySelector('.ult-ov, .modal:not(.hide)')) return;
+  const k = e.key;
+  if (k === 'ArrowLeft') { if (!rvHist.length && !cur) return; e.preventDefault(); return rvBack(); }
+  if (!cur || !$('#rv-card')) return;
+  if (k === 'Enter' || k === ' ') { e.preventDefault(); if (!shown) { shown = true; speak(cur); drawCard(); } else rvRate(2); }
+  else if (k === 'ArrowRight') { e.preventDefault(); if (shown) rvRate(2); else rvSkip(); }
+  else if (shown && /^[1-4]$/.test(k)) { e.preventDefault(); rvRate(+k - 1); }
+});
+function nextCard() {
+  if (!queue.length) {
+    cur = null;
+    const total = Object.keys(S.cards).length;
+    view.innerHTML = `<div class="card"><div class="han">🎉</div><div class="mean">Hết thẻ cần ôn!</div><p class="mut">${total ? 'Bạn có ' + total + ' từ trong bộ ôn tập. Quay lại sau để ôn tiếp.' : 'Hãy qua bài kiểm tra ở tab Học, các từ sẽ tự thêm vào đây.'}</p>${rvHist.length ? '<p class="mut">⌨️ Nhấn ← để xem lại từ trước.</p>' : ''}</div>`;
+    return;
+  }
+  cur = queue.shift(); shown = false; drawCard();
+}
+function drawCard() {
+  const w = cur;
+  view.innerHTML = `<div class="card" id="rv-card"><div class="mut">Ôn tập · còn ${queue.length} thẻ</div>
+    <div class="han">${esc(w.h)}</div><button class="sp" id="spk">🔊</button>
+    <div id="back" class="${shown ? '' : 'hide'}"><div class="pin">${esc(w.p)}</div><div class="mean">${esc(w.m)}</div></div></div><div class="row" id="ctrl"></div>
+    <p class="mut kb-hint">⌨️ ${shown ? '1 Lại · 2 Khó · 3 Tốt · 4 Dễ · Enter/→ = Tốt' : 'Enter hiện nghĩa · → bỏ qua'}${rvHist.length ? ' · ← từ trước' : ''}</p>`;
+  $('#spk').onclick = () => speak(w);
+  const ctrl = $('#ctrl');
+  if (!shown) {
+    ctrl.innerHTML = '<button class="pri" id="show">Hiện đáp án</button>';
+    $('#show').onclick = () => { shown = true; speak(w); drawCard(); };
+  } else {
+    ctrl.innerHTML = '<button class="r0" data-q="0">Lại</button><button data-q="1">Khó</button><button data-q="2">Tốt</button><button class="r3" data-q="3">Dễ</button>';
+    ctrl.onclick = e => {
+      const b = e.target.closest('button'); if (!b) return;
+      rvRate(+b.dataset.q);
+    };
+  }
+}
+
+// ================= Phần thưởng =================
+function vReward() {
+  const avail = MILESTONES.filter(m => m <= S.bestStreak).length - S.opened.length;
+  view.innerHTML = `<div class="card" style="text-align:left"><b>Rương truyện & truyền thuyết Trung Quốc</b>
+    <p class="mut" style="margin:6px 0 0">Giữ chuỗi học mỗi ngày (đạt mục tiêu ${GOAL} câu/ngày) để mở khóa từng câu chuyện. Mỗi rương còn có 1 trang bị: chuỗi dưới 7 ngày ra đúng phẩm cảnh giới, từ 7 ngày ra cao hơn 1 bậc, từ 21 ngày cao hơn 2 bậc. Chuỗi hiện tại: <b>${streak()}</b> ngày · Kỷ lục: <b>${S.bestStreak}</b> ngày.</p></div>
+  ${MILESTONES.map((m, i) => {
+    const op = i < S.opened.length, ready = !op && i === S.opened.length && m <= S.bestStreak;
+    const cls = op ? '' : (ready ? 'ready' : 'lock');
+    return `<button class="chest ${cls}" data-i="${i}" ${op || ready ? '' : 'disabled'}><span class="ic">${op ? '📜' : (ready ? '🎁' : '🔒')}</span><span><b>${op ? esc(STORIES[i].v) : (ready ? 'Rương sẵn sàng, bấm để mở!' : 'Rương bí ẩn')}</b><br><span class="mut">Cần chuỗi ${m} ngày${op ? ' · ' + esc(STORIES[i].t) : ''}</span></span></button>`;
+  }).join('')}`;
+  view.onclick = e => {
+    const b = e.target.closest('.chest'); if (!b || b.disabled) return;
+    const i = +b.dataset.i;
+    if (i === S.opened.length) { const cg = lsGain(20); S.opened.push(i); S.ls += cg; const dr = gDrop('streak', MILESTONES[i]); save(); header(); toast('🎁 Mở rương: +' + cg + ' 💎 và ' + GT[dr.tier - 1].n); return vStory(i, dr); }
+    vStory(i);
+  };
+}
+function vStory(i, drop) {
+  const s = STORIES[i];
+  view.innerHTML = `<div class="card story"><div class="mut">Truyện ${i + 1}/${STORIES.length}</div><div class="hz">${esc(s.t)}</div><div class="pin" style="font-size:20px">${esc(s.p)}</div><h3 style="margin:6px 0">${esc(s.v)}</h3>
+    ${s.b.map(p => `<p>${esc(p)}</p>`).join('')}<div class="idiom">💡 <b>Thành ngữ / văn hóa:</b> ${esc(s.i)}</div>${drop ? '<p style="text-align:left"><b>Thưởng rương chuỗi ' + MILESTONES[i] + ' ngày:</b></p>' + gDropHTML(drop) : ''}</div>
+    <div class="row"><button class="pri" id="bk">← Về danh sách rương</button></div>`;
+  $('#bk').onclick = () => go('reward');
+}
+
+// ================= Từ vựng =================
+function vWords() {
+  const L = S.level || 1;
+  view.innerHTML = `<div class="card" style="text-align:left">
+    <b>Thêm từ mới vào ${LEVEL_INFO[L].name}</b>
+    <input id="nh" placeholder="Hán tự (vd: 学校)"><input id="np" placeholder="Pinyin (vd: xuéxiào)"><input id="nm" placeholder="Nghĩa (vd: trường học)">
+    <div class="row"><button class="pri" id="add">Thêm</button></div></div>
+  <table><tr><th>Cấp</th><th>Hán</th><th>Pinyin</th><th>Nghĩa</th><th></th></tr>
+  ${S.words.map(w => `<tr><td>${w.l}</td><td style="font-size:20px">${esc(w.h)}</td><td>${esc(w.p)}</td><td>${esc(w.m)}</td><td><button class="sp" data-del="${w.id}" title="Xóa">✕</button></td></tr>`).join('')}</table>
+  <div class="row"><button id="bk-ex">⬇ Xuất sao lưu tiến độ</button><button id="bk-im">⬆ Nhập sao lưu</button><button id="rs">Xóa toàn bộ tiến độ</button></div><input type="file" id="bk-file" accept="application/json" class="hide">`;
+  $('#add').onclick = () => {
+    const h = $('#nh').value.trim(), p = $('#np').value.trim(), m = $('#nm').value.trim();
+    if (!h || !p || !m) return toast('Điền đủ 3 ô.');
+    S.words.push({ id: 'c' + Date.now(), h, p, m, l: L }); save(); vWords();
+  };
+  $('#bk-ex').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(Object.assign({}, S, { __slots: slotsLoad() }))], { type: 'application/json' })); a.download = 'tien-do-hoc-tieng-trung.json'; a.click(); };
+  $('#bk-im').onclick = () => $('#bk-file').click();
+  $('#bk-file').onchange = e => { const f = e.target.files[0]; if (!f) return; f.text().then(txt => { try { const d = JSON.parse(txt); if (!d || !d.words) throw 0; if (!confirm('Nhập sao lưu sẽ GHI ĐÈ toàn bộ tiến độ hiện tại. Tiếp tục?')) return; if (d.__slots) { window.__noSave = true; localStorage.setItem(SLOTKEY, JSON.stringify(d.__slots)); delete d.__slots; } window.__noSave = true; localStorage.setItem(KEY, JSON.stringify(d)); location.reload(); } catch (err) { toast('File sao lưu không hợp lệ.'); } }); };
+  $('#rs').onclick = () => { if (confirm('Xóa toàn bộ tiến độ học, XP, chuỗi và phần thưởng? Không thể hoàn tác.')) { S.cards = {}; S.log = {}; S.lessons = {}; S.xp = 0; S.bestStreak = 0; S.opened = []; S.ls = 0; S.inv = {}; S.equip = {}; S.perfect = {}; S.freezes = 0; S.frozen = {}; S.bag = []; S.eq = {}; S.cores = 0; S.combo = 0; S.week = null; S.hist = []; S.beast = []; S.nextBattle = 0; S.bt = {}; S.rpgStarter = false; S.shop = { d: '', sold: [] }; rpgInit(); save(); go('home'); } };
+  view.onclick = e => {
+    const b = e.target.closest('[data-del]'); if (!b) return;
+    if (!confirm('Xóa từ này?')) return;
+    const id = b.dataset.del; S.words = S.words.filter(w => w.id !== id); delete S.cards[id]; if (!S.deleted.includes(id)) S.deleted.push(id); save(); vWords();
+  };
+}
+
+// ================= Nhân vật tu tiên & cửa hàng =================
+// Nhân vật = ảnh chibi (avatars-data.js, sinh bởi tools/slice_avatars.py)
+const META = window.AVATAR_META || [];
+const CPRICE = { kiem: 0, hoa: 0, thuy: 0, moc: 0, dia: 120, phong: 120, loi: 120, doc: 120, kimcuong: 120, bang: 220, quang: 220, dan: 220, khi: 220, nho: 220, hoa2: 220, thu: 350, am: 350, co: 350, tran: 350, hon: 500, khong: 500, thoi: 500 };
+const ITEMS = META.map(m => ({ id: m.id, cat: 'char', name: m.name, kind: m.kind, skill: m.skill, price: CPRICE[m.id] ?? 220 })).concat([
+  { id: 'tt_0', cat: 'title', name: 'Tân Đệ Tử', h: '新弟子', p: 'xīn dìzǐ', price: 0 },
+  { id: 'tt_1', cat: 'title', name: 'Ngoại Môn Đệ Tử', h: '外门弟子', p: 'wàimén dìzǐ', price: 60 },
+  { id: 'tt_2', cat: 'title', name: 'Nội Môn Đệ Tử', h: '内门弟子', p: 'nèimén dìzǐ', price: 150 },
+  { id: 'tt_3', cat: 'title', name: 'Chân Truyền Đệ Tử', h: '真传弟子', p: 'zhēnchuán dìzǐ', price: 300 },
+  { id: 'tt_4', cat: 'title', name: 'Trưởng Lão', h: '长老', p: 'zhǎnglǎo', price: 600 },
+  { id: 'tt_5', cat: 'title', name: 'Thiên Kiêu', h: '天骄', p: 'tiānjiāo', price: 900 },
+  { id: 'fr_wood', cat: 'frame', name: 'Khung gỗ đàn', price: 40, css: 'linear-gradient(135deg,#b88a5a,#7a5532)', c: '#b88a5a' },
+  { id: 'fr_jade', cat: 'frame', name: 'Khung ngọc bích', price: 120, css: 'linear-gradient(135deg,#9ff5d6,#2f9e7a,#9ff5d6)', c: '#4fd1a5' },
+  { id: 'fr_gold', cat: 'frame', name: 'Khung kim sắc', price: 260, css: 'linear-gradient(135deg,#ffe28a,#c9962b,#ffe28a)', c: '#e0b84f' },
+  { id: 'fr_purple', cat: 'frame', name: 'Khung tử điện', price: 400, css: 'linear-gradient(135deg,#e0b8ff,#6a3fc4,#e0b8ff)', c: '#9a6fe0' },
+  { id: 'fr_dragon', cat: 'frame', name: 'Khung long văn', price: 650, css: 'linear-gradient(135deg,#ffd27a,#d0402f,#ffd27a,#d0402f)', c: '#d0402f' },
+  { id: 'pet_turtle', cat: 'pet', name: 'Linh quy', price: 90, e: '🐢' },
+  { id: 'pet_fox', cat: 'pet', name: 'Tiểu hồ ly', price: 160, e: '🦊' },
+  { id: 'pet_crane', cat: 'pet', name: 'Tiên hạc', price: 260, e: '🦢' },
+  { id: 'pet_tiger', cat: 'pet', name: 'Bạch hổ con', price: 400, e: '🐯' },
+  { id: 'pet_dragon', cat: 'pet', name: 'Tiểu thanh long', price: 700, e: '🐉' },
+  { id: 'au_cyan', cat: 'aura', name: 'Linh quang', price: 120, c: '#5ad1ff' },
+  { id: 'au_gold', cat: 'aura', name: 'Kim quang', price: 260, c: '#ffd24d' },
+  { id: 'au_purple', cat: 'aura', name: 'Tử khí đông lai', price: 420, c: '#b57bff' },
+  { id: 'au_red', cat: 'aura', name: 'Xích viêm', price: 560, c: '#ff6a3d' },
+  { id: 'pill_s', cat: 'use', kind: 'pill', name: 'Tụ Khí Đan', price: 25, xp: 30, e: '💊', d: '+30 tu vi (tính vào giới hạn ngày)' },
+  { id: 'pill_m', cat: 'use', kind: 'pill', name: 'Trúc Cơ Đan', price: 80, xp: 100, e: '🟣', d: '+100 tu vi (tính vào giới hạn ngày)' },
+  { id: 'pill_l', cat: 'use', kind: 'pill', name: 'Kim Đan', price: 250, xp: 250, e: '🔶', d: '+250 tu vi (tính vào giới hạn ngày)' },
+  { id: 'charm', cat: 'use', kind: 'charm', name: 'Hộ Chuỗi Phù', price: 100, e: '🧿', d: 'Tự giữ chuỗi nếu lỡ 1 ngày (giữ tối đa 2)' }
+]);
+const CATS = [['char', 'Nhân vật'], ['title', 'Danh hiệu'], ['frame', 'Khung'], ['aura', 'Hào quang'], ['pet', 'Linh thú'], ['use', 'Đan dược & Phù']];
+const itemOf = id => ITEMS.find(i => i.id === id);
+const owned = it => it.price === 0 || !!S.inv[it.id];
+const single = cat => cat === 'char' || cat === 'title'; // luôn có đúng 1 món được chọn
+const isOn = it => it.cat === 'char' ? (S.hero.char || 'kiem') === it.id : it.cat === 'title' ? (S.equip.title || 'tt_0') === it.id : S.equip[it.cat] === it.id;
+let shopCat = 'char';
+const charImg = (id, kind) => ((window.AVATARS || {})[id] || {})[kind] || ('avatars/' + id + '_' + kind + '.webp');
+
+function heroCard(w) {
+  const fr = itemOf(S.equip.frame), au = itemOf(S.equip.aura), pet = itemOf(S.equip.pet), id = S.hero.char || 'kiem';
+  return `<div class="stage" style="width:${w}px;${au ? '--gc:' + au.c + ';animation:glow 2.6s ease-in-out infinite;' : ''}">
+    <div class="frm" style="background:${fr ? fr.css : 'var(--bd)'}"><img src="${charImg(id, 'card')}" alt="Nhân vật" style="width:100%;display:block;border-radius:13px"></div>
+    ${pet ? `<span class="petb">${pet.e}</span>` : ''}</div>`;
+}
+function bustImg(px) {
+  const fr = itemOf(S.equip.frame);
+  return `<img src="${charImg(S.hero.char || 'kiem', 'bust')}" alt="" style="width:${px}px;height:${px}px;border-radius:50%;object-fit:cover;display:block;border:3px solid ${fr ? fr.c : 'var(--bd)'}">`;
+}
+function previewOf(it) {
+  if (it.cat === 'char') return `<img class="pv" src="${charImg(it.id, 'bust')}" alt="" style="object-fit:cover;padding:0">`;
+  if (it.cat === 'pet' || it.cat === 'use') return `<div class="pv">${it.e}</div>`;
+  if (it.cat === 'aura') return `<div class="pv" style="background:radial-gradient(${it.c},transparent 75%)">✨</div>`;
+  if (it.cat === 'frame') return `<div class="pv" style="background:${it.css}"></div>`;
+  return `<div class="pv" style="font-size:20px">称</div>`;
+}
+function vHeroChar() {
+  const ri = realmInfo(S.xp), h = S.hero, cm = META.find(m => m.id === (h.char || 'kiem')) || {};
+  const ti = itemOf(S.equip.title || 'tt_0');
+  const list = ITEMS.filter(i => i.cat === shopCat).sort((a, b) => a.price - b.price);
+  const roadmap = REALMS.concat([{ n: 'Phi Thăng', h: '飞升', p: 'fēishēng' }]).map((r, i) => {
+    const cur = i === ri.ri, done = i < ri.ri;
+    return `<div class="realm ${cur ? 'cur' : ''}"><span>${done ? '✓' : cur ? '▶' : '·'}</span><span style="font-size:20px;width:70px;font-family:'Microsoft YaHei',sans-serif">${r.h}</span><span style="flex:1">${r.n} <span class="mut">${r.p}</span></span><span class="mut">${i < REALMS.length ? 'HSK' + r.hsk + ' · ' + r.c * 9 + ' tu vi' : ''}</span></div>`;
+  }).join('');
+  view.innerHTML = `
+  <div class="card">${heroCard(270)}
+    <h3 style="margin:14px 0 0" id="hname">${esc(h.name)}</h3>
+    <div class="mut">${ti ? ti.h + ' · ' + ti.name : ''}</div>
+    <div class="mut">${esc(cm.name || '')} · ${esc(cm.kind || '')} · Hệ ${gElLabel(h.char || 'kiem')}</div>
+    <div class="pin" style="font-size:20px;margin-top:6px">${ri.h} ${ri.name}</div>
+    <div class="bar g"><i style="width:${ri.into / ri.need * 100}%"></i></div>
+    <div class="mut">Tu vi ${ri.max ? 'tối đa' : ri.into + ' / ' + ri.need} · hôm nay ${S.xpDay === today() ? S.xpToday : 0}/${GCFG.xpDayCap} · tổng ${S.xp} · 💎 ${S.ls} linh thạch · 🧿 ${S.freezes} Hộ Chuỗi Phù</div></div>
+  <div class="card" style="text-align:left"><b>Đạo hiệu</b>
+    <input id="nm" maxlength="16" value="${esc(h.name)}" placeholder="Đạo hiệu của bạn"></div>
+  <h3 style="margin:14px 0 4px;text-align:left">🏮 Phường thị <span class="mut" style="font-size:14px">(💎 ${S.ls})</span></h3>
+  <div class="pills" id="cats">${CATS.map(([k, n]) => `<button data-cat="${k}" class="${shopCat === k ? 'on' : ''}">${n}</button>`).join('')}</div>
+  ${list.map(it => {
+    const own = owned(it), on = isOn(it), use = it.cat === 'use', can = S.ls >= it.price;
+    const btn = use ? `<button class="buy" data-buy="${it.id}" ${can ? '' : 'disabled'}>Mua 💎${it.price}</button>`
+      : own ? (on ? (single(it.cat) ? '<button disabled>Đang dùng</button>' : `<button data-unequip="${it.cat}">Gỡ</button>`) : `<button class="use" data-equip="${it.id}">${single(it.cat) ? 'Chọn' : 'Trang bị'}</button>`)
+      : `<button class="buy" data-buy="${it.id}" ${can ? '' : 'disabled'}>Mua 💎${it.price}</button>`;
+    const sub = use ? esc(it.d) : it.cat === 'char' ? esc(it.kind + ' · ' + it.skill) + ' · Hệ ' + gElLabel(it.id) : it.cat === 'title' ? it.h + ' ' + it.p : (own ? 'Đã sở hữu' : it.price + ' linh thạch');
+    return `<div class="item">${previewOf(it)}<div class="nm"><b>${esc(it.name)}</b>${on ? ' <span class="ok-t">• đang dùng</span>' : ''}<small>${sub}${!use && own && it.price > 0 && (it.cat === 'char' || it.cat === 'title') ? ' · đã sở hữu' : ''}</small></div>${btn}</div>`;
+  }).join('')}
+  <h3 style="margin:16px 0 4px;text-align:left">Cảnh giới tu tiên</h3><div class="card" style="padding:6px 10px">${roadmap}</div>
+  <p class="mut" style="text-align:left">Kiếm tu vi và linh thạch (💎 nhân hệ số theo cảnh giới, càng lên cao càng nhiều): mỗi câu đúng +10 tu vi +${lsGain(1)} 💎 · qua bài lần đầu +20 tu vi +${lsGain(10)} 💎 · hoàn hảo lần đầu thêm +30 tu vi +${lsGain(25)} 💎 · đạt mục tiêu ngày +${lsGain(10)} 💎 · mở rương truyện +${lsGain(20)} 💎. Mỗi cảnh giới gắn với một trình độ HSK, muốn sang cảnh giới mới phải qua bài test HSK (độ kiếp).</p>`;
+  $('#nm').oninput = e => { h.name = e.target.value.slice(0, 16) || 'Đạo hữu'; $('#hname').textContent = h.name; save(); };
+  view.onclick = e => {
+    const q = a => e.target.closest('[' + a + ']'); let b;
+    if ((b = q('data-cat'))) { shopCat = b.dataset.cat; return vHero(); }
+    if ((b = q('data-equip'))) {
+      const it = itemOf(b.dataset.equip);
+      if (it.cat === 'char') h.char = it.id; else S.equip[it.cat] = it.id;
+      save(); return vHero();
+    }
+    if ((b = q('data-unequip'))) { delete S.equip[b.dataset.unequip]; save(); return vHero(); }
+    if ((b = q('data-buy'))) { buyItem(b.dataset.buy); }
+  };
+}
+function buyItem(id) {
+  const it = itemOf(id);
+  if (S.ls < it.price) return toast('Không đủ linh thạch 💎');
+  if (it.kind === 'charm') {
+    if (S.freezes >= 2) return toast('Chỉ giữ tối đa 2 Hộ Chuỗi Phù.');
+    S.ls -= it.price; S.freezes++; save(); header(); vHero(); return toast('🧿 Đã mua Hộ Chuỗi Phù');
+  }
+  S.ls -= it.price;
+  if (it.kind === 'pill') {
+    const d2 = today(); if (S.pillDay !== d2) { S.pillDay = d2; S.pillN = 0; }
+    const why = (S.log[d2] || 0) < GOAL ? 'Hãy đạt mục tiêu ngày (' + GOAL + ' câu) trước khi dùng đan dược.' : S.pillN >= GCFG.pillsPerDay ? 'Mỗi ngày chỉ dùng tối đa ' + GCFG.pillsPerDay + ' viên đan dược.' : gXpRoom() <= 0 ? 'Hôm nay đã đạt giới hạn tu vi, không cần dùng đan dược.' : '';
+    if (why) { S.ls += it.price; return toast(why); }
+    S.pillN++; save(); addXP(it.xp); vHero(); return;
+  }
+  S.inv[id] = true;
+  if (it.cat === 'char') S.hero.char = id; else S.equip[it.cat] = id;
+  save(); header(); vHero(); toast('Đã mua và chọn ' + it.name);
+}
+
+if ('speechSynthesis' in window) speechSynthesis.getVoices();
+rpgInit();
+applyFreeze();
+render();
+if (S.refunded) { toast('Đã hoàn ' + S.refunded + ' 💎 cho đồ trang phục cũ, hãy dùng để mua nhân vật mới!'); S.refunded = 0; save(); }
+</script>
+</body>
+</html>

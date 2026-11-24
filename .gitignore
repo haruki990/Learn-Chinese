@@ -1,0 +1,28 @@
+# Cấu hình cục bộ của Claude / editor
+.claude/
+.vscode/
+.idea/
+
+# File nén, file tạm
+*.zip
+*.rar
+*.7z
+*.tmp
+*.bak
+*.log
+~$*
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Hệ điều hành
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Bí mật
+.env
+.env.*
