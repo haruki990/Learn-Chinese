@@ -130,3 +130,9 @@ Các trường chính của `S`:
 - **Leo Tháp Thông Thiên** (tab Ôn tập → nút 🗼): mỗi câu đúng +1 tầng, mốc lưu mỗi 10 tầng (`TW_CP`), sai rơi về mốc. Lần đầu đạt mốc: 💎 + Yêu Đan; mỗi 50 tầng thêm 1 vé và 1 trang bị. Từ tầng 30 ẩn pinyin. Trạng thái `S.tower={f,cp,best,got}`.
 - **Phòng boss LAN**: máy chủ phòng chạy `start-coop.bat` (= `python coop-server.py`, port 8770, mở 0.0.0.0; thêm tham số `python coop-server.py 8770 127.0.0.1` để chỉ chạy nội bộ khi kiểm thử). Server phục vụ luôn file game và API `/api/join|state|start|hit|leave` (POST JSON dạng text/plain, client hỏi trạng thái mỗi giây). Boss theo cảnh giới người có tu vi cao nhất phòng, máu ×(1+0,6×(số người−1)), trận 150 giây, máu không giữ giữa các trận. Hạ boss: đồ rơi chỉ số +30% (tối đa 3 lần/ngày, `S.coop`). Không chạy được khi mở game từ GitHub Pages (https không gọi được http trong LAN).
 - **Video chiêu cuối theo nhân vật**: đặt `ult-video/<id nhân vật>.webm` và/hoặc `.mp4`; danh sách id thử phát ở `GULT_CVID` (ult-fx.js). Thiếu file thì tự dùng video theo hệ (`GULT_VID`) rồi tới canvas.
+
+## 12. Lưu tiến độ lên mây (2026-11-25, `cloud.js`)
+- Firebase project `learn-chinese-959b8` (config công khai nằm trong `CLOUD_CFG`). SDK compat 10.12.2 tải từ gstatic (cần Internet; thiếu thì game vẫn chạy offline như cũ).
+- Đăng nhập email/mật khẩu hoặc Google; nút ☁️ góc dưới phải. Firestore `saves/{uid}` = `{data: JSON S, slots, ts, name}`; Rules chỉ cho chủ tài khoản đọc/ghi.
+- `save()` được bọc: ghi `S.__ts` rồi đẩy lên mây sau 4 giây (và khi ẩn tab). Khi đăng nhập: máy chưa gắn tài khoản này (`localStorage.zh_cloud_uid`) hoặc bản mây mới hơn → tải bản mây và reload; ngược lại đẩy bản máy lên.
+- Không chạy với `file://`. Domain dùng được phải có trong Firebase Authentication → Authorized domains (localhost, 127.0.0.1, haruki990.github.io).
