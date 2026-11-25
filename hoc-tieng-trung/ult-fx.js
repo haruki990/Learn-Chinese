@@ -416,7 +416,10 @@ function gUltRender(x, S, t, el, imgs) {
 // trả về Promise khi xong (hoặc khi người chơi chạm để bỏ qua)
 // Video chiêu cuối do người dùng tạo (thư mục ult-video/). Hệ nào có video thì phát video, hệ khác dùng hiệu ứng canvas.
 // Nếu video lỗi/thiếu file thì tự quay về hiệu ứng canvas.
-const GULT_VID = { kim: 'ult-video/kim', hoa: 'ult-video/hoa', thuy: 'ult-video/thuy' }; // có cả .webm và .mp4
+const GULT_VID = { kim: 'ult-video/kim', hoa: 'ult-video/hoa', thuy: 'ult-video/thuy' }; // video theo HỆ (có cả .webm và .mp4)
+// Video chiêu cuối theo từng NHÂN VẬT: đặt file ult-video/<id nhân vật>.webm và/hoặc .mp4 (vd kiem.mp4, loi.webm).
+// Liệt kê id ở đây để app thử phát; thiếu file thì tự quay về video theo hệ rồi tới hiệu ứng canvas.
+const GULT_CVID = ['kiem', 'hoa', 'thuy', 'moc', 'dia', 'loi', 'bang', 'phong', 'hon', 'quang', 'doc', 'khong', 'thoi', 'kimcuong', 'dan', 'khi'];
 function gUltPlay(el, opts) {
   opts = opts || {};
   return new Promise(res => {
@@ -450,17 +453,22 @@ function gUltPlay(el, opts) {
       };
       raf = requestAnimationFrame(fr);
     };
-    if (!GULT_VID[el] || opts.canvas) return canvasFx();
+    const cid = opts.char || (S && S.hero && S.hero.char) || 'kiem', srcs = [];
+    const addSrc = base => { if (!base) return; const t = document.createElement('video'); if (t.canPlayType('video/webm; codecs="vp9, opus"')) srcs.push(base + '.webm'); srcs.push(base + '.mp4'); };
+    if (!opts.elOnly && GULT_CVID.includes(cid)) addSrc('ult-video/' + cid);
+    addSrc(GULT_VID[el]);
+    if (!srcs.length || opts.canvas) return canvasFx();
     vid = document.createElement('video');
     vid.className = 'ult-vd'; vid.playsInline = true; vid.preload = 'auto'; vid.loop = !!opts.loop;
     vid.style.width = Math.floor(Math.min(innerWidth - 16, 640)) + 'px';
-    vid.onerror = canvasFx;
+    // phát có tiếng; nếu trình duyệt chặn tự phát có tiếng (NotAllowedError) thì phát không tiếng. File thiếu/lỗi do onerror xử lý.
+    const tryPlay = () => vid.play().catch(e => { if (!vid || done || !e || e.name !== 'NotAllowedError') return; vid.muted = true; vid.play().catch(() => {}); });
+    let si = 0; vid.onerror = () => { if (done || !vid) return; si++; if (si < srcs.length) { vid.src = srcs[si]; tryPlay(); } else canvasFx(); };
     vid.onended = () => { if (!opts.loop) end(); };
-    vid.src = GULT_VID[el] + (vid.canPlayType('video/webm; codecs="vp9, opus"') ? '.webm' : '.mp4'); st.appendChild(vid);
-    // phát có tiếng; nếu trình duyệt chặn tự phát có tiếng thì phát không tiếng
-    vid.play().catch(() => { if (!vid) return; vid.muted = true; vid.play().catch(canvasFx); });
+    vid.src = srcs[0]; st.appendChild(vid);
+    tryPlay();
     // chống treo: nếu sau 2 giây video vẫn chưa chạy thì dùng hiệu ứng canvas
-    setTimeout(() => { if (vid && !done && vid.currentTime === 0) canvasFx(); }, 2000);
+    setTimeout(() => { if (vid && !done && vid.currentTime === 0) canvasFx(); }, 2000 + 600 * (srcs.length - 1));
   });
 }
 // hệ của nhân vật đang dùng
@@ -474,6 +482,6 @@ function vUltGallery() {
   <div class="ult-grid">${GULT_ORDER.map(k => { const E = GULT[k]; return `<button class="ult-c${k === me ? ' me' : ''}" data-el="${k}" style="--uc:${E.c[0]}"><span class="ue">${GEL[k].e}</span><span class="han" style="font-size:20px">${E.h}</span><small>${E.p}</small><b>${esc(E.n)}</b><small class="mut">Hệ ${GEL[k].n}${GULT_VID[k] ? ' · 🎬 video' : ''}${k === me ? ' · của bạn' : ''}</small></button>`; }).join('')}</div>
   <div class="row"><button id="ug-back">← Về trận chiến</button></div>`;
   scrollTo(0, 0);
-  view.querySelector('.ult-grid').onclick = e => { const b = e.target.closest('.ult-c'); if (b) gUltPlay(b.dataset.el, { boss, loop: true }); };
+  view.querySelector('.ult-grid').onclick = e => { const b = e.target.closest('.ult-c'); if (b) gUltPlay(b.dataset.el, { boss, loop: true, elOnly: b.dataset.el !== me }); };
   $('#ug-back').onclick = () => go('fight');
 }

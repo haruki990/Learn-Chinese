@@ -428,8 +428,9 @@ function gAnswer(i) {
       total = h.dmg; log = `⚔️ ${h.crit ? 'CHÍ MẠNG ' : ''}${h.dmg} sát thương${GB.mu.net > 0 ? ' (khắc chế ×' + GB.mu.dmg + ')' : GB.mu.net < 0 ? ' (bị kháng ×' + GB.mu.dmg + ')' : ''}${h.charmed ? ' (bị mê hoặc)' : ''}`;
       if (Math.random() < Math.min(.3, GB.st.spd / 300)) { const h2 = gHit(); if (!h2.miss) { total += h2.dmg; log += ` + liên kích ${h2.dmg}`; } }
     }
-    if (GB.combo % GULT_COMBO === 0) { // chiêu cuối theo hệ nhân vật: chắc chắn trúng, sát thương ×GULT_MULT
-      const uh = gHit(), ud = Math.round((uh.miss ? Math.max(1, GB.st.atk * GB.mu.dmg - W.def * .5) : uh.dmg) * GULT_MULT), ue = gUltEl();
+    if (window.fxOnRight) log += fxOnRight(GB); // hiệu ứng hỗ trợ của nhân vật gacha (features.js)
+    if (GB.combo % (window.fxUltCombo ? fxUltCombo() : GULT_COMBO) === 0) { // chiêu cuối theo hệ nhân vật: chắc chắn trúng, sát thương ×GULT_MULT
+      const uh = gHit(), ud = Math.round((uh.miss ? Math.max(1, GB.st.atk * GB.mu.dmg - W.def * .5) : uh.dmg) * GULT_MULT * (window.fxUltMul ? fxUltMul() : 1)), ue = gUltEl();
       total += ud; ult = ue; log = `🌟 <b>Chiêu cuối ${GULT[ue].h} ${esc(GULT[ue].n)}</b>: ${ud} sát thương<br>` + log;
     }
     if (total) {
@@ -438,8 +439,10 @@ function gAnswer(i) {
     }
     log += ' · +' + GCFG.timeBonus + ' giây';
   } else {
-    GB.wrong++; GB.combo = 0;
-    const b = gBossHit(); GB.php -= b.dmg; log = `💥 ${bs.n} phản công${b.crit ? ' CHÍ MẠNG' : ''}: -${b.dmg} HP`;
+    GB.wrong++;
+    const sv = window.fxOnWrong ? fxOnWrong(GB) : null; // băng giáp / né đòn của nhân vật gacha
+    if (!sv || !sv.keepCombo) GB.combo = 0;
+    if (sv) log = sv.log; else { const b = gBossHit(); GB.php -= b.dmg; log = `💥 ${bs.n} phản công${b.crit ? ' CHÍ MẠNG' : ''}: -${b.dmg} HP`; }
     if (bs.ab === 'heal') { const hl = Math.round(W.max * .04); W.hp = Math.min(W.max, W.hp + hl); log += ` · quái hồi ${hl}`; }
     if (bs.ab === 'time') { GB.endAt -= 4000; log += ' · -4 giây'; }
     if (bs.ab === 'poison') { GB.poison = Math.min(5, GB.poison + 1); log += ` · trúng độc x${GB.poison}`; }

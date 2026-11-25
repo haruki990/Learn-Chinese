@@ -97,7 +97,7 @@ Các trường chính của `S`:
 - Phím tắt: 1–4 chọn đáp án, Enter/Space qua câu (ở mọi màn có `.opt`). Đáp án chữ Hán có pinyin (trừ bài test độ kiếp và xếp trình độ).
 
 **Nhân vật**
-- 22 nhân vật (môn phái) cắt từ sprite sheet, id: kiem, hoa, thuy, moc, dia, loi, bang, phong, hon, quang, doc, khong, thoi, kimcuong, dan, khi, tran, thu, am, co, nho, hoa2. 4 nhân vật đầu miễn phí (kiem, hoa, thuy, moc), còn lại mua 120–500 💎 (`CPRICE` trong rpg.js).
+- 22 nhân vật (môn phái) cắt từ sprite sheet, id: kiem, hoa, thuy, moc, dia, loi, bang, phong, hon, quang, doc, khong, thoi, kimcuong, dan, khi, tran, thu, am, co, nho, hoa2. 5 nhân vật mặc định miễn phí (kiem, hoa, thuy, moc, dia); 17 nhân vật còn lại chỉ mở bằng gacha (xem mục 11, `features.js`).
 - Phường thị (mỹ phẩm): danh hiệu, khung, hào quang, linh thú (emoji), đan dược, Hộ Chuỗi Phù. Tiên Phủ: 6 món trang bị đổi mỗi ngày (seed theo ngày).
 - **Tạo nhân vật mới** (`vNewChar`): tùy chọn lưu nhân vật cũ, giữ/xóa tiến độ học, bắt đầu từ đầu hoặc **bài test xếp trình độ** (HSK1→HSK5, mỗi cấp 10 câu, ≥8 đúng thì làm tiếp; trượt cho tầng khởi điểm 1–5).
 - **Lưu nhiều nhân vật** (`slotSave/slotLoad/vSlots`): mỗi nhân vật là bản chụp đầy đủ `S`; chuyển nhân vật = tự lưu cái cũ, ghi `S` mới vào `zh_app_v1`, `location.reload()`.
@@ -123,3 +123,10 @@ Các trường chính của `S`:
 2. Đọc `HANDOFF.md` rồi đọc nhanh `index.html` (script chính ở cuối), `rpg.js`, `rpg-data.js`.
 3. Chạy server cục bộ để kiểm thử (mục 3). Mỗi thay đổi: sửa → tải lại (nhớ bỏ cache) → mô phỏng bằng JS → kiểm tra console → mới báo kết quả.
 4. Nếu thêm từ vựng: thêm khối `#N` ở **cuối** SEED, chạy `tools/gen_audio.py`, dựng lại `audio-data.js`.
+
+## 11. Gacha, Leo Tháp, Phòng boss LAN (2026-11-25, file `features.js` + `coop-server.py`)
+`features.js` nạp **sau** script chính (cuối `index.html`) và bọc lại `vHero`, `vReview`, `nextCard`, `drawCard`, `vFight`, `render`, `gStats`. `rpg.js` có 3 móc gọi tới nó trong `gAnswer`: `fxOnRight`, `fxOnWrong`, `fxUltCombo`/`fxUltMul`.
+- **Gacha** (`FX_CFG`, `FX_RAR`, `FX_GACHA`): vé 💎160 (10 vé 💎1440), tỉ lệ Hiếm/Sử Thi/Truyền Thuyết 60/30/10%, bảo hiểm 30 lần ra Truyền Thuyết (`S.gacha.pity`). Độ hiếm cộng ATK/CRIT và nhân sát thương chiêu cuối; mỗi nhân vật có 1 hiệu ứng hỗ trợ (heal, time, dodge, shield, ult4, hoặc burn/pierce/vamp/guard/swift của hệ trang bị). Trùng: +1★ (+3% ATK/sao, tối đa 5★), quá 5★ hoàn 💎80. Ai đã mua nhân vật trước đây vẫn giữ (`S.inv`). Mỗi save được tặng 1 vé. Trạng thái: `S.gacha={t,pity,n,stars,given}`.
+- **Leo Tháp Thông Thiên** (tab Ôn tập → nút 🗼): mỗi câu đúng +1 tầng, mốc lưu mỗi 10 tầng (`TW_CP`), sai rơi về mốc. Lần đầu đạt mốc: 💎 + Yêu Đan; mỗi 50 tầng thêm 1 vé và 1 trang bị. Từ tầng 30 ẩn pinyin. Trạng thái `S.tower={f,cp,best,got}`.
+- **Phòng boss LAN**: máy chủ phòng chạy `start-coop.bat` (= `python coop-server.py`, port 8770, mở 0.0.0.0; thêm tham số `python coop-server.py 8770 127.0.0.1` để chỉ chạy nội bộ khi kiểm thử). Server phục vụ luôn file game và API `/api/join|state|start|hit|leave` (POST JSON dạng text/plain, client hỏi trạng thái mỗi giây). Boss theo cảnh giới người có tu vi cao nhất phòng, máu ×(1+0,6×(số người−1)), trận 150 giây, máu không giữ giữa các trận. Hạ boss: đồ rơi chỉ số +30% (tối đa 3 lần/ngày, `S.coop`). Không chạy được khi mở game từ GitHub Pages (https không gọi được http trong LAN).
+- **Video chiêu cuối theo nhân vật**: đặt `ult-video/<id nhân vật>.webm` và/hoặc `.mp4`; danh sách id thử phát ở `GULT_CVID` (ult-fx.js). Thiếu file thì tự dùng video theo hệ (`GULT_VID`) rồi tới canvas.
