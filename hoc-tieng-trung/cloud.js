@@ -1,6 +1,6 @@
 // ============================================================
 //  LƯU TIẾN ĐỘ LÊN MÂY (Firebase Auth + Firestore)
-//  Đăng nhập bằng email/mật khẩu hoặc Google. Mỗi tài khoản có 1 tài liệu saves/{uid}:
+//  Đăng nhập bằng tên tài khoản + mật khẩu. Mỗi tài khoản có 1 tài liệu saves/{uid}:
 //    { data: JSON của S, slots: JSON nhân vật đã lưu, ts: thời điểm lưu, name }
 //  Nạp sau features.js. Cần mở game qua http(s) (start.bat hoặc GitHub Pages), không chạy với file://.
 // ============================================================
@@ -13,6 +13,11 @@ const CLOUD_CFG = {
   appId: '1:80058371267:web:008471c15705e17ac32676'
 };
 const CLOUD_UIDKEY = 'zh_cloud_uid', CLOUD_SKIP = 'zh_cloud_skip', CLOUD_DELAY = 4000;
+// Đăng nhập bằng TÊN TÀI KHOẢN: tên được đổi thành email ẩn <tên>@<CLOUD_DOMAIN> để dùng Firebase Email/Password.
+// Không có email thật nên không có chức năng quên mật khẩu.
+const CLOUD_DOMAIN = 'hoc-tieng-trung.game';
+const clMail = n => n.toLowerCase() + '@' + CLOUD_DOMAIN;
+const clName = u => u ? ((u.email || '').endsWith('@' + CLOUD_DOMAIN) ? u.email.slice(0, -CLOUD_DOMAIN.length - 1) : (u.email || u.displayName || '')) : '';
 const CL = { ok: false, user: null, ready: false, timer: 0, busy: false, last: 0, err: '' };
 
 function cloudAvail() { return !!window.firebase && /^https?:$/.test(location.protocol); }
@@ -76,7 +81,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 function cloudBar() {
   let b = document.getElementById('cl-bar');
   if (!b) { b = document.createElement('button'); b.id = 'cl-bar'; b.style.cssText = 'position:fixed;right:10px;bottom:74px;z-index:50;border-radius:99px;padding:6px 12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.25);cursor:pointer'; b.onclick = cloudPanel; document.body.appendChild(b); }
-  b.textContent = CL.user ? (CL.err ? '☁️⚠️ ' : '☁️ ') + (CL.user.email || CL.user.displayName || 'Đã đăng nhập') : '☁️ Đăng nhập lưu tiến độ';
+  b.textContent = CL.user ? (CL.err ? '☁️⚠️ ' : '☁️ ') + (clName(CL.user) || 'Đã đăng nhập') : '☁️ Đăng nhập lưu tiến độ';
 }
 function cloudPrompt() { if (!sessionStorage.getItem(CLOUD_SKIP)) cloudPanel(); }
 function cloudPanel() {
@@ -86,19 +91,19 @@ function cloudPanel() {
   const u = CL.user;
   ov.innerHTML = `<div class="card" style="max-width:380px;width:100%;text-align:left;margin:0"><h3 style="margin:0 0 6px">☁️ Tài khoản lưu tiến độ</h3>
     ${!CL.ok ? `<p class="bad-t">${esc(CL.err || 'Chưa dùng được đăng nhập.')}</p>`
-      : u ? `<p>Đang đăng nhập: <b>${esc(u.email || u.displayName || '')}</b></p><p class="mut">Tiến độ tự lưu lên mây vài giây sau mỗi thay đổi.${CL.last ? ' Lần lưu gần nhất: ' + new Date(CL.last).toLocaleTimeString() : ''}</p>${CL.err ? `<p class="bad-t">${esc(CL.err)}</p>` : ''}
+      : u ? `<p>Đang đăng nhập: <b>${esc(clName(u))}</b></p><p class="mut">Tiến độ tự lưu lên mây vài giây sau mỗi thay đổi.${CL.last ? ' Lần lưu gần nhất: ' + new Date(CL.last).toLocaleTimeString() : ''}</p>${CL.err ? `<p class="bad-t">${esc(CL.err)}</p>` : ''}
         <div class="row"><button class="pri" id="cl-now">Lưu ngay</button><button id="cl-out">Đăng xuất</button></div>`
       : `<p class="mut" style="margin:0 0 8px">Đăng nhập để tiến độ (nhân vật, trang bị, tu vi, tháp…) được lưu theo tài khoản. Sang máy khác chỉ cần đăng nhập là có lại dữ liệu.</p>
-        <input id="cl-em" type="email" placeholder="Email" autocomplete="username"><input id="cl-pw" type="password" placeholder="Mật khẩu (ít nhất 6 ký tự)" autocomplete="current-password">
+        <input id="cl-em" maxlength="20" placeholder="Tên tài khoản (3–20 ký tự: chữ, số, _ . -)" autocomplete="username" autocapitalize="off" spellcheck="false"><input id="cl-pw" type="password" placeholder="Mật khẩu (ít nhất 6 ký tự)" autocomplete="current-password">
         <div class="row"><button class="pri" id="cl-in">Đăng nhập</button><button id="cl-up">Tạo tài khoản</button></div>
-        <div class="row"><button id="cl-g">Đăng nhập bằng Google</button></div><div class="row"><button id="cl-reset" style="font-size:12px">Quên mật khẩu</button></div>`}
+        <p class="mut" style="font-size:12px;margin:4px 0 0">Hãy nhớ kỹ mật khẩu: tài khoản không gắn email nên không lấy lại được mật khẩu.</p>`}
     <div id="cl-msg" class="bad-t" style="min-height:18px"></div>
     <div class="row"><button id="cl-x">${u ? 'Đóng' : 'Chơi không cần tài khoản'}</button></div></div>`;
   document.body.appendChild(ov);
   const $$ = id => ov.querySelector('#' + id), msg = t => { $$('cl-msg').textContent = t; };
   const close = () => { sessionStorage.setItem(CLOUD_SKIP, '1'); ov.remove(); };
   $$('cl-x').onclick = close; ov.onclick = e => { if (e.target === ov) close(); };
-  const viErr = e => ({ 'auth/invalid-email': 'Email không hợp lệ.', 'auth/missing-password': 'Hãy nhập mật khẩu.', 'auth/weak-password': 'Mật khẩu cần ít nhất 6 ký tự.', 'auth/email-already-in-use': 'Email này đã có tài khoản, hãy bấm Đăng nhập.', 'auth/invalid-credential': 'Sai email hoặc mật khẩu.', 'auth/wrong-password': 'Sai mật khẩu.', 'auth/user-not-found': 'Chưa có tài khoản này, hãy bấm Tạo tài khoản.', 'auth/operation-not-allowed': 'Cách đăng nhập này chưa được bật trong Firebase (Authentication → Sign-in method).', 'auth/unauthorized-domain': 'Tên miền này chưa được thêm vào Authorized domains của Firebase.', 'auth/popup-closed-by-user': 'Đã đóng cửa sổ đăng nhập.', 'auth/too-many-requests': 'Thử quá nhiều lần, chờ một lát rồi thử lại.' }[e.code] || e.message);
+  const viErr = e => ({ 'auth/invalid-email': 'Tên tài khoản không hợp lệ.', 'auth/missing-password': 'Hãy nhập mật khẩu.', 'auth/weak-password': 'Mật khẩu cần ít nhất 6 ký tự.', 'auth/email-already-in-use': 'Tên này đã có người dùng. Nếu là tài khoản của bạn, hãy bấm Đăng nhập.', 'auth/invalid-credential': 'Sai tên tài khoản hoặc mật khẩu.', 'auth/invalid-login-credentials': 'Sai tên tài khoản hoặc mật khẩu.', 'auth/wrong-password': 'Sai mật khẩu.', 'auth/user-not-found': 'Chưa có tài khoản tên này, hãy bấm Tạo tài khoản.', 'auth/operation-not-allowed': 'Cách đăng nhập này chưa được bật trong Firebase (Authentication → Sign-in method).', 'auth/unauthorized-domain': 'Tên miền này chưa được thêm vào Authorized domains của Firebase.', 'auth/popup-closed-by-user': 'Đã đóng cửa sổ đăng nhập.', 'auth/too-many-requests': 'Thử quá nhiều lần, chờ một lát rồi thử lại.' }[e.code] || e.message);
   const run = p => p.then(() => { ov.remove(); }).catch(e => msg(viErr(e)));
   if (!CL.ok) return;
   if (u) {
@@ -106,11 +111,10 @@ function cloudPanel() {
     $$('cl-out').onclick = async () => { await cloudPush(); await CL.auth.signOut(); localStorage.removeItem(CLOUD_UIDKEY); ov.remove(); toast('Đã đăng xuất. Tiến độ trên máy này vẫn giữ.'); };
     return;
   }
-  const em = () => $$('cl-em').value.trim(), pw = () => $$('cl-pw').value;
-  $$('cl-in').onclick = () => run(CL.auth.signInWithEmailAndPassword(em(), pw()));
-  $$('cl-up').onclick = () => run(CL.auth.createUserWithEmailAndPassword(em(), pw()));
-  $$('cl-g').onclick = () => run(CL.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()));
-  $$('cl-reset').onclick = () => { if (!em()) return msg('Nhập email trước.'); CL.auth.sendPasswordResetEmail(em()).then(() => msg('Đã gửi email đặt lại mật khẩu.')).catch(e => msg(viErr(e))); };
+  const nm = () => $$('cl-em').value.trim(), pw = () => $$('cl-pw').value;
+  const chk = () => { if (!/^[A-Za-z0-9_.-]{3,20}$/.test(nm())) { msg('Tên tài khoản cần 3–20 ký tự, chỉ gồm chữ không dấu, số, dấu _ . -'); return false; } if (pw().length < 6) { msg('Mật khẩu cần ít nhất 6 ký tự.'); return false; } return true; };
+  $$('cl-in').onclick = () => { if (chk()) run(CL.auth.signInWithEmailAndPassword(clMail(nm()), pw())); };
+  $$('cl-up').onclick = () => { if (chk()) run(CL.auth.createUserWithEmailAndPassword(clMail(nm()), pw())); };
   $$('cl-pw').onkeydown = e => { if (e.key === 'Enter') $$('cl-in').click(); };
 }
 

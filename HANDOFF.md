@@ -133,6 +133,6 @@ Các trường chính của `S`:
 
 ## 12. Lưu tiến độ lên mây (2026-11-25, `cloud.js`)
 - Firebase project `learn-chinese-959b8` (config công khai nằm trong `CLOUD_CFG`). SDK compat 10.12.2 tải từ gstatic (cần Internet; thiếu thì game vẫn chạy offline như cũ).
-- Đăng nhập email/mật khẩu hoặc Google; nút ☁️ góc dưới phải. Firestore `saves/{uid}` = `{data: JSON S, slots, ts, name}`; Rules chỉ cho chủ tài khoản đọc/ghi.
+- Đăng nhập bằng tên tài khoản + mật khẩu (tên đổi thành email ẩn `<tên>@hoc-tieng-trung.game` cho Firebase Email/Password, không có quên mật khẩu); nút ☁️ góc dưới phải. Firestore `saves/{uid}` = `{data: JSON S, slots, ts, name}`; Rules chỉ cho chủ tài khoản đọc/ghi.
 - `save()` được bọc: ghi `S.__ts` rồi đẩy lên mây sau 4 giây (và khi ẩn tab). Khi đăng nhập: máy chưa gắn tài khoản này (`localStorage.zh_cloud_uid`) hoặc bản mây mới hơn → tải bản mây và reload; ngược lại đẩy bản máy lên.
 - Không chạy với `file://`. Domain dùng được phải có trong Firebase Authentication → Authorized domains (localhost, 127.0.0.1, haruki990.github.io).
