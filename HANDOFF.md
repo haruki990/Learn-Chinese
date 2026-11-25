@@ -136,3 +136,7 @@ Các trường chính của `S`:
 - Đăng nhập bằng tên tài khoản + mật khẩu (tên đổi thành email ẩn `<tên>@hoc-tieng-trung.game` cho Firebase Email/Password, không có quên mật khẩu); nút ☁️ góc dưới phải. Firestore `saves/{uid}` = `{data: JSON S, slots, ts, name}`; Rules chỉ cho chủ tài khoản đọc/ghi.
 - `save()` được bọc: ghi `S.__ts` rồi đẩy lên mây sau 4 giây (và khi ẩn tab). Khi đăng nhập: máy chưa gắn tài khoản này (`localStorage.zh_cloud_uid`) hoặc bản mây mới hơn → tải bản mây và reload; ngược lại đẩy bản máy lên.
 - Không chạy với `file://`. Domain dùng được phải có trong Firebase Authentication → Authorized domains (localhost, 127.0.0.1, haruki990.github.io).
+
+## 13. Vật phẩm hỗ trợ đánh boss (2026-11-26, cuối `features.js`)
+Mua ở Tu tiên → Phường thị → Đan dược & Phù, lưu ở `S.bitems{id:số lượng}` (lên mây cùng save). Dùng bằng thanh nút dưới câu hỏi trong trận quái tuần và phòng boss online, mỗi loại tối đa `BI_MAX = 2` lần/trận:
+Thiên Nhãn Phù 💎60 (sáng đáp án đúng), Phá Vọng Phù 💎30 (xóa 2 đáp án sai), Định Thời Phù 💎40 (dừng đồng hồ tới khi trả lời; không dùng trong phòng online), Hồi Xuân Đan 💎50 (+40% HP), Kim Chung Tráo 💎45 (lần sai kế tiếp không mất HP, giữ liên kích), Bạo Kích Đan 💎50 (đòn đúng kế tiếp chắc trúng ×2). Bảng `BITEMS`; hiệu ứng qua bọc `gNextQ/gAnswer/gHit`, `fxOnWrong` (B.iguard) và `cpHit` (B.ipow).

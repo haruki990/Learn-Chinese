@@ -77,6 +77,7 @@ function fxOnRight(B) {
   return '';
 }
 function fxOnWrong(B) {
+  if (B.iguard) { B.iguard = false; return { log: '🛡️ Kim Chung Tráo chặn đòn phản công, giữ liên kích', keepCombo: true }; } // vật phẩm trận
   const c = fxCur(); if (!c) return null;
   if (c.fx === 'shield') { B.shield = B.shield == null ? c.v : B.shield; if (B.shield > 0) { B.shield--; return { log: `🛡️ Băng giáp chặn đòn phản công (còn ${B.shield} lần)`, keepCombo: true }; } }
   if (c.fx === 'dodge' && Math.random() * 100 < c.v) return { log: '💨 Né được đòn phản công!' };
@@ -131,6 +132,7 @@ function fxGachaPanel() {
 const fx_vHero = vHero;
 vHero = function () {
   fx_vHero();
+  if (gSub === 'char' && shopCat === 'use') biShopCounts();
   if (gSub !== 'char' || shopCat !== 'char') return;
   // thay nút "Mua" của nhân vật gacha bằng nhãn độ hiếm, chèn bảng quay thưởng
   view.querySelectorAll('[data-buy]').forEach(b => {
@@ -375,9 +377,11 @@ function cpNextQ() {
   if (q.speakOnShow && q.word) speak(q.word);
   $('#nx').onclick = () => { clearTimeout(B.nt); cpNextQ(); };
   $('#cp-o').onclick = e => { const b = e.target.closest('.opt'); if (b && !B.locked && !B.over) cpAnswer(+b.dataset.i); };
+  biMount($('#cp-q'), B, 'coop');
 }
 function cpHit(B, mul) {
   const st = B.st;
+  if (B.ipow && !mul) { B.ipow = false; return Math.round(Math.max(1, st.atk * 1.8 * 2 * B.mdmg - B.def * .5)); } // Bạo Kích Đan
   if (Math.random() > Math.min(.97, Math.max(.55, st.hit / (st.hit + 20)))) return 0;
   let d = st.atk * (.9 + Math.random() * .2); if (Math.random() * 100 < st.crit) d *= 1.8;
   d *= 1 + Math.min(.3, B.combo * .03); d *= 1 + (st.fx.burn || 0) / 100; d *= B.mdmg * (mul || 1);
@@ -439,5 +443,71 @@ function cpEnd(st) {
   $('#cp-lobby').onclick = () => { B.showLobby = true; cpPoll(); };
   $('#cp-out').onclick = () => { cpApi('leave', { room: CP.room, pid: CP.pid }).catch(() => {}); go('fight'); };
 }
+
+// ---------------- 4. VẬT PHẨM HỖ TRỢ ĐÁNH BOSS (mua ở Phường thị → Đan dược & Phù) ----------------
+// Dùng trong trận đánh quái tuần và phòng boss online, mỗi loại tối đa BI_MAX lần/trận để việc học vẫn là chính.
+const BI_MAX = 2;
+const BITEMS = [
+  { id: 'bi_reveal', k: 'reveal', e: '🔮', name: 'Thiên Nhãn Phù', price: 60, d: 'Trong trận: chỉ ra đáp án đúng của câu hiện tại' },
+  { id: 'bi_half', k: 'half', e: '✂️', name: 'Phá Vọng Phù', price: 30, d: 'Trong trận: xóa 2 đáp án sai (50%)' },
+  { id: 'bi_freeze', k: 'freeze', e: '⏸️', name: 'Định Thời Phù', price: 40, d: 'Trong trận đánh quái tuần: dừng đồng hồ cho tới khi trả lời câu này' },
+  { id: 'bi_heal', k: 'heal', e: '💗', name: 'Hồi Xuân Đan', price: 50, d: 'Trong trận: hồi 40% HP' },
+  { id: 'bi_guard', k: 'guard', e: '🛡️', name: 'Kim Chung Tráo', price: 45, d: 'Trong trận: lần sai kế tiếp không mất HP, giữ liên kích' },
+  { id: 'bi_power', k: 'power', e: '🔥', name: 'Bạo Kích Đan', price: 50, d: 'Trong trận: đòn đúng kế tiếp chắc chắn trúng, sát thương ×2' }
+];
+BITEMS.forEach(b => ITEMS.push({ id: b.id, cat: 'use', kind: 'bitem', name: b.name, price: b.price, e: b.e, d: b.d }));
+const biInv = () => { if (!S.bitems || typeof S.bitems !== 'object') S.bitems = {}; return S.bitems; };
+const fx_buyItem = buyItem;
+buyItem = function (id) {
+  const it = itemOf(id);
+  if (!it || it.kind !== 'bitem') return fx_buyItem(id);
+  if (S.ls < it.price) return toast('Không đủ linh thạch 💎');
+  S.ls -= it.price; biInv()[id] = (biInv()[id] || 0) + 1; save(); header(); vHero(); toast(`${it.e} Đã mua ${it.name} (đang có ${biInv()[id]})`);
+};
+function biShopCounts() {
+  BITEMS.forEach(b => { const btn = view.querySelector(`[data-buy="${b.id}"]`), sm = btn && btn.closest('.item') && btn.closest('.item').querySelector('small'); if (sm) sm.insertAdjacentHTML('beforeend', ` · <b>đang có ${biInv()[b.id] || 0}</b>`); });
+}
+function biMount(host, B, mode) {
+  if (!host || !B || B.over) return;
+  B.biUsed = B.biUsed || {};
+  const inv = biInv(), list = BITEMS.filter(b => (inv[b.id] || 0) > 0);
+  const old = host.querySelector('.bi-bar'); if (old) old.remove();
+  if (!list.length) return;
+  host.insertAdjacentHTML('beforeend', `<div class="bi-bar" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:8px">${list.map(b => {
+    const used = B.biUsed[b.k] || 0, off = used >= BI_MAX || (mode === 'coop' && b.k === 'freeze');
+    return `<button data-bi="${b.k}" title="${esc(b.d)}" ${off ? 'disabled' : ''} style="padding:4px 9px;font-size:13px;border-radius:99px">${b.e} ${esc(b.name)} ×${inv[b.id]}</button>`;
+  }).join('')}</div>`);
+  host.querySelector('.bi-bar').onclick = e => { const b = e.target.closest('[data-bi]'); if (b && !b.disabled) biUse(b.dataset.bi, B, mode, host); };
+}
+function biUse(k, B, mode, host) {
+  const def = BITEMS.find(b => b.k === k), inv = biInv();
+  if (!def || !(inv[def.id] > 0) || B.over || B.locked) return;
+  const opts = [...host.querySelectorAll('.opt')], q = B.q; if (!q || !opts.length) return;
+  const okIdx = q.opts.findIndex(o => o.ok);
+  let msg = '';
+  if (k === 'reveal') { opts[okIdx].style.outline = '3px solid #e0b84f'; opts[okIdx].style.boxShadow = '0 0 12px #e0b84f'; msg = 'Đáp án đúng đã sáng lên'; }
+  else if (k === 'half') { const wrong = opts.filter((o, i) => i !== okIdx && !o.disabled); shuffle(wrong).slice(0, 2).forEach(o => { o.disabled = true; o.style.opacity = '.25'; }); msg = 'Đã xóa 2 đáp án sai'; }
+  else if (k === 'freeze') { if (mode === 'coop' || B.pauseAt) return; B.pauseAt = Date.now(); B.freezeQ = true; const tm = $('#gb-tm'); if (tm) tm.textContent = '⏸'; msg = 'Đồng hồ dừng tới khi bạn trả lời'; }
+  else if (k === 'heal') { if (B.php >= B.pmax) return toast('HP đang đầy.'); const h = Math.round(B.pmax * .4); B.php = Math.min(B.pmax, B.php + h); msg = `Hồi ${h} HP`; if (mode === 'solo') gBars(); else cpUpdate(CP.st); }
+  else if (k === 'guard') { if (B.iguard) return toast('Kim Chung Tráo đang có hiệu lực.'); B.iguard = true; msg = 'Lần sai kế tiếp không mất HP'; }
+  else if (k === 'power') { if (B.ipow) return toast('Bạo Kích Đan đang có hiệu lực.'); B.ipow = true; msg = 'Đòn đúng kế tiếp ×2 sát thương'; }
+  inv[def.id]--; B.biUsed[k] = (B.biUsed[k] || 0) + 1; save();
+  toast(`${def.e} ${def.name}: ${msg}`);
+  biMount(host, B, mode);
+}
+// trận đánh quái tuần: gắn thanh vật phẩm dưới mỗi câu hỏi
+const fx_gNextQ = gNextQ;
+gNextQ = function () { fx_gNextQ(); if (GB && !GB.over) biMount($('#gb-q'), GB, 'solo'); };
+const fx_gAnswer = gAnswer;
+gAnswer = function (i) {
+  if (GB && GB.freezeQ) { GB.endAt += Date.now() - GB.pauseAt; GB.pauseAt = 0; GB.freezeQ = false; } // hết Định Thời Phù khi đã trả lời
+  const bar = document.querySelector('#gb-q .bi-bar'); if (bar) bar.remove();
+  return fx_gAnswer(i);
+};
+const fx_gHit = gHit;
+gHit = function () {
+  if (GB && GB.ipow) { GB.ipow = false; const h = fx_gHit(), base = h.miss ? GB.st.atk * 1.8 * GB.mu.dmg : h.dmg * (h.crit ? 1 : 1.8); return { dmg: Math.round(base * 2), crit: true }; }
+  return fx_gHit();
+};
 
 fxInit();
