@@ -221,48 +221,108 @@ function vTower() {
   draw('');
 }
 
-// ---------------- 3. PHÒNG BOSS LAN (co-op) ----------------
-// Máy chủ phòng chạy coop-server.py (start-coop.bat). Các máy cùng mạng nhập địa chỉ http://<IP máy chủ>:8770 và cùng mã phòng.
-const CP_CFG = { sec: 150, dropMul: 1.3, dropsPerDay: 3 };
+// ---------------- 3. PHÒNG BOSS ONLINE (co-op qua Firebase) ----------------
+// Người chơi đã đăng nhập (cloud.js) ở bất kỳ đâu nhập cùng một mã phòng. Phòng là tài liệu Firestore rooms/{mã}:
+//   { phase: 'lobby'|'fight'|'done', round, boss, ri, max, dmg, ends(ms), result, p: { uid: {name,char,xp,ri,dmg,seen} } }
+// Sát thương cộng bằng FieldValue.increment nên nhiều người đánh cùng lúc không ghi đè nhau.
+const CP_CFG = { sec: 150, dropMul: 1.3, dropsPerDay: 3, hpPerPlayer: .6, idleMs: 30000, maxHitFrac: .25 };
 let CP = null; // trạng thái phòng phía client
+const cpRef = room => CL.db.collection('rooms').doc(room);
+function cpActive(d) { const now = Date.now(); return Object.entries((d && d.p) || {}).filter(([, v]) => v && now - (v.seen || 0) < CP_CFG.idleMs); }
+function cpState(d) {
+  d = d || {}; const max = d.max || 0, hp = Math.max(0, max - (d.dmg || 0)), now = Date.now();
+  return { phase: d.phase || 'lobby', round: d.round || 0, boss: d.boss || 0, ri: d.ri || 0, max, hp, result: d.result || null,
+    left: d.phase === 'fight' ? Math.max(0, (d.ends || 0) - now) : 0,
+    players: cpActive(d).map(([pid, v]) => ({ pid, name: v.name || 'Đạo hữu', char: v.char || 'kiem', xp: v.xp || 0, ri: v.ri || 0, dmg: v.dmg || 0 })) };
+}
+async function cpFinish(room, round) { // kết thúc trận (ai thấy trước thì ghi, chỉ ghi một lần)
+  const ref = cpRef(room);
+  await CL.db.runTransaction(async tx => {
+    const d = (await tx.get(ref)).data() || {};
+    if (d.phase !== 'fight' || d.round !== round) return;
+    const win = (d.max || 0) - (d.dmg || 0) <= 0;
+    if (!win && Date.now() < (d.ends || 0)) return;
+    const board = Object.values(d.p || {}).filter(v => v.dmg > 0).map(v => ({ name: v.name, dmg: v.dmg })).sort((a, b) => b.dmg - a.dmg);
+    tx.update(ref, { phase: 'done', result: { win, boss: d.boss, max: d.max, board, round } });
+  });
+}
 async function cpApi(path, body) {
-  const url = (S.coop.url || '').replace(/\/+$/, '') + '/api/' + path;
-  const r = await fetch(url, body ? { method: 'POST', body: JSON.stringify(body) } : {}); // text/plain: không cần preflight CORS
-  const j = await r.json(); if (j.error) throw new Error(j.error); return j;
+  if (!CL.user) throw new Error('Hãy đăng nhập tài khoản (nút ☁️) để vào phòng.');
+  const uid = CL.user.uid, room = body.room, ref = cpRef(room), FV = firebase.firestore.FieldValue;
+  const meRec = () => Object.assign({}, cpMe(), { seen: Date.now() });
+  if (path === 'join') {
+    await ref.set({ p: { [uid]: Object.assign(meRec(), { dmg: 0 }) } }, { merge: true });
+    if (CP && CP.unsub) CP.unsub();
+    const box = { doc: null };
+    box.unsub = ref.onSnapshot(sn => { box.doc = sn.data() || null; if (CP && CP.box === box) cpPoll(); }, () => {});
+    return { pid: uid, box };
+  }
+  if (path === 'state') {
+    const B = CP && CP.box; if (!B) throw new Error('Chưa vào phòng');
+    if (!CP.beat || Date.now() - CP.beat > 8000) { CP.beat = Date.now(); const m = cpMe(); ref.update({ [`p.${uid}.seen`]: Date.now(), [`p.${uid}.name`]: m.name, [`p.${uid}.char`]: m.char, [`p.${uid}.xp`]: m.xp, [`p.${uid}.ri`]: m.ri }).catch(() => {}); }
+    const st = cpState(B.doc);
+    if (st.phase === 'fight' && (st.hp <= 0 || st.left <= 0)) cpFinish(room, st.round).catch(() => {});
+    return st;
+  }
+  if (path === 'start') {
+    await CL.db.runTransaction(async tx => {
+      const sn = await tx.get(ref), d = sn.data() || {};
+      if (d.phase === 'fight' && Date.now() < (d.ends || 0) && (d.max || 0) > (d.dmg || 0)) return; // trận đang diễn ra
+      const act = cpActive(d); if (!act.find(([k]) => k === uid)) act.push([uid, meRec()]);
+      const top = act.reduce((a, b) => ((b[1].xp || 0) > (a[1].xp || 0) ? b : a));
+      const ri = Math.max(0, Math.min(GCFG.bossHp.length - 1, top[1].ri || 0)), max = Math.round(GCFG.bossHp[ri] * (1 + CP_CFG.hpPerPlayer * (act.length - 1)));
+      const up = { phase: 'fight', round: (d.round || 0) + 1, boss: Math.floor(Math.random() * GBOSS.length), ri, max, dmg: 0, ends: Date.now() + CP_CFG.sec * 1000, result: null };
+      Object.keys(d.p || {}).forEach(k => { up[`p.${k}.dmg`] = 0; });
+      tx.update(ref, up);
+    });
+    return {};
+  }
+  if (path === 'hit') {
+    const d = CP && CP.box && CP.box.doc; if (!d || d.phase !== 'fight' || d.round !== body.round) return {};
+    const dmg = Math.max(0, Math.min(Math.round(body.dmg), Math.round((d.max || 0) * CP_CFG.maxHitFrac)));
+    await ref.update({ dmg: FV.increment(dmg), [`p.${uid}.dmg`]: FV.increment(dmg) });
+    return {};
+  }
+  if (path === 'leave') {
+    if (CP && CP.unsub) CP.unsub();
+    await ref.update({ [`p.${uid}`]: FV.delete() });
+    return {};
+  }
 }
 const cpMe = () => ({ name: S.hero.name || 'Đạo hữu', char: S.hero.char || 'kiem', xp: S.xp, ri: Math.min(realmInfo(S.xp).ri, GCFG.bossHp.length - 1), cp: gCP(gStats()) });
 const fx_vFight = vFight;
 vFight = function () {
   fx_vFight();
   const c = view.querySelector('.card'); if (!c) return;
-  c.insertAdjacentHTML('afterend', `<div class="card" style="text-align:left"><b>👥 Phòng boss LAN</b> <span class="mut">· đánh boss cùng bạn bè chung mạng</span>
+  c.insertAdjacentHTML('afterend', `<div class="card" style="text-align:left"><b>👥 Phòng boss online</b> <span class="mut">· đánh boss cùng bạn bè ở bất kỳ đâu (cần đăng nhập ☁️)</span>
     <p class="mut" style="margin:6px 0">Boss mạnh theo người có tu vi cao nhất phòng, máu tăng theo số người, trận ${CP_CFG.sec} giây. Hạ boss: đồ rơi chỉ số cao hơn thường ${Math.round((CP_CFG.dropMul - 1) * 100)}% (tối đa ${CP_CFG.dropsPerDay} lần/ngày).</p>
     <div class="row"><button class="pri" id="cp-open">👥 Vào phòng</button></div></div>`);
   $('#cp-open').onclick = vCoop;
 };
-function cpStop() { if (CP) { clearInterval(CP.poll); clearInterval(CP.tm); } CP = null; }
+function cpStop() { if (CP) { clearInterval(CP.poll); clearInterval(CP.tm); if (CP.unsub) CP.unsub(); } CP = null; }
 const fx_render = render;
 render = function () { cpStop(); fx_render(); };
 function vCoop() {
   cpStop();
-  view.innerHTML = `<div class="card" style="text-align:left"><h3 style="margin:0 0 6px">👥 Phòng boss LAN</h3>
-    <p class="mut" style="margin:0 0 8px">Máy làm chủ phòng nhấp đúp <b>start-coop.bat</b> (cần Python). Cửa sổ server sẽ in địa chỉ dạng <code>http://192.168.x.x:8770</code>: các máy khác nhập địa chỉ đó, máy chủ nhập <code>http://127.0.0.1:8770</code>. Mọi người dùng cùng một mã phòng.</p>
-    <label class="mut">Địa chỉ server</label><input id="cp-url" value="${esc(S.coop.url || 'http://127.0.0.1:8770')}">
+  if (typeof CL === 'undefined' || !CL.ok) { toast('Phòng online cần mở game qua start.bat hoặc link web và có Internet.'); return; }
+  if (!CL.user) { toast('Hãy đăng nhập tài khoản trước để vào phòng.'); return cloudPanel(); }
+  view.innerHTML = `<div class="card" style="text-align:left"><h3 style="margin:0 0 6px">👥 Phòng boss online</h3>
+    <p class="mut" style="margin:0 0 8px">Mọi người (đã đăng nhập) nhập cùng một mã phòng là vào chung phòng, không cần chung mạng. Đặt mã khó đoán (vd: tên nhóm + số) để người lạ không vào nhầm.</p>
     <label class="mut">Mã phòng</label><input id="cp-room" maxlength="12" value="${esc(S.coop.room || '')}" placeholder="vd: 1234">
     <div class="row"><button class="pri" id="cp-join">Vào phòng</button><button id="cp-back">← Về trận chiến</button></div>
     <div id="cp-err" class="bad-t"></div></div>`;
   $('#cp-back').onclick = () => go('fight');
   $('#cp-join').onclick = async () => {
-    S.coop.url = $('#cp-url').value.trim(); S.coop.room = $('#cp-room').value.trim() || 'phong1'; save();
+    S.coop.room = ($('#cp-room').value.trim().replace(/[^A-Za-z0-9_-]/g, '') || 'phong1').slice(0, 20); save();
     try {
       const j = await cpApi('join', Object.assign({ room: S.coop.room }, cpMe()));
-      CP = { pid: j.pid, room: S.coop.room, st: null, B: null };
-      cpPoll(); CP.poll = setInterval(cpPoll, 1000);
-    } catch (e) { $('#cp-err').textContent = 'Không kết nối được server: ' + e.message + '. Kiểm tra địa chỉ, server đã chạy chưa và tường lửa.'; }
+      CP = { pid: j.pid, room: S.coop.room, st: null, B: null, box: j.box, unsub: j.box.unsub };
+      CP.poll = setInterval(cpPoll, 1000);
+    } catch (e) { $('#cp-err').textContent = /permission/i.test(e.message) ? 'Firestore chưa cho phép tạo phòng: cần thêm quy tắc rooms trong Firebase Rules.' : 'Không vào được phòng: ' + e.message; }
   };
 }
 async function cpPoll() {
-  if (!CP) return;
+  if (!CP || !CP.box || !CP.box.doc) return;
   if (tab !== 'fight') return cpStop();
   let st; try { st = await cpApi('state', Object.assign({ room: CP.room, pid: CP.pid }, cpMe())); } catch (e) { return; }
   if (!CP) return;
