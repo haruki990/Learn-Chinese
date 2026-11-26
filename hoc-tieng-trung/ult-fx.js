@@ -416,10 +416,11 @@ function gUltRender(x, S, t, el, imgs) {
 // trả về Promise khi xong (hoặc khi người chơi chạm để bỏ qua)
 // Video chiêu cuối do người dùng tạo (thư mục ult-video/). Hệ nào có video thì phát video, hệ khác dùng hiệu ứng canvas.
 // Nếu video lỗi/thiếu file thì tự quay về hiệu ứng canvas.
-const GULT_VID = { kim: 'ult-video/kim', hoa: 'ult-video/hoa', thuy: 'ult-video/thuy' }; // video theo HỆ (có cả .webm và .mp4)
+// video theo HỆ (có cả .webm và .mp4): dùng cho bảng xem 14 hệ và cho nhân vật chưa có video riêng. Hệ Ảo chưa có video.
+const GULT_VID = { kim: 'ult-video/kim', moc: 'ult-video/moc', tho: 'ult-video/dia', thuy: 'ult-video/thuy', hoa: 'ult-video/hoa', loi: 'ult-video/loi', bang: 'ult-video/bang', phong: 'ult-video/phong', am: 'ult-video/hon', quang: 'ult-video/quang', doc: 'ult-video/doc', khong: 'ult-video/khong', thoi: 'ult-video/thoi' };
 // Video chiêu cuối theo từng NHÂN VẬT: đặt file ult-video/<id nhân vật>.webm và/hoặc .mp4 (vd kiem.mp4, loi.webm).
 // Liệt kê id ở đây để app thử phát; thiếu file thì tự quay về video theo hệ rồi tới hiệu ứng canvas.
-const GULT_CVID = ['kiem', 'hoa', 'thuy', 'moc', 'dia', 'loi', 'bang', 'phong', 'hon', 'quang', 'doc', 'khong', 'thoi', 'kimcuong', 'dan', 'khi'];
+const GULT_CVID = ['kiem', 'hoa', 'thuy', 'moc', 'dia', 'loi', 'bang', 'phong', 'hon', 'quang', 'doc', 'khong', 'thoi', 'kimcuong', 'dan', 'khi', 'tran', 'thu'];
 function gUltPlay(el, opts) {
   opts = opts || {};
   return new Promise(res => {
