@@ -68,6 +68,18 @@ td,th{padding:7px 4px;border-bottom:1px solid var(--bd);text-align:left}
 .stage{position:relative;margin:auto;border-radius:20px}
 .frm{padding:5px;border-radius:20px}
 .petb{position:absolute;right:-6px;bottom:-6px;font-size:40px;filter:drop-shadow(0 2px 3px #0006)}
+.frm{position:relative;z-index:1}
+.aur{position:absolute;left:50%;top:50%;width:150%;aspect-ratio:1;transform:translate(-50%,-50%);pointer-events:none;z-index:0;animation:auspin 30s linear infinite,aupulse 2.6s ease-in-out infinite}
+@keyframes auspin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes aupulse{0%,100%{opacity:.8}50%{opacity:1}}
+.peti{position:absolute;right:-22px;bottom:-16px;width:42%;z-index:3;filter:drop-shadow(0 4px 6px #0007);animation:petfloat 3s ease-in-out infinite;pointer-events:none}
+@keyframes petfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.frbadge{position:absolute;left:-14px;top:-14px;z-index:3}
+.bst{position:relative;display:block;flex:none}
+.bst>img{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:block;max-width:none}
+.bst>.bau{width:140%;opacity:.9;animation:auspin 30s linear infinite}
+.item .pv.pvi{object-fit:contain;padding:2px;background:radial-gradient(#2b2440,#15121f)}
+@media (prefers-reduced-motion:reduce){.aur,.peti,.bst>.bau{animation:none}}
 @keyframes glow{0%,100%{box-shadow:0 0 10px 2px var(--gc)}50%{box-shadow:0 0 30px 9px var(--gc)}}
 .gi{display:inline-block;border-radius:10px;padding:2px;flex:none}
 .item{display:flex;align-items:center;gap:12px;border:1px solid var(--bd);background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:8px;text-align:left}
@@ -2996,20 +3008,20 @@ const ITEMS = META.map(m => ({ id: m.id, cat: 'char', name: m.name, kind: m.kind
   { id: 'tt_3', cat: 'title', name: 'Chân Truyền Đệ Tử', h: '真传弟子', p: 'zhēnchuán dìzǐ', price: 300 },
   { id: 'tt_4', cat: 'title', name: 'Trưởng Lão', h: '长老', p: 'zhǎnglǎo', price: 600 },
   { id: 'tt_5', cat: 'title', name: 'Thiên Kiêu', h: '天骄', p: 'tiānjiāo', price: 900 },
-  { id: 'fr_wood', cat: 'frame', name: 'Khung gỗ đàn', price: 40, css: 'linear-gradient(135deg,#b88a5a,#7a5532)', c: '#b88a5a' },
-  { id: 'fr_jade', cat: 'frame', name: 'Khung ngọc bích', price: 120, css: 'linear-gradient(135deg,#9ff5d6,#2f9e7a,#9ff5d6)', c: '#4fd1a5' },
-  { id: 'fr_gold', cat: 'frame', name: 'Khung kim sắc', price: 260, css: 'linear-gradient(135deg,#ffe28a,#c9962b,#ffe28a)', c: '#e0b84f' },
-  { id: 'fr_purple', cat: 'frame', name: 'Khung tử điện', price: 400, css: 'linear-gradient(135deg,#e0b8ff,#6a3fc4,#e0b8ff)', c: '#9a6fe0' },
-  { id: 'fr_dragon', cat: 'frame', name: 'Khung long văn', price: 650, css: 'linear-gradient(135deg,#ffd27a,#d0402f,#ffd27a,#d0402f)', c: '#d0402f' },
-  { id: 'pet_turtle', cat: 'pet', name: 'Linh quy', price: 90, e: '🐢' },
-  { id: 'pet_fox', cat: 'pet', name: 'Tiểu hồ ly', price: 160, e: '🦊' },
-  { id: 'pet_crane', cat: 'pet', name: 'Tiên hạc', price: 260, e: '🦢' },
-  { id: 'pet_tiger', cat: 'pet', name: 'Bạch hổ con', price: 400, e: '🐯' },
-  { id: 'pet_dragon', cat: 'pet', name: 'Tiểu thanh long', price: 700, e: '🐉' },
-  { id: 'au_cyan', cat: 'aura', name: 'Linh quang', price: 120, c: '#5ad1ff' },
-  { id: 'au_gold', cat: 'aura', name: 'Kim quang', price: 260, c: '#ffd24d' },
-  { id: 'au_purple', cat: 'aura', name: 'Tử khí đông lai', price: 420, c: '#b57bff' },
-  { id: 'au_red', cat: 'aura', name: 'Xích viêm', price: 560, c: '#ff6a3d' },
+  { id: 'fr_wood', cat: 'frame', name: 'Khung gỗ đàn', price: 40, css: 'linear-gradient(135deg,#b88a5a,#7a5532)', c: '#b88a5a', img: 'items/fr_wood.webp', hole: 0.591 },
+  { id: 'fr_jade', cat: 'frame', name: 'Khung ngọc bích', price: 120, css: 'linear-gradient(135deg,#9ff5d6,#2f9e7a,#9ff5d6)', c: '#4fd1a5', img: 'items/fr_jade.webp', hole: 0.548 },
+  { id: 'fr_gold', cat: 'frame', name: 'Khung kim sắc', price: 260, css: 'linear-gradient(135deg,#ffe28a,#c9962b,#ffe28a)', c: '#e0b84f', img: 'items/fr_gold.webp', hole: 0.574 },
+  { id: 'fr_purple', cat: 'frame', name: 'Khung tử điện', price: 400, css: 'linear-gradient(135deg,#e0b8ff,#6a3fc4,#e0b8ff)', c: '#9a6fe0', img: 'items/fr_purple.webp', hole: 0.55 },
+  { id: 'fr_dragon', cat: 'frame', name: 'Khung long văn', price: 650, css: 'linear-gradient(135deg,#ffd27a,#d0402f,#ffd27a,#d0402f)', c: '#d0402f', img: 'items/fr_dragon.webp', hole: 0.527 },
+  { id: 'pet_turtle', cat: 'pet', name: 'Linh quy', price: 90, e: '🐢', img: 'items/pet_turtle.webp' },
+  { id: 'pet_fox', cat: 'pet', name: 'Tiểu hồ ly', price: 160, e: '🦊', img: 'items/pet_fox.webp' },
+  { id: 'pet_crane', cat: 'pet', name: 'Tiên hạc', price: 260, e: '🦢', img: 'items/pet_crane.webp' },
+  { id: 'pet_tiger', cat: 'pet', name: 'Bạch hổ con', price: 400, e: '🐯', img: 'items/pet_tiger.webp' },
+  { id: 'pet_dragon', cat: 'pet', name: 'Tiểu thanh long', price: 700, e: '🐉', img: 'items/pet_dragon.webp' },
+  { id: 'au_cyan', cat: 'aura', name: 'Linh quang', price: 120, c: '#5ad1ff', img: 'items/au_cyan.webp' },
+  { id: 'au_gold', cat: 'aura', name: 'Kim quang', price: 260, c: '#ffd24d', img: 'items/au_gold.webp' },
+  { id: 'au_purple', cat: 'aura', name: 'Tử khí đông lai', price: 420, c: '#b57bff', img: 'items/au_purple.webp' },
+  { id: 'au_red', cat: 'aura', name: 'Xích viêm', price: 560, c: '#ff6a3d', img: 'items/au_red.webp' },
   { id: 'pill_s', cat: 'use', kind: 'pill', name: 'Tụ Khí Đan', price: 25, xp: 30, e: '💊', d: '+30 tu vi (tính vào giới hạn ngày)' },
   { id: 'pill_m', cat: 'use', kind: 'pill', name: 'Trúc Cơ Đan', price: 80, xp: 100, e: '🟣', d: '+100 tu vi (tính vào giới hạn ngày)' },
   { id: 'pill_l', cat: 'use', kind: 'pill', name: 'Kim Đan', price: 250, xp: 250, e: '🔶', d: '+250 tu vi (tính vào giới hạn ngày)' },
@@ -3025,16 +3037,23 @@ const charImg = (id, kind) => ((window.AVATARS || {})[id] || {})[kind] || ('avat
 
 function heroCard(w) {
   const fr = itemOf(S.equip.frame), au = itemOf(S.equip.aura), pet = itemOf(S.equip.pet), id = S.hero.char || 'kiem';
-  return `<div class="stage" style="width:${w}px;${au ? '--gc:' + au.c + ';animation:glow 2.6s ease-in-out infinite;' : ''}">
+  const glow = au && !au.img ? '--gc:' + au.c + ';animation:glow 2.6s ease-in-out infinite;' : '';
+  return `<div class="stage" style="width:${w}px;${glow}">
+    ${au && au.img ? `<img class="aur" src="${au.img}" alt="">` : ''}
     <div class="frm" style="background:${fr ? fr.css : 'var(--bd)'}"><img src="${charImg(id, 'card')}" alt="Nhân vật" style="width:100%;display:block;border-radius:13px"></div>
-    ${pet ? `<span class="petb">${pet.e}</span>` : ''}</div>`;
+    ${fr && fr.img ? `<span class="frbadge">${bustImg(Math.round(w * .3), true)}</span>` : ''}
+    ${pet ? (pet.img ? `<img class="peti" src="${pet.img}" alt="${esc(pet.name)}">` : `<span class="petb">${pet.e}</span>`) : ''}</div>`;
 }
-function bustImg(px) {
-  const fr = itemOf(S.equip.frame);
-  return `<img src="${charImg(S.hero.char || 'kiem', 'bust')}" alt="" style="width:${px}px;height:${px}px;border-radius:50%;object-fit:cover;display:block;border:3px solid ${fr ? fr.c : 'var(--bd)'}">`;
+// Ảnh đại diện tròn: khung (PNG nền trong) phủ lên, hào quang xoay phía sau. Giữ nguyên kích thước ô px.
+function bustImg(px, noAura) {
+  const fr = itemOf(S.equip.frame), au = noAura ? null : itemOf(S.equip.aura), src = charImg(S.hero.char || 'kiem', 'bust');
+  if (!(fr && fr.img) && !(au && au.img)) return `<img src="${src}" alt="" style="width:${px}px;height:${px}px;border-radius:50%;object-fit:cover;display:block;border:3px solid ${fr ? fr.c : 'var(--bd)'}">`;
+  const F = Math.round(px * 1.1), b = fr && fr.img ? Math.round(F * fr.hole * 1.04) : px;
+  return `<span class="bst" style="width:${px}px;height:${px}px">${au && au.img ? `<img class="bau" src="${au.img}" alt="">` : ''}<img src="${src}" alt="" style="width:${b}px;height:${b}px;border-radius:50%;object-fit:cover;${fr && fr.img ? '' : 'border:3px solid ' + (fr ? fr.c : 'var(--bd)')}">${fr && fr.img ? `<img src="${fr.img}" alt="" style="width:${F}px;height:${F}px">` : ''}</span>`;
 }
 function previewOf(it) {
   if (it.cat === 'char') return `<img class="pv" src="${charImg(it.id, 'bust')}" alt="" style="object-fit:cover;padding:0">`;
+  if (it.img) return `<img class="pv pvi" src="${it.img}" alt="">`;
   if (it.cat === 'pet' || it.cat === 'use') return `<div class="pv">${it.e}</div>`;
   if (it.cat === 'aura') return `<div class="pv" style="background:radial-gradient(${it.c},transparent 75%)">✨</div>`;
   if (it.cat === 'frame') return `<div class="pv" style="background:${it.css}"></div>`;
