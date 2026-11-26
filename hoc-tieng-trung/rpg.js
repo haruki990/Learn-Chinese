@@ -482,8 +482,9 @@ const GAR_CSS = `
 .ar-b .ar-i{animation:arBreath 2.6s ease-in-out infinite;box-shadow:none;overflow:visible;border-radius:0}
 .ar-b .ar-i img{object-fit:contain;filter:drop-shadow(0 6px 8px rgba(0,0,0,.55))}
 .ar-b{width:46%;max-width:220px}
-.ar-p .ar-i{animation:arBob 2.1s ease-in-out infinite;border:2px solid var(--ac2,#e0b84f);object-position:top}
-.ar-p .ar-i img{object-position:50% 15%}
+.ar-p .ar-i{animation:arBob 2.1s ease-in-out infinite;box-shadow:none;overflow:visible;border-radius:0}
+/* ảnh chibi quay phải: lật ở thẻ img để nhân vật quay về phía boss; nhún/lao/trúng đòn chạy ở .ar-i và .ar-u nên không đè transform */
+.ar-p .ar-i img{object-fit:contain;transform:scaleX(-1);filter:drop-shadow(0 6px 8px rgba(0,0,0,.55))}
 .ar-sh{position:absolute;left:12%;right:12%;bottom:-14px;height:12px;border-radius:50%;background:rgba(0,0,0,.35);filter:blur(3px)}
 .ar-p.lunge{animation:arLungeL .45s ease-out}
 .ar-b.lunge{animation:arLungeR .45s ease-out}

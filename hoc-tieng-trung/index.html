@@ -80,6 +80,8 @@ td,th{padding:7px 4px;border-bottom:1px solid var(--bd);text-align:left}
 .bst>.bau{width:140%;opacity:.9;animation:auspin 30s linear infinite}
 .item .pv.pvi{object-fit:contain;padding:2px;background:radial-gradient(#2b2440,#15121f)}
 @media (prefers-reduced-motion:reduce){.aur,.peti,.bst>.bau{animation:none}}
+img[src*="chars/"]{background:radial-gradient(circle at 50% 42%,#5a5288 0%,#2a2640 70%,#1d1a2c 100%)}
+.ar img[src*="chars/"]{background:none}
 @keyframes glow{0%,100%{box-shadow:0 0 10px 2px var(--gc)}50%{box-shadow:0 0 30px 9px var(--gc)}}
 .gi{display:inline-block;border-radius:10px;padding:2px;flex:none}
 .item{display:flex;align-items:center;gap:12px;border:1px solid var(--bd);background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:8px;text-align:left}
@@ -3037,7 +3039,13 @@ const owned = it => it.price === 0 || !!S.inv[it.id];
 const single = cat => cat === 'char' || cat === 'title'; // luôn có đúng 1 món được chọn
 const isOn = it => it.cat === 'char' ? (S.hero.char || 'kiem') === it.id : it.cat === 'title' ? (S.equip.title || 'tt_0') === it.id : S.equip[it.cat] === it.id;
 let shopCat = 'char';
-const charImg = (id, kind) => ((window.AVATARS || {})[id] || {})[kind] || ('avatars/' + id + '_' + kind + '.webp');
+// Ảnh nhân vật chibi nền trong suốt (quay mặt sang phải): chars/<id>_card.webp (toàn thân) và chars/<id>_bust.webp (chân dung).
+// Thiếu file thì tự đổi về ảnh cũ nhúng trong avatars-data.js (xem bắt lỗi ảnh ngay dưới).
+const charImg = (id, kind) => (kind === 'card' || kind === 'bust') ? 'chars/' + id + '_' + kind + '.webp' : (((window.AVATARS || {})[id] || {})[kind] || ('avatars/' + id + '_' + kind + '.webp'));
+document.addEventListener('error', e => {
+  const t = e.target, m = t && t.tagName === 'IMG' && /chars\/(\w+)_(card|bust)\.webp/.exec(t.src || '');
+  if (!m) return; const alt = ((window.AVATARS || {})[m[1]] || {})[m[2]] || ('avatars/' + m[1] + '_' + m[2] + '.webp'); if (t.src !== alt) t.src = alt;
+}, true);
 
 function heroCard(w) {
   const fr = itemOf(S.equip.frame), au = itemOf(S.equip.aura), pet = itemOf(S.equip.pet), id = S.hero.char || 'kiem';

@@ -74,7 +74,8 @@ function gUShape(x, kind, px, py, s, rot, col, a) {
 function gUDisc(x, img, px, py, r, ring, tint) {
   x.save(); x.beginPath(); x.arc(px, py, r, 0, 7); x.closePath();
   if (img && img.complete && img.naturalWidth) {
-    x.save(); x.clip(); const w = img.naturalWidth, h = img.naturalHeight, tp = /bosses\//.test(img.src); // ảnh boss chibi nền trong suốt: vừa khung, có nền tối
+    x.save(); x.clip(); const w = img.naturalWidth, h = img.naturalHeight, tp = /bosses\//.test(img.src), tc = /chars\//.test(img.src);
+    if (tc) { x.fillStyle = '#2a2540'; x.fill(); } // ảnh boss chibi nền trong suốt: vừa khung, có nền tối
     if (tp) { x.fillStyle = '#2a2540'; x.fill(); const k = Math.min(2 * r / w, 2 * r / h) * 1.2; x.drawImage(img, px - w * k / 2, py - h * k / 2, w * k, h * k); }
     else { const k = Math.max(2 * r / w, 2 * r / h); x.drawImage(img, px - w * k / 2, py - h * k / 2.6, w * k, h * k); }
     x.restore();
