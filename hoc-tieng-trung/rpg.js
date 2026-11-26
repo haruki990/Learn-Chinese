@@ -155,7 +155,7 @@ function gGen(slot, tier, rng, q) {
 //  - trib (độ kiếp thành công): đồ phẩm của cảnh giới mới + 1 bậc.
 //  - streak (rương chuỗi ngày): chuỗi < 7 ngày ra T; chuỗi từ 7 ngày ra T+1; từ 21 ngày ra T+2.
 function gRollTier(src, arg) {
-  const ri = (src === 'boss' && GB && GB.W) ? GB.W.ri : realmInfo(S.xp).ri, T = gTierForRealm(ri), luck = (gStats().fx.fortune || 0) / 100, r = Math.random();
+  const ri = (src === 'boss' && GB && GB.W) ? GB.W.ri : realmInfo(S.xp).ri, T = gTierForRealm(ri), luck = gLuck(), r = Math.random();
   let t = T;
   if (src === 'kill') src = 'boss', arg = 1;
   if (src === 'combo') { const pT = Math.min(.95, .6 + .1 * (arg || 0) + luck); t = r < pT ? T : T - 1; }
@@ -171,7 +171,7 @@ function gRollTier(src, arg) {
 // phẩm cấp theo nguồn: boss (quái tuần, tháp, phòng online) luôn từ Thượng Phẩm; kết liễu boss phòng từ Cực Phẩm
 function gQSrc(src, arg) { return src === 'kill' ? 'kill' : src === 'boss' || src === 'coop' ? 'boss' : src === 'trib' ? 'trib' : src === 'streak' ? (arg >= 21 ? 'boss' : 'trib') : 'normal'; }
 function gDrop(src, arg) {
-  const luck = (gStats().fx.fortune || 0) / 100;
+  const luck = gLuck();
   const slot = Math.random() < .25 ? 'weapon' : pick(GSLOTS), it = gGen(slot, gRollTier(src || 'combo', arg || 0), null, gRollQ(gQSrc(src, arg), null, luck));
   it.isNew = true; it.src = src || 'combo';
   if (S.bag.length >= GCFG.bagMax) { const p = gSellPrice(it); S.ls += p; it.autoSold = p; }
@@ -207,13 +207,17 @@ function gStats() {
     Object.keys(it.st).forEach(s => { t[s] = (t[s] || 0) + gStatOf(it, s); });
     if (gFxOn(it)) fx[it.fx] = (fx[it.fx] || 0) + gFxVal(it);
   });
-  const pet = typeof itemOf === 'function' && S.equip ? itemOf(S.equip.pet) : null; // linh thú (Phường thị)
-  if (pet && pet.st) Object.keys(pet.st).forEach(s => { t[s] = GPET_PCT[s] ? t[s] * (1 + pet.st[s] / 100) : (t[s] || 0) + pet.st[s]; });
+  if (typeof itemOf === 'function' && S.equip) GCOS_ST.forEach(c => { // khung / hào quang / linh thú (Phường thị)
+    const it = itemOf(S.equip[c]);
+    if (it && it.st) Object.keys(it.st).forEach(s => { t[s] = GPET_PCT[s] ? t[s] * (1 + it.st[s] / 100) : (t[s] || 0) + it.st[s]; });
+  });
   Object.keys(t).forEach(s => { t[s] = gRoundStat(s, t[s]); });
   t.fx = fx; return t;
 }
 const gCP = st => Math.round(st.hp / 8 + st.atk * 3 + st.def * 2 + st.crit * 4 + st.spd * 2 + (st.hit - 100) * 2);
 const gExpBonus = () => (gStats().expb || 0);
+// may mắn rơi đồ = Phúc vận (hiệu ứng) + chỉ số Vận (trang bị, khung, hào quang), mỗi điểm = 1%
+const gLuck = () => { const st = gStats(); return ((st.fx.fortune || 0) + (st.luck || 0)) / 100; };
 
 // ---------- khởi tạo & di trú dữ liệu ----------
 function rpgInit() {

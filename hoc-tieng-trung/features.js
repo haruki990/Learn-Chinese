@@ -10,10 +10,10 @@ const FX_DEFAULT = ['kiem', 'hoa', 'thuy', 'moc', 'dia']; // 5 nhân vật mặc
 const FX_CFG = {
   ticket: 160,        // giá 1 vé quay (linh thạch)
   ten: 1440,          // giá 10 vé (giảm 10%)
-  pity: 30,           // quay 30 lần chưa ra Truyền Thuyết thì lần thứ 30 chắc chắn ra
-  rates: [0.6, 0.3, 0.1], // Hiếm / Sử Thi / Truyền Thuyết
+  pity: 100,          // quay 100 lần chưa ra Truyền Thuyết thì lần thứ 100 chắc chắn ra
+  rates: [0.69, 0.3, 0.01], // Hiếm / Sử Thi / Truyền Thuyết
   maxStar: 5,         // trùng nhân vật: +1 sao (mỗi sao +3% ATK), tối đa 5 sao
-  dupRefund: 80       // đã 5 sao mà trùng nữa thì hoàn linh thạch
+  dupRefund: 80       // trùng nhân vật đã có: hoàn 50% giá vé (160 / 2)
 };
 const FX_RAR = [null,
   { n: 'Hiếm', c: '#4a90e2', atk: .10, crit: 0, ult: 1.1 },
@@ -93,8 +93,10 @@ function fxRoll() {
   const pool = Object.keys(FX_GACHA).filter(id => FX_GACHA[id].r === rar && META.some(m => m.id === id));
   const id = pick(pool), res = { id, r: rar };
   if (!S.inv[id]) { S.inv[id] = true; g.stars[id] = 1; res.isNew = true; }
-  else if ((g.stars[id] || 1) < FX_CFG.maxStar) { g.stars[id] = (g.stars[id] || 1) + 1; res.star = g.stars[id]; }
-  else { S.ls += FX_CFG.dupRefund; res.refund = FX_CFG.dupRefund; }
+  else {
+    if ((g.stars[id] || 1) < FX_CFG.maxStar) { g.stars[id] = (g.stars[id] || 1) + 1; res.star = g.stars[id]; }
+    S.ls += FX_CFG.dupRefund; res.refund = FX_CFG.dupRefund; // trùng: luôn hoàn 50% vé, còn +1★ nếu chưa tối đa
+  }
   return res;
 }
 function fxPull(n) {
@@ -114,7 +116,7 @@ function fxShowPull(out) {
     <div style="display:grid;grid-template-columns:repeat(${out.length > 1 ? 5 : 1},1fr);gap:8px">${out.map(o => {
       const m = META.find(x => x.id === o.id) || {}, R = FX_RAR[o.r];
       return `<div style="border:3px solid ${R.c};border-radius:12px;padding:4px;${o.r === 3 ? 'box-shadow:0 0 14px ' + R.c : ''}"><img src="${charImg(o.id, 'bust')}" alt="" style="width:100%;border-radius:8px;display:block">
-        <b style="font-size:12px">${esc(m.name || o.id)}</b><br><small style="color:${R.c};font-weight:700">${R.n}</small><br><small>${o.isNew ? '🆕 Mới!' : o.refund ? '+' + o.refund + ' 💎' : '+1★ (' + o.star + '★)'}</small></div>`;
+        <b style="font-size:12px">${esc(m.name || o.id)}</b><br><small style="color:${R.c};font-weight:700">${R.n}</small><br><small>${o.isNew ? '🆕 Mới!' : (o.star ? '+1★ (' + o.star + '★) · ' : '') + '+' + o.refund + ' 💎'}</small></div>`;
     }).join('')}</div>
     <p class="mut">Đảm bảo Truyền Thuyết sau ${FX_CFG.pity - fxG().pity} lần quay nữa · Còn ${fxG().t} vé</p></div>
     <div class="row"><button class="pri" id="fx-back">← Về Phường thị</button></div>`;
@@ -124,7 +126,7 @@ function fxShowPull(out) {
 function fxGachaPanel() {
   const g = fxG(), cur = fxCur();
   return `<div class="card" id="fx-gacha" style="text-align:left;border:2px solid var(--gold,#e0b84f)"><b>🎟️ Quay thưởng nhân vật</b> <span class="mut">· vé: <b>${g.t}</b> · 💎 ${S.ls}</span>
-    <p class="mut" style="margin:6px 0">5 nhân vật mặc định: Kiếm, Hỏa, Thủy, Mộc, Địa. 17 nhân vật còn lại chỉ mở bằng vé quay. Tỉ lệ: Hiếm 60% (+10% ATK, chiêu cuối ×1,1) · Sử Thi 30% (+18% ATK, +3 CRIT, ×1,2) · Truyền Thuyết 10% (+28% ATK, +5 CRIT, ×1,35). Mỗi nhân vật quay được có thêm 1 hiệu ứng hỗ trợ riêng. Trùng nhân vật: +1★ (+3% ATK/sao). Đảm bảo Truyền Thuyết sau <b>${FX_CFG.pity - g.pity}</b> lần quay nữa.</p>
+    <p class="mut" style="margin:6px 0">5 nhân vật mặc định: Kiếm, Hỏa, Thủy, Mộc, Địa. 17 nhân vật còn lại chỉ mở bằng vé quay. Tỉ lệ: Hiếm 69% (+10% ATK, chiêu cuối ×1,1) · Sử Thi 30% (+18% ATK, +3 CRIT, ×1,2) · Truyền Thuyết 1% (+28% ATK, +5 CRIT, ×1,35). Mỗi nhân vật quay được có thêm 1 hiệu ứng hỗ trợ riêng. Trùng nhân vật: hoàn ${FX_CFG.dupRefund} 💎 (50% giá vé) và +1★ (+3% ATK/sao, tối đa ${FX_CFG.maxStar}★). Đảm bảo Truyền Thuyết sau <b>${FX_CFG.pity - g.pity}</b> lần quay nữa.</p>
     ${cur ? `<p style="margin:4px 0">Đang dùng: <b style="color:${FX_RAR[cur.r].c}">${FX_RAR[cur.r].n} ${'★'.repeat(cur.star)}</b> · ${esc(fxSupTxt(cur.id))}</p>` : ''}
     <div class="row" style="flex-wrap:wrap"><button data-fxpull="1" ${g.t >= 1 ? 'class="pri"' : 'disabled'}>Quay 1</button><button data-fxpull="10" ${g.t >= 10 ? 'class="pri"' : 'disabled'}>Quay 10</button>
     <button data-fxbuy="1" ${S.ls >= FX_CFG.ticket ? '' : 'disabled'}>Mua 1 vé 💎${FX_CFG.ticket}</button><button data-fxbuy="10" ${S.ls >= FX_CFG.ten ? '' : 'disabled'}>Mua 10 vé 💎${FX_CFG.ten}</button></div></div>`;
