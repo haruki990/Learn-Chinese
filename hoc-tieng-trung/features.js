@@ -225,15 +225,16 @@ function vTower() {
 
 // ---------------- 3. PHÒNG BOSS ONLINE (co-op qua Firebase) ----------------
 // Người chơi đã đăng nhập (cloud.js) ở bất kỳ đâu nhập cùng một mã phòng. Phòng là tài liệu Firestore rooms/{mã}:
-//   { phase: 'lobby'|'fight'|'done', round, boss, ri, max, dmg, ends(ms), result, p: { uid: {name,char,xp,ri,dmg,seen} } }
+//   { phase: 'lobby'|'fight'|'done', round, boss, ri, max, dmg, ends(ms), result, killer:{uid,name}, p: { uid: {name,char,xp,ri,dmg,seen} } }
+// Đòn có thể kết liễu (máu boss còn ít) đi qua transaction để ghi đúng một người kết liễu (killer); người đó nhận thêm đồ Cực Phẩm trở lên.
 // Sát thương cộng bằng FieldValue.increment nên nhiều người đánh cùng lúc không ghi đè nhau.
-const CP_CFG = { sec: 150, dropMul: 1.3, dropsPerDay: 3, hpPerPlayer: .6, idleMs: 30000, maxHitFrac: .25 };
+const CP_CFG = { sec: 150, dropMul: 1.3, dropsPerDay: 3, killPerDay: 3, killLs: 40, hpPerPlayer: .6, idleMs: 30000, maxHitFrac: .25 };
 let CP = null; // trạng thái phòng phía client
 const cpRef = room => CL.db.collection('rooms').doc(room);
 function cpActive(d) { const now = Date.now(); return Object.entries((d && d.p) || {}).filter(([, v]) => v && now - (v.seen || 0) < CP_CFG.idleMs); }
 function cpState(d) {
   d = d || {}; const max = d.max || 0, hp = Math.max(0, max - (d.dmg || 0)), now = Date.now();
-  return { phase: d.phase || 'lobby', round: d.round || 0, boss: d.boss || 0, ri: d.ri || 0, max, hp, result: d.result || null,
+  return { phase: d.phase || 'lobby', round: d.round || 0, boss: d.boss || 0, ri: d.ri || 0, max, hp, result: d.result || null, killer: d.killer || null,
     left: d.phase === 'fight' ? Math.max(0, (d.ends || 0) - now) : 0,
     players: cpActive(d).map(([pid, v]) => ({ pid, name: v.name || 'Đạo hữu', char: v.char || 'kiem', xp: v.xp || 0, ri: v.ri || 0, dmg: v.dmg || 0 })) };
 }
@@ -244,8 +245,11 @@ async function cpFinish(room, round) { // kết thúc trận (ai thấy trước
     if (d.phase !== 'fight' || d.round !== round) return;
     const win = (d.max || 0) - (d.dmg || 0) <= 0;
     if (!win && Date.now() < (d.ends || 0)) return;
-    const board = Object.values(d.p || {}).filter(v => v.dmg > 0).map(v => ({ name: v.name, dmg: v.dmg })).sort((a, b) => b.dmg - a.dmg);
-    tx.update(ref, { phase: 'done', result: { win, boss: d.boss, max: d.max, board, round } });
+    const board = Object.entries(d.p || {}).filter(([, v]) => v && v.dmg > 0).map(([pid, v]) => ({ pid, name: v.name, char: v.char || 'kiem', dmg: v.dmg })).sort((a, b) => b.dmg - a.dmg);
+    // dự phòng: nếu không ghi được người kết liễu (đòn cộng dồn cùng lúc), tính cho người gây sát thương cao nhất
+    let killer = win ? (d.killer || null) : null;
+    if (win && !killer && board[0]) killer = { uid: board[0].pid, name: board[0].name };
+    tx.update(ref, { phase: 'done', result: { win, boss: d.boss, max: d.max, board, round, killer } });
   });
 }
 async function cpApi(path, body) {
@@ -273,7 +277,7 @@ async function cpApi(path, body) {
       const act = cpActive(d); if (!act.find(([k]) => k === uid)) act.push([uid, meRec()]);
       const top = act.reduce((a, b) => ((b[1].xp || 0) > (a[1].xp || 0) ? b : a));
       const ri = Math.max(0, Math.min(GCFG.bossHp.length - 1, top[1].ri || 0)), max = Math.round(GCFG.bossHp[ri] * (1 + CP_CFG.hpPerPlayer * (act.length - 1)));
-      const up = { phase: 'fight', round: (d.round || 0) + 1, boss: Math.floor(Math.random() * GBOSS.length), ri, max, dmg: 0, ends: Date.now() + CP_CFG.sec * 1000, result: null };
+      const up = { phase: 'fight', round: (d.round || 0) + 1, boss: Math.floor(Math.random() * GBOSS.length), ri, max, dmg: 0, ends: Date.now() + CP_CFG.sec * 1000, result: null, killer: null };
       Object.keys(d.p || {}).forEach(k => { up[`p.${k}.dmg`] = 0; });
       tx.update(ref, up);
     });
@@ -282,8 +286,18 @@ async function cpApi(path, body) {
   if (path === 'hit') {
     const d = CP && CP.box && CP.box.doc; if (!d || d.phase !== 'fight' || d.round !== body.round) return {};
     const dmg = Math.max(0, Math.min(Math.round(body.dmg), Math.round((d.max || 0) * CP_CFG.maxHitFrac)));
-    await ref.update({ dmg: FV.increment(dmg), [`p.${uid}.dmg`]: FV.increment(dmg) });
-    return {};
+    const left = (d.max || 0) - (d.dmg || 0);
+    if (left - dmg > (d.max || 0) * .15) { await ref.update({ dmg: FV.increment(dmg), [`p.${uid}.dmg`]: FV.increment(dmg) }); return {}; }
+    // gần chết: dùng transaction để biết chính xác ai ra đòn cuối
+    let kill = false;
+    await CL.db.runTransaction(async tx => {
+      const x = (await tx.get(ref)).data() || {}; kill = false;
+      if (x.phase !== 'fight' || x.round !== body.round || (x.dmg || 0) >= (x.max || 0)) return; // boss đã gục
+      const up = { dmg: (x.dmg || 0) + dmg, [`p.${uid}.dmg`]: (((x.p || {})[uid] || {}).dmg || 0) + dmg };
+      if (up.dmg >= (x.max || 0)) { kill = true; up.killer = { uid, name: cpMe().name }; }
+      tx.update(ref, up);
+    });
+    return { kill };
   }
   if (path === 'leave') {
     if (CP && CP.unsub) CP.unsub();
@@ -297,7 +311,7 @@ vFight = function () {
   fx_vFight();
   const c = view.querySelector('.card'); if (!c) return;
   c.insertAdjacentHTML('afterend', `<div class="card" style="text-align:left"><b>👥 Phòng boss online</b> <span class="mut">· đánh boss cùng bạn bè ở bất kỳ đâu (cần đăng nhập ☁️)</span>
-    <p class="mut" style="margin:6px 0">Boss mạnh theo người có tu vi cao nhất phòng, máu tăng theo số người, trận ${CP_CFG.sec} giây. Hạ boss: đồ rơi chỉ số cao hơn thường ${Math.round((CP_CFG.dropMul - 1) * 100)}% (tối đa ${CP_CFG.dropsPerDay} lần/ngày).</p>
+    <p class="mut" style="margin:6px 0">Boss mạnh theo người có tu vi cao nhất phòng, máu tăng theo số người, trận ${CP_CFG.sec} giây. Hạ boss: đồ rơi Thượng Phẩm trở lên, chỉ số cao hơn thường ${Math.round((CP_CFG.dropMul - 1) * 100)}% (tối đa ${CP_CFG.dropsPerDay} lần/ngày). Người ra đòn kết liễu 🗡️ nhận thêm 1 món Cực Phẩm trở lên.</p>
     <div class="row"><button class="pri" id="cp-open">👥 Vào phòng</button></div></div>`);
   $('#cp-open').onclick = vCoop;
 };
@@ -341,7 +355,7 @@ function cpLobby(st) {
   view.innerHTML = `<div class="card" style="text-align:left"><b>👥 Phòng "${esc(CP.room)}"</b> <span class="mut">· ${ps.length} người</span>
     ${ps.map(p => `<div class="realm"><img src="${charImg(p.char, 'bust')}" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:cover"><span style="flex:1">${esc(p.name)}${p.pid === CP.pid ? ' (bạn)' : ''}</span><span class="mut">${REALMS[p.ri] ? REALMS[p.ri].n : ''} · ${p.xp} tu vi</span></div>`).join('')}
     <p class="mut">Boss sẽ theo cảnh giới <b>${REALMS[ri].n}</b> (người tu vi cao nhất: ${top ? esc(top.name) : '-'}). Máu boss ×${(1 + .6 * Math.max(0, ps.length - 1)).toFixed(1)} theo số người.</p>
-    ${last ? `<p>${last.win ? '👑 Trận trước: đã hạ ' : '⏳ Trận trước: hết giờ với '}${esc(GBOSS[last.boss] ? GBOSS[last.boss].n : '')}</p>` : ''}
+    ${last ? `<p>${last.win ? '👑 Trận trước: đã hạ ' : '⏳ Trận trước: hết giờ với '}${esc(GBOSS[last.boss] ? GBOSS[last.boss].n : '')}${last.win && last.killer ? ` · 🗡️ kết liễu: <b>${esc(last.killer.name || '')}</b>` : ''}</p>${(last.board || []).length ? `<div style="margin:4px 0 8px">${cpBoard(last.board, last.max, last.win ? last.killer : null)}</div>` : ''}` : ''}
     <div class="row"><button class="pri" id="cp-start">⚔️ Bắt đầu đánh boss</button><button id="cp-leave">Rời phòng</button></div></div>`;
   $('#cp-start').onclick = async () => { try { await cpApi('start', { room: CP.room, pid: CP.pid }); cpPoll(); } catch (e) { toast(e.message); } };
   $('#cp-leave').onclick = () => { cpApi('leave', { room: CP.room, pid: CP.pid }).catch(() => {}); go('fight'); };
@@ -364,8 +378,20 @@ function cpStartFight(st) {
 function cpUpdate(st) {
   const B = CP.B; if (!B || B.over) return;
   const hb = $('#cp-bh'); if (hb) { hb.style.width = Math.max(0, st.hp / st.max * 100) + '%'; $('#cp-bt').textContent = Math.max(0, st.hp) + ' / ' + st.max; }
-  const ps = $('#cp-ps'); if (ps) ps.textContent = st.players.map(p => `${p.name}: ${p.dmg}`).join(' · ');
+  const ps = $('#cp-ps'); if (ps) { const h = cpBoard(st.players.map(p => ({ pid: p.pid, name: p.name, char: p.char, dmg: p.dmg })), st.max, st.killer); if (ps.dataset.h !== h) { ps.dataset.h = h; ps.innerHTML = h; } }
   const pb = $('#cp-ph'); if (pb) { pb.style.width = Math.max(0, B.php / B.pmax * 100) + '%'; $('#cp-pt').textContent = Math.max(0, Math.round(B.php)) + ' / ' + B.pmax; }
+}
+// bảng sát thương từng thành viên: thứ hạng, thanh % máu boss, 🗡️ người kết liễu
+function cpBoard(list, max, killer) {
+  const rows = (list || []).slice().sort((a, b) => b.dmg - a.dmg), tot = rows.reduce((a, b) => a + (b.dmg || 0), 0) || 1, medal = ['🥇', '🥈', '🥉'];
+  return rows.map((p, i) => {
+    const pc = max ? Math.min(100, p.dmg / max * 100) : p.dmg / tot * 100, me = CP && p.pid === CP.pid, kl = killer && killer.uid === p.pid;
+    return `<div style="display:flex;align-items:center;gap:6px;margin:3px 0;font-size:12px"><span style="width:20px;text-align:center">${medal[i] || i + 1}</span>
+      <img src="${charImg(p.char || 'kiem', 'bust')}" alt="" style="width:20px;height:20px;border-radius:50%;object-fit:cover">
+      <span style="width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${me ? 'font-weight:700' : ''}">${esc(p.name || 'Đạo hữu')}${me ? ' (bạn)' : ''}</span>
+      <span class="bar" style="flex:1;height:8px;margin:0"><i style="width:${pc.toFixed(1)}%;background:${kl ? '#ff9f1c' : me ? 'var(--ac2)' : '#6b8cce'}"></i></span>
+      <span style="min-width:86px;text-align:right">${p.dmg} <span class="mut">(${Math.round(p.dmg / tot * 100)}%)</span>${kl ? ' 🗡️' : ''}</span></div>`;
+  }).join('');
 }
 function cpNextQ() {
   const B = CP && CP.B; if (!B || B.over) return;
@@ -401,7 +427,7 @@ async function cpAnswer(i) {
     if (B.combo % fxUltCombo() === 0) { const ud = Math.max(1, cpHit(B, GULT_MULT * fxUltMul())); total += ud; ult = gUltEl(); log = `🌟 <b>Chiêu cuối</b>: ${ud} sát thương<br>` + log; }
     if (total && B.st.fx.vamp) B.php = Math.min(B.pmax, B.php + Math.round(total * B.st.fx.vamp / 100));
     B.dmg += total;
-    if (total) cpApi('hit', { room: CP.room, pid: CP.pid, dmg: total, round: B.round }).catch(() => {});
+    if (total) cpApi('hit', { room: CP.room, pid: CP.pid, dmg: total, round: B.round }).then(r => { if (r && r.kill) { B.kill = true; toast('🗡️ Bạn đã kết liễu boss!'); } }).catch(() => {});
   } else {
     B.wrong++;
     const sv = fxOnWrong(B);
@@ -432,12 +458,23 @@ function cpEnd(st) {
         it.name += ' (Phòng)'; it.src = 'coop';
         lines.push('👑 Đồ rơi boss phòng (chỉ số +' + Math.round((CP_CFG.dropMul - 1) * 100) + '%):' + gDropHTML(it));
       } else lines.push(`Hôm nay đã nhận đủ ${CP_CFG.dropsPerDay} lần đồ rơi boss phòng.`);
+      // thưởng kết liễu: thêm 1 món Cực Phẩm trở lên + linh thạch (tối đa killPerDay lần/ngày)
+      if (r.killer && r.killer.uid === CP.pid) {
+        if (C.kd !== d) { C.kd = d; C.kn = 0; }
+        if (C.kn < CP_CFG.killPerDay) {
+          C.kn++; const kls = lsGain(CP_CFG.killLs), it = gDrop('kill', 1);
+          Object.keys(it.st).forEach(s => { it.st[s] = gRoundStat(s, it.st[s] * CP_CFG.dropMul); });
+          it.name += ' (Kết liễu)'; it.src = 'kill'; S.ls += kls;
+          lines.push(`🗡️ <b>Thưởng kết liễu boss</b>: +${kls} 💎 và thêm 1 món:` + gDropHTML(it));
+        } else lines.push(`🗡️ Bạn kết liễu boss, nhưng hôm nay đã nhận đủ ${CP_CFG.killPerDay} lần thưởng kết liễu.`);
+      }
     }
     save(); addXP(xp);
   }
   view.innerHTML = `<div class="card"><div class="han" style="font-size:52px">${win ? '👑' : '⏳'}</div><h3 style="margin:4px 0">${win ? 'Cả phòng đã hạ boss!' : 'Hết giờ!'}</h3>
     <div class="mean">Sát thương của bạn: <b>${B.dmg}</b> · Đúng ${B.correct} · Sai ${B.wrong}</div>
-    <p class="mut">${(r.board || []).map(p => esc(p.name) + ': ' + p.dmg).join(' · ')}</p>
+    ${win && r.killer ? `<p style="margin:6px 0">🗡️ Người kết liễu: <b style="color:#ff9f1c">${esc(r.killer.name || 'Đạo hữu')}</b>${r.killer.uid === CP.pid ? ' (bạn)' : ''}</p>` : ''}
+    <div style="text-align:left;margin:8px 0"><b style="font-size:13px">📊 Sát thương từng thành viên</b>${cpBoard(r.board || [], r.max, win ? r.killer : null) || '<div class="mut">Chưa ai gây sát thương.</div>'}</div>
     ${lines.map(l => `<div style="margin:4px 0">${l}</div>`).join('')}</div>
     <div class="row"><button class="pri" id="cp-lobby">Về phòng</button><button id="cp-out">Rời phòng</button></div>`;
   $('#cp-lobby').onclick = () => { B.showLobby = true; cpPoll(); };

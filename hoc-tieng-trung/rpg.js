@@ -73,6 +73,33 @@ const GFX = {
   swift: { n: 'Thần tốc', base: 2, d: v => `+${v} giây mỗi trận đánh quái` },
   fortune: { n: 'Phúc vận', base: 8, d: v => `+${v}% cơ hội rơi đồ phẩm cao hơn` }
 };
+// Phẩm cấp trong cùng một phẩm (cảnh giới): q = 1..5. m = hệ số chỉ số, x = số dòng thuộc tính cộng thêm, fx = hệ số hiệu ứng.
+// Đồ cũ (chưa có it.q) được coi là Trung Phẩm, chỉ số giữ nguyên.
+const GQ = [
+  { n: 'Hạ Phẩm', c: '#9aa0a6', m: .85, x: 0, fx: .9 },
+  { n: 'Trung Phẩm', c: '#5fb878', m: 1, x: 0, fx: 1 },
+  { n: 'Thượng Phẩm', c: '#4a90e2', m: 1.15, x: 1, fx: 1.1 },
+  { n: 'Cực Phẩm', c: '#b06ce0', m: 1.32, x: 2, fx: 1.2 },
+  { n: 'Tuyệt Phẩm', c: '#ff9f1c', m: 1.55, x: 3, fx: 1.35 }
+];
+// Tỉ lệ (%) ra từng phẩm cấp theo nguồn rơi [Hạ, Trung, Thượng, Cực, Tuyệt]
+const GQW = {
+  normal: [40, 33, 18, 7, 2],   // combo, luyện tập, Tiên Phủ
+  trib: [0, 45, 35, 15, 5],     // độ kiếp, rương chuỗi < 21 ngày
+  boss: [0, 0, 65, 27, 8],      // mọi đồ rơi từ boss: chắc chắn Thượng Phẩm trở lên
+  kill: [0, 0, 0, 75, 25]       // thưởng kết liễu boss phòng online
+};
+// Giá trị gốc của một dòng thuộc tính cộng thêm (nhân với hệ số phẩm và phẩm cấp)
+const GXS = { hp: 40, atk: 5, def: 4, crit: .8, spd: 1.5, hit: 2.5, luck: 1, expb: .6 };
+const gQOf = it => Math.max(1, Math.min(5, it.q || 2));
+const gQTag = it => { const g = GQ[gQOf(it) - 1]; return `<span style="color:${g.c};font-weight:700">${'★'.repeat(gQOf(it))} ${g.n}</span>`; };
+function gRollQ(src, rng, luck) {
+  const r = rng || Math.random, w = GQW[src] || GQW.normal, tot = w.reduce((a, b) => a + b, 0);
+  let x = r() * tot, q = 1;
+  for (let i = 0; i < 5; i++) { if (x < w[i]) { q = i + 1; break; } x -= w[i]; q = i + 1; }
+  if (luck && q < 5 && r() < luck) q++; // Phúc vận: có cơ hội lên thêm 1 phẩm cấp
+  return q;
+}
 const GFXSLOT = { weapon: ['burn', 'pierce', 'vamp'], treasure: ['pierce', 'burn', 'swift'], armor: ['guard', 'vamp'], pendant: ['guard', 'fortune'], ring: ['burn', 'fortune'], talisman: ['swift', 'fortune', 'guard'] };
 
 // ---------- tiện ích ----------
@@ -85,11 +112,12 @@ function gRng(seedStr) { // mulberry32 từ chuỗi
 }
 const gMult = lvl => 1 + .08 * lvl + (lvl >= 4 ? .05 : 0) + (lvl >= 10 ? .15 : 0);
 const gStatOf = (it, s) => gRoundStat(s, (it.st[s] || 0) * gMult(it.lvl));
-const gFxVal = it => { const f = GFX[it.fx]; if (!f) return 0; const v = f.base * (1 + (it.tier - 1) * .2) * (it.lvl >= 10 ? 1.5 : 1); return Math.round(v); };
-const gFxOn = it => it.fx && it.lvl >= 7;
+const gFxVal = it => { const f = GFX[it.fx]; if (!f) return 0; const v = f.base * (1 + (it.tier - 1) * .2) * (it.lvl >= 10 ? 1.5 : 1) * GQ[gQOf(it) - 1].fx; return Math.round(v); };
+const gFxLv = it => gQOf(it) >= 5 ? 4 : 7; // Tuyệt Phẩm mở hiệu ứng sớm từ +4
+const gFxOn = it => it.fx && it.lvl >= gFxLv(it);
 const gTierForRealm = ri => [1, 2, 3, 4, 5, 6, 6, 7, 8][Math.min(ri, 8)];
 const gCanUse = it => realmInfo(S.xp).ri >= GT[it.tier - 1].minRealm;
-const gSellPrice = it => Math.round(8 * GT[it.tier - 1].m * (1 + it.lvl * .5));
+const gSellPrice = it => Math.round(8 * GT[it.tier - 1].m * GQ[gQOf(it) - 1].m * (1 + it.lvl * .5));
 const gUpCost = it => ({ ls: Math.round(15 * GT[it.tier - 1].m * (it.lvl + 1)), cores: it.lvl + 1 });
 const gIconSrc = it => (window.GIMG || {})[it.slot === 'weapon' ? `w_${it.tier}_${it.kind}` : it.slot === 'treasure' ? `t_${it.kind}` : `s_${it.slot}`] || '';
 function gIconHTML(it, w) {
@@ -99,13 +127,22 @@ function gIconHTML(it, w) {
 const gName = it => `${esc(it.name)}${it.lvl ? ' +' + it.lvl : ''}`;
 
 // ---------- sinh trang bị ----------
-function gGen(slot, tier, rng) {
-  const r = rng || Math.random, kinds = GKINDS[slot], k = kinds[(r() * kinds.length) | 0], m = GT[tier - 1].m, st = {};
+function gGen(slot, tier, rng, q) {
+  const r = rng || Math.random, kinds = GKINDS[slot], k = kinds[(r() * kinds.length) | 0], st = {};
+  q = q || gRollQ('normal', r);
+  const g = GQ[q - 1], m = GT[tier - 1].m * g.m;
   Object.entries(GBASE[slot]).forEach(([s, b]) => { st[s] = gRoundStat(s, b * m * (.8 + r() * .4)); });
   if (k.x) Object.entries(k.x).forEach(([s, b]) => { st[s] = gRoundStat(s, (st[s] || 0) + b * m * (.8 + r() * .4)); });
+  // phẩm cấp cao: thêm dòng thuộc tính mới (ưu tiên chỉ số món này chưa có)
+  const xs = [];
+  for (let n = 0; n < g.x; n++) {
+    const free = Object.keys(GXS).filter(s2 => !(s2 in st)), pool = free.length ? free : Object.keys(st).filter(s2 => !xs.includes(s2));
+    if (!pool.length) break;
+    const s2 = pool[(r() * pool.length) | 0]; st[s2] = gRoundStat(s2, (st[s2] || 0) + GXS[s2] * m * (.8 + r() * .4)); xs.push(s2);
+  }
   const fxl = GFXSLOT[slot], fx = fxl[(r() * fxl.length) | 0];
   const name = `${GT[tier - 1].pref} ${k.n}·${GEPI[(r() * GEPI.length) | 0]}`;
-  return { uid: 'g' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36), slot, kind: k.id, tier, name, st, lvl: 0, fx };
+  return { uid: 'g' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36), slot, kind: k.id, tier, q, xs, name, st, lvl: 0, fx };
 }
 // Phẩm chất đồ rơi theo NGUỒN:
 //  - combo / luyện tập: chỉ ra đúng phẩm của cảnh giới hiện tại (T) hoặc thấp hơn 1 bậc (T-1), KHÔNG bao giờ cao hơn.
@@ -116,6 +153,7 @@ function gGen(slot, tier, rng) {
 function gRollTier(src, arg) {
   const ri = realmInfo(S.xp).ri, T = gTierForRealm(ri), luck = (gStats().fx.fortune || 0) / 100, r = Math.random();
   let t = T;
+  if (src === 'kill') src = 'boss', arg = 1;
   if (src === 'combo') { const pT = Math.min(.95, .6 + .1 * (arg || 0) + luck); t = r < pT ? T : T - 1; }
   else if (src === 'boss') {
     if (arg <= .5) t = r < .75 + luck ? T : T - 1;
@@ -126,13 +164,16 @@ function gRollTier(src, arg) {
   else if (src === 'streak') t = T + (arg >= 21 ? 2 : arg >= 7 ? 1 : 0);
   return Math.max(1, Math.min(8, t));
 }
+// phẩm cấp theo nguồn: boss (quái tuần, tháp, phòng online) luôn từ Thượng Phẩm; kết liễu boss phòng từ Cực Phẩm
+function gQSrc(src, arg) { return src === 'kill' ? 'kill' : src === 'boss' || src === 'coop' ? 'boss' : src === 'trib' ? 'trib' : src === 'streak' ? (arg >= 21 ? 'boss' : 'trib') : 'normal'; }
 function gDrop(src, arg) {
-  const slot = Math.random() < .25 ? 'weapon' : pick(GSLOTS), it = gGen(slot, gRollTier(src || 'combo', arg || 0));
+  const luck = (gStats().fx.fortune || 0) / 100;
+  const slot = Math.random() < .25 ? 'weapon' : pick(GSLOTS), it = gGen(slot, gRollTier(src || 'combo', arg || 0), null, gRollQ(gQSrc(src, arg), null, luck));
   it.isNew = true; it.src = src || 'combo';
   if (S.bag.length >= GCFG.bagMax) { const p = gSellPrice(it); S.ls += p; it.autoSold = p; }
   else S.bag.push(it);
   return it;
-}const gDropHTML = it => `<div style="margin-top:8px;padding:8px;border-radius:10px;border:2px solid ${GT[it.tier - 1].c};text-align:left;display:flex;gap:10px;align-items:center">${gIconHTML(it, 60)}<span><b>🎁 Rơi trang bị!</b><br><span style="color:${GT[it.tier - 1].c};font-weight:700">${GT[it.tier - 1].n}</span> · ${esc(it.name)}${it.autoSold ? '<br><span class="mut">Hành trang đầy, tự bán +' + it.autoSold + ' 💎</span>' : ''}</span></div>`;
+}const gDropHTML = it => `<div style="margin-top:8px;padding:8px;border-radius:10px;border:2px solid ${GT[it.tier - 1].c};text-align:left;display:flex;gap:10px;align-items:center">${gIconHTML(it, 60)}<span><b>🎁 Rơi trang bị!</b><br><span style="color:${GT[it.tier - 1].c};font-weight:700">${GT[it.tier - 1].n}</span> · ${gQTag(it)}<br>${esc(it.name)}${it.autoSold ? '<br><span class="mut">Hành trang đầy, tự bán +' + it.autoSold + ' 💎</span>' : ''}</span></div>`;
 // gọi mỗi khi có câu trả lời (trắc nghiệm, gõ pinyin, bài học, đánh quái)
 function rpgOnAnswer(right) {
   if (!right) { S.combo = 0; save(); header(); return null; }
@@ -141,7 +182,7 @@ function rpgOnAnswer(right) {
   if (S.combo % GCFG.comboDrop === 0) {
     const d = today();
     if (S.dropsDay !== d) { S.dropsDay = d; S.dropsToday = 0; }
-    if (S.dropsToday < GCFG.dropsPerDay) { S.dropsToday++; drop = gDrop('combo', Math.min(3, S.combo / GCFG.comboDrop - 1)); toast('🎁 Combo ' + S.combo + '! Rơi ' + GT[drop.tier - 1].n + ': ' + drop.name); }
+    if (S.dropsToday < GCFG.dropsPerDay) { S.dropsToday++; drop = gDrop('combo', Math.min(3, S.combo / GCFG.comboDrop - 1)); toast('🎁 Combo ' + S.combo + '! Rơi ' + GT[drop.tier - 1].n + ' ' + GQ[gQOf(drop) - 1].n + ': ' + drop.name); }
     else toast('⚡ Combo ' + S.combo + ' nhưng hôm nay đã nhặt đủ ' + GCFG.dropsPerDay + ' món rơi.');
   }
   save(); header();
@@ -179,7 +220,7 @@ function rpgInit() {
   }
   if (!S.rpgStarter) { // bộ đồ khởi đầu
     S.rpgStarter = true;
-    const w = gGen('weapon', 1), a = gGen('armor', 1);
+    const w = gGen('weapon', 1, null, 2), a = gGen('armor', 1, null, 2);
     w.name = 'Phàm Thiết Kiếm·Sơ Nhập'; w.kind = 'kiem'; a.name = 'Phàm Y·Sơ Nhập';
     S.bag.push(w, a); S.eq.weapon = w.uid; S.eq.armor = a.uid;
   }
@@ -635,12 +676,15 @@ let gFilter = 'all';
 function gItemRow(it, shop) {
   const t = GT[it.tier - 1], eqd = S.eq[it.slot] === it.uid, cur = S.bag.find(i => i.uid === S.eq[it.slot]);
   const delta = cur && cur.uid !== it.uid ? gCPslot(it) - gCPslot(cur) : null;
-  const chips = Object.keys(it.st).map(s => `<span class="chip" style="font-size:12px;padding:2px 7px">${GSTATN[s]} +${gStatOf(it, s)}</span>`).join(' ');
-  const fx = it.fx ? `<div class="mut" style="font-size:12px">${it.lvl >= 7 ? '✨' : '🔒 (+7)'} ${GFX[it.fx].n}: ${GFX[it.fx].d(gFxVal(it))}</div>` : '';
+  const xs = it.xs || [], gq = GQ[gQOf(it) - 1];
+  const chips = Object.keys(it.st).map(s => xs.includes(s)
+    ? `<span class="chip" style="font-size:12px;padding:2px 7px;border-color:${gq.c};color:${gq.c}" title="Thuộc tính thêm của ${gq.n}">✦ ${GSTATN[s]} +${gStatOf(it, s)}</span>`
+    : `<span class="chip" style="font-size:12px;padding:2px 7px">${GSTATN[s]} +${gStatOf(it, s)}</span>`).join(' ');
+  const fx = it.fx ? `<div class="mut" style="font-size:12px">${it.lvl >= gFxLv(it) ? '✨' : '🔒 (+' + gFxLv(it) + ')'} ${GFX[it.fx].n}: ${GFX[it.fx].d(gFxVal(it))}</div>` : '';
   const can = gCanUse(it), up = gUpCost(it);
   return `<div class="item" style="align-items:flex-start;${eqd ? 'border-color:var(--ac2)' : ''}">${gIconHTML(it)}
     <div class="nm"><b style="color:${t.c}">${gName(it)}</b>${it.isNew ? ' <span class="ok-t">MỚI</span>' : ''}${eqd ? ' <span class="ok-t">• đang mặc</span>' : ''}
-    <small>${t.n} · ${GSLOTN[it.slot]} · yêu cầu ${REALMS[t.minRealm].h} ${REALMS[t.minRealm].n}${can ? '' : ' <span class="bad-t">(chưa đủ cảnh giới)</span>'}</small>
+    <small>${t.n} · ${gQTag(it)} · ${GSLOTN[it.slot]} · yêu cầu ${REALMS[t.minRealm].h} ${REALMS[t.minRealm].n}${can ? '' : ' <span class="bad-t">(chưa đủ cảnh giới)</span>'}</small>
     <div style="margin:4px 0">${chips}</div>${fx}${delta != null ? `<div class="${delta >= 0 ? 'ok-t' : 'bad-t'}" style="font-size:12px">${delta >= 0 ? '▲' : '▼'} ${Math.abs(delta)} CP so với đồ đang mặc</div>` : ''}
     <div class="row" style="margin-top:6px">${shop
       ? `<button class="buy" data-buy="${shop.i}" ${shop.sold || S.ls < shop.price ? 'disabled' : ''}>${shop.sold ? 'Đã mua' : 'Mua 💎' + shop.price}</button>`
@@ -650,10 +694,10 @@ function gItemRow(it, shop) {
 }
 function gCPslot(it) { const o = {}; Object.keys(it.st).forEach(s => o[s] = gStatOf(it, s)); return gCP({ hp: o.hp || 0, atk: o.atk || 0, def: o.def || 0, crit: o.crit || 0, spd: o.spd || 0, hit: 100 + (o.hit || 0), luck: 0, expb: 0 }); }
 function gGear() {
-  const items = S.bag.filter(i => gFilter === 'all' || i.slot === gFilter).sort((a, b) => b.tier - a.tier || b.lvl - a.lvl);
+  const items = S.bag.filter(i => gFilter === 'all' || i.slot === gFilter).sort((a, b) => b.tier - a.tier || gQOf(b) - gQOf(a) || b.lvl - a.lvl);
   view.innerHTML = gSubNav() + gStatsPanel() + `<div class="pills" id="gfl">${[['all', 'Tất cả']].concat(GSLOTS.map(s => [s, GSLOTN[s]])).map(([k, n]) => `<button data-fl="${k}" class="${gFilter === k ? 'on' : ''}">${n}</button>`).join('')}</div>
     <div class="mut" style="margin-bottom:6px">Hành trang ${S.bag.length}/${GCFG.bagMax} · 💎 ${S.ls} · Yêu Đan ${S.cores}</div>${items.map(i => gItemRow(i)).join('') || '<div class="card">Chưa có trang bị. Hãy trả lời đúng liên tiếp để nhặt đồ!</div>'}
-    <p class="mut" style="text-align:left">Cường hóa +0→+10 (mỗi cấp +8% chỉ số): +4 mở thêm 5%, +7 kích hoạt hiệu ứng đặc biệt, +10 thức tỉnh (+15% chỉ số, hiệu ứng x1.5). Trang bị cao hơn cảnh giới thì chưa mặc được.</p>`;
+    <p class="mut" style="text-align:left">Cường hóa +0→+10 (mỗi cấp +8% chỉ số): +4 mở thêm 5%, +7 kích hoạt hiệu ứng đặc biệt, +10 thức tỉnh (+15% chỉ số, hiệu ứng x1.5). Trang bị cao hơn cảnh giới thì chưa mặc được.<br>Phẩm cấp trong cùng phẩm: ${GQ.map((g, i) => `<span style="color:${g.c}">${g.n}</span> ×${g.m}${g.x ? ' +' + g.x + ' thuộc tính' : ''}`).join(' · ')}. Tuyệt Phẩm mở hiệu ứng từ +4. Đồ rơi từ boss luôn từ Thượng Phẩm trở lên.</p>`;
   S.bag.forEach(i => delete i.isNew); save();
   view.onclick = e => {
     const q = a => e.target.closest('[' + a + ']'); let b;
@@ -665,7 +709,7 @@ function gGear() {
       const it = S.bag.find(i => i.uid === b.dataset.up), c = gUpCost(it);
       if (S.ls < c.ls || S.cores < c.cores) return toast('Thiếu linh thạch hoặc Yêu Đan (đánh quái tuần để có Yêu Đan).');
       S.ls -= c.ls; S.cores -= c.cores; it.lvl++; save(); header();
-      toast(it.lvl === 10 ? '🌟 Thức tỉnh! ' + it.name : it.lvl === 7 ? '✨ Mở hiệu ứng đặc biệt: ' + GFX[it.fx].n : it.lvl === 4 ? '✨ Linh quang bộc phát +5%' : 'Cường hóa thành công +' + it.lvl);
+      toast(it.lvl === 10 ? '🌟 Thức tỉnh! ' + it.name : it.lvl === gFxLv(it) ? '✨ Mở hiệu ứng đặc biệt: ' + GFX[it.fx].n : it.lvl === 4 ? '✨ Linh quang bộc phát +5%' : 'Cường hóa thành công +' + it.lvl);
       return gGear();
     }
     if ((b = q('data-sell'))) { const it = S.bag.find(i => i.uid === b.dataset.sell); if (!confirm('Bán ' + it.name + ' với giá ' + gSellPrice(it) + ' 💎?')) return; S.ls += gSellPrice(it); S.bag = S.bag.filter(i => i.uid !== it.uid); save(); header(); return gGear(); }
@@ -675,7 +719,7 @@ function gGear() {
 function gStock() {
   const d = today(), T = gTierForRealm(realmInfo(S.xp).ri);
   if (S.shop.d !== d) S.shop = { d, sold: [] };
-  return GSLOTS.map((sl, i) => { const r = gRng(d + sl + 'x'), tier = Math.max(1, T - (r() < .45 ? 1 : 0)); const it = gGen(sl, tier, r); it.uid = 'shop-' + d + '-' + i; return { it, price: Math.round(45 * GT[tier - 1].m), i }; });
+  return GSLOTS.map((sl, i) => { const r = gRng(d + sl + 'x'), tier = Math.max(1, T - (r() < .45 ? 1 : 0)); const it = gGen(sl, tier, r); it.uid = 'shop-' + d + '-' + i; return { it, price: Math.round(45 * GT[tier - 1].m * GQ[gQOf(it) - 1].m ** 2), i }; });
 }
 function gStore() {
   const stock = gStock();
