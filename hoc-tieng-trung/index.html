@@ -82,6 +82,9 @@ td,th{padding:7px 4px;border-bottom:1px solid var(--bd);text-align:left}
 @media (prefers-reduced-motion:reduce){.aur,.peti,.bst>.bau{animation:none}}
 img[src*="chars/"]{background:radial-gradient(circle at 50% 42%,#5a5288 0%,#2a2640 70%,#1d1a2c 100%)}
 .ar img[src*="chars/"]{background:none}
+/* nhân vật trong trận boss: không khung, lật quay về phía boss (đặt cả ở đây để không phụ thuộc rpg.js bị cache) */
+#ar .ar-p .ar-i{border:0;box-shadow:none;border-radius:0;overflow:visible;background:none}
+#ar .ar-p .ar-i img{object-fit:contain;transform:scaleX(-1);background:none}
 @keyframes glow{0%,100%{box-shadow:0 0 10px 2px var(--gc)}50%{box-shadow:0 0 30px 9px var(--gc)}}
 .gi{display:inline-block;border-radius:10px;padding:2px;flex:none}
 .item{display:flex;align-items:center;gap:12px;border:1px solid var(--bd);background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:8px;text-align:left}
@@ -125,9 +128,9 @@ img[src*="chars/"]{background:radial-gradient(circle at 50% 42%,#5a5288 0%,#2a26
 <script src="audio-data.js"></script>
 <script src="avatars-data.js"></script>
 <script src="game-data.js"></script>
-<script src="rpg-data.js"></script>
-<script src="rpg.js"></script>
-<script src="ult-fx.js"></script>
+<script src="rpg-data.js?v=20261126c"></script>
+<script src="rpg.js?v=20261126c"></script>
+<script src="ult-fx.js?v=20261126c"></script>
 <script>
 // Báo lỗi dễ hiểu nếu các file đi kèm không tải được (ví dụ xem trước dạng data: trong khung trình duyệt của Claude)
 window.addEventListener("DOMContentLoaded", function () {
@@ -3140,10 +3143,10 @@ applyFreeze();
 render();
 if (S.refunded) { toast('Đã hoàn ' + S.refunded + ' 💎 cho đồ trang phục cũ, hãy dùng để mua nhân vật mới!'); S.refunded = 0; save(); }
 </script>
-<script src="features.js"></script>
+<script src="features.js?v=20261126c"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="cloud.js"></script>
+<script src="cloud.js?v=20261126c"></script>
 </body>
 </html>
