@@ -2636,7 +2636,7 @@ function realmInfo(xp) {
 function addXP(n) {
   if (typeof gExpBonus === 'function') n = Math.round(n * (1 + gExpBonus() / 100));
   const dd = today(); if (S.xpDay !== dd) { S.xpDay = dd; S.xpToday = 0; S.xpCapToast = false; }
-  const room = Math.max(0, GCFG.xpDayCap - (S.xpToday || 0));
+  const room = gXpRoom();
   if (n > room) { n = room; if (!S.xpCapToast) { S.xpCapToast = true; toast('⏳ Đã đạt giới hạn tu vi hôm nay (' + GCFG.xpDayCap + '). Quay lại ngày mai để tiếp tục tu luyện!'); } }
   S.xpToday = (S.xpToday || 0) + n;
   if (n <= 0) { save(); header(); return; }
@@ -2713,7 +2713,7 @@ function vHome() {
     <div style="width:64px;flex:none">${bustImg(64)}</div>
     <div style="flex:1"><b>${esc(S.hero.name)}</b> <span class="mut">· ${ri.h} ${ri.name}</span>
       <div class="bar g"><i style="width:${ri.into / ri.need * 100}%"></i></div>
-      <div class="mut">Tu vi ${ri.max ? 'tối đa' : ri.into + '/' + ri.need} · hôm nay ${S.xpDay === today() ? S.xpToday : 0}/${GCFG.xpDayCap} · 💎 ${S.ls}</div></div>
+      <div class="mut">Tu vi ${ri.max ? 'tối đa' : ri.into + '/' + ri.need} · hôm nay ${S.xpDay === today() ? S.xpToday : 0}${GCFG.xpDayLimit ? '/' + GCFG.xpDayCap : ''} · 💎 ${S.ls}</div></div>
   </div>
   <div class="stats">
     <div class="stat"><b>${streak()}</b>chuỗi ngày</div>
@@ -3074,7 +3074,7 @@ function vHeroChar() {
     <div class="mut">${esc(cm.name || '')} · ${esc(cm.kind || '')} · Hệ ${gElLabel(h.char || 'kiem')}</div>
     <div class="pin" style="font-size:20px;margin-top:6px">${ri.h} ${ri.name}</div>
     <div class="bar g"><i style="width:${ri.into / ri.need * 100}%"></i></div>
-    <div class="mut">Tu vi ${ri.max ? 'tối đa' : ri.into + ' / ' + ri.need} · hôm nay ${S.xpDay === today() ? S.xpToday : 0}/${GCFG.xpDayCap} · tổng ${S.xp} · 💎 ${S.ls} linh thạch · 🧿 ${S.freezes} Hộ Chuỗi Phù</div></div>
+    <div class="mut">Tu vi ${ri.max ? 'tối đa' : ri.into + ' / ' + ri.need} · hôm nay ${S.xpDay === today() ? S.xpToday : 0}${GCFG.xpDayLimit ? '/' + GCFG.xpDayCap : ''} · tổng ${S.xp} · 💎 ${S.ls} linh thạch · 🧿 ${S.freezes} Hộ Chuỗi Phù</div></div>
   <div class="card" style="text-align:left"><b>Đạo hiệu</b>
     <input id="nm" maxlength="16" value="${esc(h.name)}" placeholder="Đạo hiệu của bạn"></div>
   <h3 style="margin:14px 0 4px;text-align:left">🏮 Phường thị <span class="mut" style="font-size:14px">(💎 ${S.ls})</span></h3>

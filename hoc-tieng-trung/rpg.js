@@ -11,7 +11,8 @@ const GCFG = {
   // HP quái tuần theo cảnh giới của người chơi (Luyện Khí... Độ Kiếp). Quái luôn cùng cảnh giới với bạn.
   bossHp: [2000, 4800, 8400, 13000, 19000, 27000, 36000, 48000, 64000],
   timeBonus: 1,       // mỗi câu đúng khi đánh quái được cộng thêm bao nhiêu giây vào tổng thời gian
-  xpDayCap: 700,      // tu vi tối đa nhận được mỗi ngày (mọi nguồn)
+  xpDayCap: 700,      // tu vi chuẩn mỗi ngày, dùng để tính độ dài cảnh giới
+  xpDayLimit: false,  // true = chặn tu vi nhận mỗi ngày ở mức xpDayCap; false = không giới hạn
   daysPerRealm: 7,    // số ngày học đều tối thiểu để lên 1 cảnh giới (tu vi mỗi cảnh = xpDayCap x daysPerRealm)
   pillsPerDay: 3,     // số đan dược tối đa dùng mỗi ngày
   bagMax: 80,         // sức chứa hành trang
@@ -26,7 +27,7 @@ const GCFG = {
 };
 // Hệ số linh thạch theo cảnh giới (ri = 0..8): càng lên cao càng nhận nhiều để theo kịp giá đồ
 const LSM = [1, 1.4, 2, 2.6, 3.4, 4.4, 5.6, 7, 9];
-const gXpRoom = () => Math.max(0, GCFG.xpDayCap - (S.xpDay === today() ? (S.xpToday || 0) : 0));
+const gXpRoom = () => !GCFG.xpDayLimit ? Infinity : Math.max(0, GCFG.xpDayCap - (S.xpDay === today() ? (S.xpToday || 0) : 0));
 const lsGain = n => Math.max(1, Math.round(n * LSM[Math.min(realmInfo(S.xp).ri, 8)]));
 const GHSK_AVAIL = [1, 2, 3, 4, 5]; // các HSK đã có nội dung trong app
 function gPracOK() {
