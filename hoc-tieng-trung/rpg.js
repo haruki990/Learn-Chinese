@@ -430,9 +430,87 @@ function gBars() {
   if (hb) { hb.style.width = Math.max(0, W.hp / W.max * 100) + '%'; $('#gb-bt').textContent = Math.max(0, W.hp) + ' / ' + W.max; }
   if (pb) { pb.style.width = Math.max(0, GB.php / GB.pmax * 100) + '%'; $('#gb-pt').textContent = Math.max(0, Math.round(GB.php)) + ' / ' + GB.pmax; }
 }
+// ---------- sân đấu: quái góc trên trái, nhân vật góc trên phải, cử động đơn giản + hiệu ứng trúng đòn ----------
+const GAR_CSS = `
+.ar{position:relative;height:190px;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#1d2440 0%,#3b3560 55%,#5a4a5e 72%,#2d2633 73%,#211c27 100%)}
+.ar.quake{animation:arQuake .42s}
+.ar-u{position:absolute;top:10px;width:42%;max-width:190px;height:150px}
+.ar-b{left:10px}.ar-p{right:10px}
+.ar-i{width:100%;height:100%;border-radius:12px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.45)}
+.ar-i img{width:100%;height:100%;object-fit:cover;display:block}
+.ar-b .ar-i{animation:arBreath 2.6s ease-in-out infinite;border:2px solid #d0402f}
+.ar-p .ar-i{animation:arBob 2.1s ease-in-out infinite;border:2px solid var(--ac2,#e0b84f);object-position:top}
+.ar-p .ar-i img{object-position:50% 15%}
+.ar-sh{position:absolute;left:12%;right:12%;bottom:-14px;height:12px;border-radius:50%;background:rgba(0,0,0,.35);filter:blur(3px)}
+.ar-p.lunge{animation:arLungeL .45s ease-out}
+.ar-b.lunge{animation:arLungeR .45s ease-out}
+.ar-u.hit .ar-i{animation:arHit .45s}
+.ar-p.hit .ar-i::after,.ar-b.hit .ar-i::after{content:'';position:absolute;inset:0}
+.ar-u.hit{filter:drop-shadow(0 0 10px #ff3b30)}
+.ar-b.dodge{animation:arDodge .45s}
+.ar-n{position:absolute;font-weight:800;font-size:22px;color:#fff;text-shadow:0 2px 0 #000,0 0 8px rgba(0,0,0,.7);pointer-events:none;animation:arFloat .95s ease-out forwards;white-space:nowrap;text-align:center;line-height:1.05;z-index:3}
+.ar-n.bad{color:#ff5a4f}.ar-n.crit{font-size:30px;color:#ffd23f}.ar-n.info{font-size:17px;color:#cfe3ff}
+.ar-sl{position:absolute;width:120px;height:8px;border-radius:8px;background:linear-gradient(90deg,transparent,#fff,#ffe27a,transparent);box-shadow:0 0 12px #ffe27a;transform:rotate(-35deg) scaleX(0);animation:arSlash .35s ease-out forwards;z-index:2}
+.ar-cl{position:absolute;width:12px;height:110px;border-radius:10px;background:linear-gradient(180deg,transparent,#ff2d2d,#8b0000,transparent);box-shadow:0 0 14px #ff2d2d;transform:skewX(-22deg) scaleY(0);transform-origin:top;animation:arClaw .38s ease-out forwards;z-index:2}
+.ar-shield{position:absolute;border-radius:50%;border:3px solid #9fd8ff;background:radial-gradient(rgba(159,216,255,.05),rgba(159,216,255,.35));box-shadow:0 0 18px #9fd8ff;animation:arShield .6s ease-out forwards;z-index:2}
+.ar-vig{position:fixed;inset:0;pointer-events:none;z-index:9998;box-shadow:inset 0 0 120px 40px rgba(220,20,20,.75);animation:arVig .55s ease-out forwards}
+.bar.flash i{animation:arBarFlash .5s}
+@keyframes arBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes arBreath{0%,100%{transform:scale(1) translateY(0)}50%{transform:scale(1.04) translateY(-4px)}}
+@keyframes arLungeL{0%{transform:none}35%{transform:translateX(-55%) scale(1.06)}60%{transform:translateX(-50%)}100%{transform:none}}
+@keyframes arLungeR{0%{transform:none}35%{transform:translateX(55%) scale(1.08)}60%{transform:translateX(50%)}100%{transform:none}}
+@keyframes arHit{0%,100%{transform:none;filter:none}15%{transform:translateX(-8px) rotate(-3deg);filter:brightness(2.2) saturate(0)}35%{transform:translateX(7px) rotate(2deg);filter:brightness(1.4) sepia(1) hue-rotate(-50deg) saturate(5)}55%{transform:translateX(-5px)}75%{transform:translateX(3px)}}
+@keyframes arDodge{0%,100%{transform:none}40%{transform:translateX(-22px) translateY(-6px) rotate(-6deg);opacity:.6}}
+@keyframes arFloat{0%{transform:translate(-50%,0) scale(.6);opacity:0}15%{transform:translate(-50%,-10px) scale(1.15);opacity:1}100%{transform:translate(-50%,-62px) scale(1);opacity:0}}
+@keyframes arSlash{0%{transform:rotate(-35deg) scaleX(0);opacity:1}60%{transform:rotate(-35deg) scaleX(1.1);opacity:1}100%{transform:rotate(-35deg) scaleX(1.2);opacity:0}}
+@keyframes arClaw{0%{transform:skewX(-22deg) scaleY(0);opacity:1}55%{transform:skewX(-22deg) scaleY(1);opacity:1}100%{transform:skewX(-22deg) scaleY(1);opacity:0}}
+@keyframes arShield{0%{transform:scale(.4);opacity:0}30%{transform:scale(1.05);opacity:1}100%{transform:scale(1.15);opacity:0}}
+@keyframes arVig{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+@keyframes arQuake{0%,100%{transform:none}20%{transform:translate(-6px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-4px,2px)}80%{transform:translate(3px,-1px)}}
+@keyframes arBarFlash{0%,100%{filter:none}30%{filter:brightness(2.5)}}
+@media (prefers-reduced-motion:reduce){.ar-b .ar-i,.ar-p .ar-i{animation:none}.ar.quake{animation:none}}`;
+function gArenaHTML(bossSrc, charId) {
+  if (!document.getElementById('gar-css')) { const s = document.createElement('style'); s.id = 'gar-css'; s.textContent = GAR_CSS; document.head.appendChild(s); }
+  return `<div class="ar" id="ar"><div class="ar-u ar-b" id="ar-b"><div class="ar-sh"></div><div class="ar-i"><img src="${bossSrc}" alt=""></div></div>
+    <div class="ar-u ar-p" id="ar-p"><div class="ar-sh"></div><div class="ar-i"><img src="${charImg(charId || 'kiem', 'card')}" alt=""></div></div></div>`;
+}
+const gArReplay = (el, cls) => { if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); clearTimeout(el['_t' + cls]); el['_t' + cls] = setTimeout(() => el.classList.remove(cls), 600); };
+function gArSpawn(html, x, y, ms) { // x, y: % trong sân đấu
+  const ar = document.getElementById('ar'); if (!ar) return;
+  const d = document.createElement('div'); d.innerHTML = html; const e = d.firstChild;
+  e.style.left = x + '%'; e.style.top = y + '%'; ar.appendChild(e); setTimeout(() => e.remove(), ms || 1000);
+}
+// kind: 'atk' (mình đánh trúng), 'miss' (mình đánh trượt), 'hurt' (quái gây sát thương khi trả lời sai), 'block' (đỡ được), 'dot' (độc)
+function gArenaFx(kind, o) {
+  o = o || {}; const ar = document.getElementById('ar'); if (!ar) return;
+  const P = document.getElementById('ar-p'), B = document.getElementById('ar-b');
+  if (kind === 'atk') {
+    gArReplay(P, 'lunge');
+    setTimeout(() => {
+      gArReplay(B, 'hit');
+      gArSpawn('<div class="ar-sl"></div>', 6, 38, 400); if (o.crit) { gArSpawn('<div class="ar-sl" style="transform:rotate(30deg)"></div>', 8, 30, 400); gArReplay(ar, 'quake'); }
+      gArSpawn(`<div class="ar-n ${o.crit ? 'crit' : ''}">${o.crit ? '<small style="font-size:15px">CHÍ MẠNG</small><br>' : ''}-${o.dmg}</div>`, 25, 20);
+    }, 160);
+  } else if (kind === 'miss') {
+    gArReplay(P, 'lunge'); setTimeout(() => { gArReplay(B, 'dodge'); gArSpawn('<div class="ar-n info">Trượt!</div>', 24, 22); }, 160);
+  } else if (kind === 'hurt' || kind === 'block') {
+    gArReplay(B, 'lunge');
+    setTimeout(() => {
+      if (kind === 'block') { gArSpawn('<div class="ar-shield" style="width:150px;height:150px;margin-left:-75px"></div>', 76, 4, 650); gArSpawn(`<div class="ar-n info">${esc(o.txt || 'Đỡ đòn!')}</div>`, 76, 24); return; }
+      gArReplay(P, 'hit'); gArReplay(ar, 'quake');
+      [0, 1, 2].forEach(i => setTimeout(() => gArSpawn('<div class="ar-cl"></div>', 66 + i * 7, 10 + i * 3, 450), i * 60));
+      gArSpawn(`<div class="ar-n bad ${o.crit ? 'crit' : ''}" ${o.crit ? 'style="color:#ff3b30"' : ''}>${o.crit ? '<small style="font-size:15px">CHÍ MẠNG</small><br>' : ''}-${o.dmg} HP</div>`, 75, 20);
+      const v = document.createElement('div'); v.className = 'ar-vig'; document.body.appendChild(v); setTimeout(() => v.remove(), 600);
+      document.querySelectorAll('#gb-ph,#cp-ph').forEach(i => gArReplay(i.parentElement, 'flash'));
+      try { if (navigator.vibrate) navigator.vibrate(o.crit ? [60, 40, 90] : 70); } catch (e) {}
+    }, 170);
+  } else if (kind === 'dot') {
+    gArReplay(P, 'hit'); gArSpawn(`<div class="ar-n bad" style="color:#7dff6a">☠ -${o.dmg}</div>`, 76, 24);
+  }
+}
 function gDrawBattle() {
   const W = S.week, bs = GBOSS[W.boss];
-  view.innerHTML = `<div class="card" style="padding:10px"><img src="${GIMG['m_' + bs.id + '_art']}" alt="" style="width:100%;max-width:300px;border-radius:12px;display:block;margin:auto">
+  view.innerHTML = `<div class="card" style="padding:10px">${gArenaHTML(GIMG['m_' + bs.id + '_art'], S.hero.char)}
     <div style="text-align:left;margin-top:6px"><b>${esc(bs.n)}</b> ${bs.h} <span class="mut">· ${esc(bs.el)}</span>
     <div class="bar" style="height:14px"><i id="gb-bh" style="width:100%;background:#d0402f"></i></div><div class="mut" id="gb-bt"></div>
     <div class="mut">${esc(bs.abn)}</div><div class="${GB.mu.cls}" style="font-size:13px">${gElChips(GB.mu.els)} vs ${gElLabel(S.hero.char || 'kiem')}: ${GB.mu.txt}</div></div></div>
@@ -444,7 +522,7 @@ function gDrawBattle() {
 }
 function gNextQ() {
   if (!GB || GB.over) return;
-  if (GB.poison > 0) { const pd = GB.poison * Math.max(2, Math.round(S.week.atk * .05)); GB.php -= pd; gBars(); if (GB.php <= 0) return gEndBattle('dead'); }
+  if (GB.poison > 0) { const pd = GB.poison * Math.max(2, Math.round(S.week.atk * .05)); GB.php -= pd; gBars(); gArenaFx('dot', { dmg: pd }); if (GB.php <= 0) return gEndBattle('dead'); }
   const q = GB.q = gQuestion(); GB.locked = false;
   $('#gb-q').innerHTML = `${q.stem}<div id="gb-o">${q.opts.map((o, i) => `<button class="opt" data-i="${i}"><span class="kn">${i + 1}</span>${o.label}</button>`).join('')}</div>`;
   $('#gb-cb').textContent = GB.combo ? 'Liên kích x' + GB.combo : '';
@@ -464,7 +542,7 @@ function gAnswer(i) {
   if (right) {
     GB.correct++; GB.combo++; GB.endAt += GCFG.timeBonus * 1000; GB.total += GCFG.timeBonus;
     let h = gHit(), total = 0;
-    if (h.miss) log = '💨 Đòn đánh trượt!';
+    if (h.miss) { log = '💨 Đòn đánh trượt!'; gArenaFx('miss'); }
     else {
       total = h.dmg; log = `⚔️ ${h.crit ? 'CHÍ MẠNG ' : ''}${h.dmg} sát thương${GB.mu.net > 0 ? ' (khắc chế ×' + GB.mu.dmg + ')' : GB.mu.net < 0 ? ' (bị kháng ×' + GB.mu.dmg + ')' : ''}${h.charmed ? ' (bị mê hoặc)' : ''}`;
       if (Math.random() < Math.min(.3, GB.st.spd / 300)) { const h2 = gHit(); if (!h2.miss) { total += h2.dmg; log += ` + liên kích ${h2.dmg}`; } }
@@ -474,6 +552,7 @@ function gAnswer(i) {
       const uh = gHit(), ud = Math.round((uh.miss ? Math.max(1, GB.st.atk * GB.mu.dmg - W.def * .5) : uh.dmg) * GULT_MULT * (window.fxUltMul ? fxUltMul() : 1)), ue = gUltEl();
       total += ud; ult = ue; log = `🌟 <b>Chiêu cuối ${GULT[ue].h} ${esc(GULT[ue].n)}</b>: ${ud} sát thương<br>` + log;
     }
+    if (total && !ult) gArenaFx('atk', { dmg: total, crit: h.crit });
     if (total) {
       W.hp = Math.max(0, W.hp - total); W.dmg += total; GB.dmg += total;
       if (GB.st.fx.vamp) { const hl = Math.round(total * GB.st.fx.vamp / 100); GB.php = Math.min(GB.pmax, GB.php + hl); if (hl) log += ` · hồi ${hl} HP`; }
@@ -483,7 +562,7 @@ function gAnswer(i) {
     GB.wrong++;
     const sv = window.fxOnWrong ? fxOnWrong(GB) : null; // băng giáp / né đòn của nhân vật gacha
     if (!sv || !sv.keepCombo) GB.combo = 0;
-    if (sv) log = sv.log; else { const b = gBossHit(); GB.php -= b.dmg; log = `💥 ${bs.n} phản công${b.crit ? ' CHÍ MẠNG' : ''}: -${b.dmg} HP`; }
+    if (sv) { log = sv.log; gArenaFx('block'); } else { const b = gBossHit(); GB.php -= b.dmg; gArenaFx('hurt', { dmg: b.dmg, crit: b.crit }); log = `💥 ${bs.n} phản công${b.crit ? ' CHÍ MẠNG' : ''}: -${b.dmg} HP`; }
     if (bs.ab === 'heal') { const hl = Math.round(W.max * .04); W.hp = Math.min(W.max, W.hp + hl); log += ` · quái hồi ${hl}`; }
     if (bs.ab === 'time') { GB.endAt -= 4000; log += ' · -4 giây'; }
     if (bs.ab === 'poison') { GB.poison = Math.min(5, GB.poison + 1); log += ` · trúng độc x${GB.poison}`; }

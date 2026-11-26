@@ -366,7 +366,7 @@ function cpStartFight(st) {
   CP.B = { round: st.round, boss: st.boss, ri: st.ri, atk: bsS.atk, def: bsS.def, st: stt, pmax: stt.hp, php: stt.hp, combo: 0, dmg: 0, correct: 0, wrong: 0, over: false,
     mdmg: net >= 2 ? 1.75 : net === 1 ? 1.5 : net === 0 ? 1 : .8, mtaken: net > 0 ? .85 : net === 0 ? 1 : 1.25, endAt: st.endsAtLocal, total: CP_CFG.sec };
   const B = CP.B;
-  view.innerHTML = `<div class="card" style="padding:10px"><img src="${GIMG['m_' + bs.id + '_art']}" alt="" style="width:100%;max-width:260px;border-radius:12px;display:block;margin:auto">
+  view.innerHTML = `<div class="card" style="padding:10px">${gArenaHTML(GIMG['m_' + bs.id + '_art'], S.hero.char)}
     <div style="text-align:left;margin-top:6px"><b>${esc(bs.n)}</b> ${bs.h} <span class="mut">· ${esc(bs.el)} · cảnh giới ${REALMS[st.ri].n}</span>
     <div class="bar" style="height:14px"><i id="cp-bh" style="width:100%;background:#d0402f"></i></div><div class="mut" id="cp-bt"></div><div class="mut" id="cp-ps" style="font-size:12px"></div></div></div>
     <div class="card" style="padding:10px;text-align:left"><div style="display:flex;align-items:center;gap:10px">${bustImg(44)}<div style="flex:1"><b>${esc(S.hero.name)}</b> <span class="mut" id="cp-cb"></span>
@@ -423,6 +423,7 @@ async function cpAnswer(i) {
   if (right) {
     B.correct++; B.combo++;
     total = cpHit(B); log = total ? `⚔️ ${total} sát thương` : '💨 Trượt!';
+    if (B.combo % fxUltCombo() !== 0) gArenaFx(total ? 'atk' : 'miss', { dmg: total });
     const c = fxCur(); if (c && c.fx === 'heal') { const h = Math.round(B.pmax * c.v / 100); B.php = Math.min(B.pmax, B.php + h); log += ` · 💚 +${h} HP`; }
     if (B.combo % fxUltCombo() === 0) { const ud = Math.max(1, cpHit(B, GULT_MULT * fxUltMul())); total += ud; ult = gUltEl(); log = `🌟 <b>Chiêu cuối</b>: ${ud} sát thương<br>` + log; }
     if (total && B.st.fx.vamp) B.php = Math.min(B.pmax, B.php + Math.round(total * B.st.fx.vamp / 100));
@@ -432,8 +433,8 @@ async function cpAnswer(i) {
     B.wrong++;
     const sv = fxOnWrong(B);
     if (!sv || !sv.keepCombo) B.combo = 0;
-    if (sv) log = sv.log;
-    else { const d = Math.round(Math.max(1, B.atk * (.9 + Math.random() * .2) * B.mtaken - B.st.def * .5) * (1 - (B.st.fx.guard || 0) / 100)); B.php -= d; log = `💥 Boss phản công: -${d} HP`; }
+    if (sv) { log = sv.log; gArenaFx('block'); }
+    else { const d = Math.round(Math.max(1, B.atk * (.9 + Math.random() * .2) * B.mtaken - B.st.def * .5) * (1 - (B.st.fx.guard || 0) / 100)); B.php -= d; log = `💥 Boss phản công: -${d} HP`; gArenaFx('hurt', { dmg: d }); }
   }
   cpUpdate(CP.st);
   $('#cp-log').innerHTML = `${log}<div class="mut" style="margin-top:4px">${q.expl}</div>`;
