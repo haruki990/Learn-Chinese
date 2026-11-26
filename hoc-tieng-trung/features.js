@@ -354,6 +354,7 @@ function cpLobby(st) {
   const sig = JSON.stringify([st.players, st.result, st.phase]); if (CP.sig === sig && $('#cp-start')) return; CP.sig = sig;
   const ps = st.players.slice().sort((a, b) => b.xp - a.xp), top = ps[0];
   const ri = top ? top.ri : 0, last = st.result;
+  if (GBOSS[st.boss]) gPreloadBg(GBOSS[st.boss]);
   view.innerHTML = `<div class="card" style="text-align:left"><b>👥 Phòng "${esc(CP.room)}"</b> <span class="mut">· ${ps.length} người</span>
     ${ps.map(p => `<div class="realm"><img src="${charImg(p.char, 'bust')}" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:cover"><span style="flex:1">${esc(p.name)}${p.pid === CP.pid ? ' (bạn)' : ''}</span><span class="mut">${REALMS[p.ri] ? REALMS[p.ri].n : ''} · ${p.xp} tu vi</span></div>`).join('')}
     <p class="mut">Boss sẽ theo cảnh giới <b>${REALMS[ri].n}</b> (người tu vi cao nhất: ${top ? esc(top.name) : '-'}). Máu boss ×${(1 + .6 * Math.max(0, ps.length - 1)).toFixed(1)} theo số người.</p>
@@ -368,12 +369,12 @@ function cpStartFight(st) {
   CP.B = { round: st.round, boss: st.boss, ri: st.ri, atk: bsS.atk, def: bsS.def, st: stt, pmax: stt.hp, php: stt.hp, combo: 0, dmg: 0, correct: 0, wrong: 0, over: false,
     mdmg: net >= 2 ? 1.75 : net === 1 ? 1.5 : net === 0 ? 1 : .8, mtaken: net > 0 ? .85 : net === 0 ? 1 : 1.25, endAt: st.endsAtLocal, total: CP_CFG.sec };
   const B = CP.B;
-  view.innerHTML = `<div class="card" style="padding:10px">${gArenaHTML(GIMG['m_' + bs.id + '_art'], S.hero.char)}
+  view.innerHTML = gScene(bs, `<div class="card" style="padding:10px">${gArenaHTML(GIMG['m_' + bs.id + '_art'], S.hero.char)}
     <div style="text-align:left;margin-top:6px"><b>${esc(bs.n)}</b> ${bs.h} <span class="mut">· ${esc(bs.el)} · cảnh giới ${REALMS[st.ri].n}</span>
     <div class="bar" style="height:14px"><i id="cp-bh" style="width:100%;background:#d0402f"></i></div><div class="mut" id="cp-bt"></div><div class="mut" id="cp-ps" style="font-size:12px"></div></div></div>
     <div class="card" style="padding:10px;text-align:left"><div style="display:flex;align-items:center;gap:10px">${bustImg(44)}<div style="flex:1"><b>${esc(S.hero.name)}</b> <span class="mut" id="cp-cb"></span>
     <div class="bar"><i id="cp-ph" style="width:100%"></i></div><div class="mut" id="cp-pt"></div></div><b id="cp-tm" style="font-size:22px"></b></div></div>
-    <div class="card" id="cp-q"></div><div id="cp-log" class="mut" style="min-height:44px;text-align:center">Phím 1–4 chọn đáp án · Enter sang câu tiếp</div>`;
+    <div class="card" id="cp-q"></div><div id="cp-log" class="mut" style="min-height:44px;text-align:center">Phím 1–4 chọn đáp án · Enter sang câu tiếp</div>`);
   clearInterval(CP.tm); CP.tm = setInterval(() => { const el = $('#cp-tm'); if (el && CP && CP.B && !CP.B.over) el.textContent = B.pauseAt ? '⏸' : Math.max(0, Math.ceil((CP.st.endsAtLocal - Date.now()) / 1000)) + 's'; }, 250);
   cpUpdate(st); cpNextQ();
 }

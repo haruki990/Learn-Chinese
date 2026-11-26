@@ -496,7 +496,24 @@ const GAR_CSS = `
 @keyframes arVig{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
 @keyframes arQuake{0%,100%{transform:none}20%{transform:translate(-6px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-4px,2px)}80%{transform:translate(3px,-1px)}}
 @keyframes arBarFlash{0%,100%{filter:none}30%{filter:brightness(2.5)}}
-@media (prefers-reduced-motion:reduce){.ar-b .ar-i,.ar-p .ar-i{animation:none}.ar.quake{animation:none}}`;
+@media (prefers-reduced-motion:reduce){.ar-b .ar-i,.ar-p .ar-i{animation:none}.ar.quake{animation:none}}
+.gbs{position:relative;isolation:isolate;margin:0 -6px 10px;padding:8px 8px 4px;border-radius:16px;overflow:hidden;background:var(--gbc,#0d0c12);color-scheme:dark;
+  --card:rgba(12,11,18,.72);--tx:#f1efe8;--mut:#bdbab0;--bd:rgba(255,255,255,.16);--ac:#e8705f;--ac2:#6cc29a;--bad:#f2867d;--gold:#e9b44c;color:var(--tx)}
+.gbs::before{content:'';position:absolute;left:0;right:0;top:0;aspect-ratio:16/9;min-height:250px;z-index:-1;background:var(--gbg) 50% 0/cover no-repeat;
+  -webkit-mask-image:linear-gradient(#000 62%,transparent);mask-image:linear-gradient(#000 62%,transparent)}
+.gbs .card{background:var(--card);border-color:var(--bd);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.gbs>.card:first-child{background:transparent;border:0;padding:0!important;-webkit-backdrop-filter:none;backdrop-filter:none}
+.gbs .ar{background:transparent;width:100%;height:auto;aspect-ratio:2.4/1;min-height:190px;max-height:270px}
+@media (max-width:520px){.gbs .ar-u{width:36%;height:132px;top:14px}}
+.gbs .ar+div{background:rgba(10,9,14,.62);border-radius:10px;padding:6px 10px;margin-top:2px!important;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.gbs .opt{background:rgba(255,255,255,.07)}
+.gbs>.mut:last-child{color:#d6d3ca;text-shadow:0 1px 2px #000}`;
+// nền sân đấu theo từng boss: bg/<id>.webp (16:9, trên: quái trái / người phải, nửa dưới tối cho câu hỏi). GBGC: màu đáy ảnh để nối liền phần dưới
+const GBGC = { thaothiet: '#120d1d', cungky: '#190c0d', daongot: '#23110d', hondon: '#190d12', cuuviho: '#211b23', bachtrach: '#2c282f', phuchu: '#0e2532', chuyem: '#241114',
+  tuonglieu: '#171425', quynguu: '#121f2e', biphuong: '#142837', anhchieu: '#27242c', unglong: '#181e2d', chuclong: '#1e1319', thanhlong: '#121f21', phuonghoang: '#1e1e2a' };
+const gBgSrc = bs => 'bg/' + bs.id + '.webp';
+const gScene = (bs, inner) => `<div class="gbs" style="--gbg:url('${gBgSrc(bs)}');--gbc:${GBGC[bs.id] || '#0d0c12'}">${inner}</div>`;
+function gPreloadBg(bs) { if (bs && !gPreloadBg[bs.id]) { gPreloadBg[bs.id] = new Image(); gPreloadBg[bs.id].src = gBgSrc(bs); } }
 function gArenaHTML(bossSrc, charId) {
   if (!document.getElementById('gar-css')) { const s = document.createElement('style'); s.id = 'gar-css'; s.textContent = GAR_CSS; document.head.appendChild(s); }
   return `<div class="ar" id="ar"><div class="ar-u ar-b" id="ar-b"><div class="ar-sh"></div><div class="ar-i"><img src="${bossSrc}" alt=""></div></div>
@@ -538,14 +555,14 @@ function gArenaFx(kind, o) {
 }
 function gDrawBattle() {
   const W = gW(), bs = GBOSS[W.boss];
-  view.innerHTML = `<div class="card" style="padding:10px">${gArenaHTML(GIMG['m_' + bs.id + '_art'], S.hero.char)}
+  view.innerHTML = gScene(bs, `<div class="card" style="padding:10px">${gArenaHTML(GIMG['m_' + bs.id + '_art'], S.hero.char)}
     <div style="text-align:left;margin-top:6px"><b>${esc(bs.n)}</b> ${bs.h} <span class="mut">· ${esc(bs.el)} · ${REALMS[W.ri].n}</span>${W.x ? ` <span class="bad-t" style="font-weight:700">⚠️ Vượt ${W.x} cảnh giới · nhận sát thương ×${GCFG.overTaken}</span>` : ''}
     <div class="bar" style="height:14px"><i id="gb-bh" style="width:100%;background:#d0402f"></i></div><div class="mut" id="gb-bt"></div>
     <div class="mut">${esc(bs.abn)}</div><div class="${GB.mu.cls}" style="font-size:13px">${gElChips(GB.mu.els)} vs ${gElLabel(S.hero.char || 'kiem')}: ${GB.mu.txt}</div></div></div>
   <div class="card" style="padding:10px;text-align:left"><div style="display:flex;align-items:center;gap:10px">${bustImg(44)}<div style="flex:1"><b>${esc(S.hero.name)}</b> <span class="mut" id="gb-cb"></span>
     <div class="bar"><i id="gb-ph" style="width:100%"></i></div><div class="mut" id="gb-pt"></div></div><div style="text-align:center"><b id="gb-tm" style="font-size:22px">${GB.total}s</b></div></div>
     <div class="bar g"><i id="gb-tb" style="width:100%"></i></div></div>
-  <div class="card" id="gb-q"></div><div id="gb-log" class="mut" style="min-height:44px;text-align:center">Phím 1–4: chọn đáp án · Enter: sang câu tiếp / bỏ qua chiêu cuối</div>`;
+  <div class="card" id="gb-q"></div><div id="gb-log" class="mut" style="min-height:44px;text-align:center">Phím 1–4: chọn đáp án · Enter: sang câu tiếp / bỏ qua chiêu cuối</div>`);
   gBars();
 }
 function gNextQ() {
@@ -656,6 +673,7 @@ window.addEventListener('pagehide', () => { try { gLeave(); } catch (e) {} });
 // ---------- màn hình chiến đấu ----------
 function vFight() {
   const W = gEnsureWeek(), bs = GBOSS[W.boss], st = gStats(), cd = gCD(), pct = Math.max(0, W.hp / W.max * 100);
+  gPreloadBg(bs);
   const ms = [.25, .5, .75, 1].map(t => `<span class="chip" style="${W.claimed.includes(t) ? 'background:var(--ac2);color:#fff' : ''}">${W.claimed.includes(t) ? '✓' : '🔒'} ${t * 100}%</span>`).join(' ');
   view.innerHTML = `
   <div class="card" style="padding:10px"><div class="mut" style="text-align:left">Quái tuần ${(W.k % 52) + 1} · cảnh giới ${REALMS[W.ri].h} ${REALMS[W.ri].n} · còn ${gDaysLeft()} ngày</div>
