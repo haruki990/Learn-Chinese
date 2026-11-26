@@ -19,7 +19,10 @@ const GCFG = {
   practiceCap: 100,   // số câu luyện tập tự do/ngày được tính thưởng (chống cày)
   tribCdMin: 10,      // phút chờ giữa 2 lần thi độ kiếp
   testQ: 20,          // số câu bài test độ kiếp
-  testPass: 0.8       // tỉ lệ đúng tối thiểu để qua độ kiếp
+  testPass: 0.8,      // tỉ lệ đúng tối thiểu để qua độ kiếp
+  overMax: 2,         // đánh quái vượt tối đa bao nhiêu cảnh giới (Luyện Khí đánh được Trúc Cơ, Kim Đan)
+  overTaken: 2,       // sát thương nhận vào khi đánh vượt cấp (×2)
+  overReward: .5      // mỗi cảnh giới vượt: +50% linh thạch/Yêu Đan; đồ rơi theo phẩm của cảnh giới quái
 };
 // Hệ số linh thạch theo cảnh giới (ri = 0..8): càng lên cao càng nhận nhiều để theo kịp giá đồ
 const LSM = [1, 1.4, 2, 2.6, 3.4, 4.4, 5.6, 7, 9];
@@ -151,7 +154,7 @@ function gGen(slot, tier, rng, q) {
 //  - trib (độ kiếp thành công): đồ phẩm của cảnh giới mới + 1 bậc.
 //  - streak (rương chuỗi ngày): chuỗi < 7 ngày ra T; chuỗi từ 7 ngày ra T+1; từ 21 ngày ra T+2.
 function gRollTier(src, arg) {
-  const ri = realmInfo(S.xp).ri, T = gTierForRealm(ri), luck = (gStats().fx.fortune || 0) / 100, r = Math.random();
+  const ri = (src === 'boss' && GB && GB.W) ? GB.W.ri : realmInfo(S.xp).ri, T = gTierForRealm(ri), luck = (gStats().fx.fortune || 0) / 100, r = Math.random();
   let t = T;
   if (src === 'kill') src = 'boss', arg = 1;
   if (src === 'combo') { const pT = Math.min(.95, .6 + .1 * (arg || 0) + luck); t = r < pT ? T : T - 1; }
@@ -244,7 +247,7 @@ const gBossEls = b => b.el.split('·').map(s => GELV[s.trim()]).filter(Boolean);
 const gElChips = els => els.map(x => GEL[x].e + ' ' + GEL[x].n).join(' · ');
 // Kết quả tương khắc giữa nhân vật hiện tại và quái tuần: dmg = hệ số sát thương gây ra, taken = hệ số sát thương nhận vào
 function gMatchup() {
-  const me = gElOf(S.hero.char || 'kiem'), els = gBossEls(GBOSS[S.week.boss]);
+  const me = gElOf(S.hero.char || 'kiem'), els = gBossEls(GBOSS[gW().boss]);
   const a = els.filter(e => GEL[me].k.includes(e)).length, d = els.filter(e => GEL[e].k.includes(me)).length, net = a - d;
   const dmg = net >= 2 ? 1.75 : net === 1 ? 1.5 : net === 0 ? 1 : .8, taken = net > 0 ? .85 : net === 0 ? 1 : 1.25;
   const cls = net > 0 ? 'ok-t' : net < 0 ? 'bad-t' : 'mut';
@@ -271,7 +274,22 @@ function gEnsureWeek() {
     Object.assign(S.week, { ri, max: b.max, hp: Math.round(frac * b.max), atk: b.atk, def: b.def }); save();
   }
   return S.week;
-}const gDaysLeft = () => { const end = Date.UTC(2026, 0, 5) + (gWeekIdx() + 1) * 7 * DAY, ms = end - Date.now(); return Math.max(0, Math.ceil(ms / DAY)); };
+}// quái đang đánh: quái tuần thường, hoặc quái vượt cấp (GB.W) khi đang trong trận vượt cấp
+const gW = () => (GB && GB.W) || S.week;
+// ---------- đánh quái vượt cấp: cùng loài thú của tuần nhưng ở cảnh giới cao hơn (tối đa +GCFG.overMax), sát thương nhận vào luôn ×GCFG.overTaken ----------
+function gOverList() {
+  const W = gEnsureWeek(), base = W.ri, out = [];
+  if (!S.wx || S.wx.k !== W.k) S.wx = { k: W.k, r: {} };
+  for (let d = 1; d <= GCFG.overMax; d++) {
+    const ri = base + d; if (ri >= GCFG.bossHp.length) break;
+    let X = S.wx.r[ri];
+    if (!X) { const b = gBossStats(ri); X = { k: W.k, boss: W.boss, ri, max: b.max, hp: b.max, atk: b.atk, def: b.def, dmg: 0, battles: 0, claimed: [], dead: false }; }
+    X.x = d; out.push(X);
+  }
+  return out;
+}
+const gOverMul = () => (GB && GB.W && GB.W.x) ? 1 + GCFG.overReward * GB.W.x : 1; // thưởng 💎/Yêu Đan nhân theo số cảnh giới vượt
+const gDaysLeft = () => { const end = Date.UTC(2026, 0, 5) + (gWeekIdx() + 1) * 7 * DAY, ms = end - Date.now(); return Math.max(0, Math.ceil(ms / DAY)); };
 const gCD = () => Math.max(0, (S.nextBattle || 0) - Date.now());
 const gFmt = ms => { const s = Math.ceil(ms / 1000), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? `${h}g ${m}p` : `${m}p ${s % 60}s`; };
 
@@ -386,7 +404,7 @@ function gQuestion() {
 // ---------- trận đánh ----------
 let GB = null, GTM = null;
 function gHit() {
-  const st = GB.st, W = S.week, bs = GBOSS[W.boss];
+  const st = GB.st, W = gW(), bs = GBOSS[W.boss];
   const hc = Math.min(.97, Math.max(.55, st.hit / (st.hit + bs.eva)));
   if (Math.random() > hc) return { miss: true, dmg: 0 };
   let d = st.atk * (.9 + Math.random() * .2), crit = false, charmed = false;
@@ -400,21 +418,24 @@ function gHit() {
   return { dmg: Math.round(d), crit, charmed };
 }
 function gBossHit() {
-  const W = S.week, bs = GBOSS[W.boss], st = GB.st;
+  const W = gW(), bs = GBOSS[W.boss], st = GB.st;
   let atk = W.atk; if (bs.ab === 'rage') atk *= 1 + .6 * (1 - W.hp / W.max);
   let d = atk * (.9 + Math.random() * .2), crit = false;
   if (bs.ab === 'crit' && Math.random() < .3) { d *= 1.8; crit = true; }
   if (bs.ab === 'burn') d *= 1.4;
   d = Math.max(1, d * GB.mu.taken - st.def * .5) * (1 - (st.fx.guard || 0) / 100);
+  if (GB.W) d *= GCFG.overTaken; // vượt cấp: sát thương nhận vào ×2
   return { dmg: Math.round(d), crit };
 }
-function gStartBattle() {
-  const W = gEnsureWeek();
-  if (W.dead) return toast('Quái tuần này đã bị hạ. Hãy chờ tuần sau!');
+function gStartBattle(overRi) {
+  const base = gEnsureWeek(), X = overRi ? gOverList().find(o => o.ri === overRi) : null, W = X || base;
+  if (W.dead) return toast(X ? 'Quái vượt cấp này đã bị hạ tuần này.' : 'Quái tuần này đã bị hạ. Hãy chờ tuần sau!');
+  if (X) S.wx.r[X.ri] = X;
   if (gCD() > 0) return toast('Chưa hồi sức: còn ' + gFmt(gCD()));
   const st = gStats(), t = GCFG.battleSec + (st.fx.swift || 0);
-  GB = { mu: gMatchup(), st, pmax: st.hp, php: st.hp, endAt: Date.now() + t * 1000, total: t, correct: 0, wrong: 0, dmg: 0, poison: 0, combo: 0, over: false, locked: false, drops: [], q: null, log: '' };
-  S.nextBattle = Date.now() + GCFG.cooldownH * 3600000; S.week.battles++; save();
+  GB = { W: X || null, mu: null, st, pmax: st.hp, php: st.hp, endAt: Date.now() + t * 1000, total: t, correct: 0, wrong: 0, dmg: 0, poison: 0, combo: 0, over: false, locked: false, drops: [], q: null, log: '' };
+  GB.mu = gMatchup();
+  S.nextBattle = Date.now() + GCFG.cooldownH * 3600000; W.battles++; save();
   gDrawBattle(); gNextQ();
   clearInterval(GTM); GTM = setInterval(gTick, 250);
 }
@@ -426,7 +447,7 @@ function gTick() {
   if (left <= 0) gEndBattle('time');
 }
 function gBars() {
-  const W = S.week, hb = $('#gb-bh'), pb = $('#gb-ph');
+  const W = gW(), hb = $('#gb-bh'), pb = $('#gb-ph');
   if (hb) { hb.style.width = Math.max(0, W.hp / W.max * 100) + '%'; $('#gb-bt').textContent = Math.max(0, W.hp) + ' / ' + W.max; }
   if (pb) { pb.style.width = Math.max(0, GB.php / GB.pmax * 100) + '%'; $('#gb-pt').textContent = Math.max(0, Math.round(GB.php)) + ' / ' + GB.pmax; }
 }
@@ -509,9 +530,9 @@ function gArenaFx(kind, o) {
   }
 }
 function gDrawBattle() {
-  const W = S.week, bs = GBOSS[W.boss];
+  const W = gW(), bs = GBOSS[W.boss];
   view.innerHTML = `<div class="card" style="padding:10px">${gArenaHTML(GIMG['m_' + bs.id + '_art'], S.hero.char)}
-    <div style="text-align:left;margin-top:6px"><b>${esc(bs.n)}</b> ${bs.h} <span class="mut">· ${esc(bs.el)}</span>
+    <div style="text-align:left;margin-top:6px"><b>${esc(bs.n)}</b> ${bs.h} <span class="mut">· ${esc(bs.el)} · ${REALMS[W.ri].n}</span>${W.x ? ` <span class="bad-t" style="font-weight:700">⚠️ Vượt ${W.x} cảnh giới · nhận sát thương ×${GCFG.overTaken}</span>` : ''}
     <div class="bar" style="height:14px"><i id="gb-bh" style="width:100%;background:#d0402f"></i></div><div class="mut" id="gb-bt"></div>
     <div class="mut">${esc(bs.abn)}</div><div class="${GB.mu.cls}" style="font-size:13px">${gElChips(GB.mu.els)} vs ${gElLabel(S.hero.char || 'kiem')}: ${GB.mu.txt}</div></div></div>
   <div class="card" style="padding:10px;text-align:left"><div style="display:flex;align-items:center;gap:10px">${bustImg(44)}<div style="flex:1"><b>${esc(S.hero.name)}</b> <span class="mut" id="gb-cb"></span>
@@ -522,7 +543,7 @@ function gDrawBattle() {
 }
 function gNextQ() {
   if (!GB || GB.over) return;
-  if (GB.poison > 0) { const pd = GB.poison * Math.max(2, Math.round(S.week.atk * .05)); GB.php -= pd; gBars(); gArenaFx('dot', { dmg: pd }); if (GB.php <= 0) return gEndBattle('dead'); }
+  if (GB.poison > 0) { const pd = GB.poison * Math.max(2, Math.round(gW().atk * .05)) * (GB.W ? GCFG.overTaken : 1); GB.php -= pd; gBars(); gArenaFx('dot', { dmg: pd }); if (GB.php <= 0) return gEndBattle('dead'); }
   const q = GB.q = gQuestion(); GB.locked = false;
   $('#gb-q').innerHTML = `${q.stem}<div id="gb-o">${q.opts.map((o, i) => `<button class="opt" data-i="${i}"><span class="kn">${i + 1}</span>${o.label}</button>`).join('')}</div>`;
   $('#gb-cb').textContent = GB.combo ? 'Liên kích x' + GB.combo : '';
@@ -532,7 +553,7 @@ function gNextQ() {
 }
 function gAnswer(i) {
   GB.locked = true;
-  const q = GB.q, W = S.week, bs = GBOSS[W.boss], right = q.opts[i].ok;
+  const q = GB.q, W = gW(), bs = GBOSS[W.boss], right = q.opts[i].ok;
   const btns = [...document.querySelectorAll('#gb-o .opt')];
   btns[i].classList.add(right ? 'ok' : 'no'); const okIdx = q.opts.findIndex(o => o.ok); btns[okIdx].classList.add('ok');
   if (q.speakOnAnswer && q.word) speak(q.word);
@@ -588,7 +609,7 @@ function gAnswer(i) {
 }
 function gClaimMilestones(W, lines) {
   [[.25, 20, 0], [.5, 40, 0], [.75, 80, 1], [1, 200, 2]].forEach(([thr, base, bonus]) => {
-    const ls = lsGain(base);
+    const ls = Math.round(lsGain(base) * gOverMul());
     if (!W.claimed.includes(thr) && (W.max - W.hp) >= thr * W.max - 0.5) {
       W.claimed.push(thr); S.ls += ls; const it = gDrop('boss', thr); GB.drops.push(it);
       lines.push(`🏆 Mốc ${thr * 100}% HP quái: +${ls} 💎 và <b style="color:${GT[it.tier - 1].c}">${esc(it.name)}</b>`);
@@ -597,14 +618,14 @@ function gClaimMilestones(W, lines) {
 }
 function gEndBattle(reason, silent) {
   if (!GB || GB.over) return; GB.over = true; clearInterval(GTM);
-  const W = S.week, bs = GBOSS[W.boss], lines = [];
+  const W = gW(), bs = GBOSS[W.boss], lines = [];
   const frac = W.max ? GB.dmg / W.max : 0;
-  const ls = lsGain(Math.round(8 + Math.min(60, GB.dmg / (W.max / 30)))), cores = Math.max(1, Math.round(frac * 30)), xp = 15 + GB.correct * 8;
+  const om = gOverMul(), ls = Math.round(lsGain(Math.round(8 + Math.min(60, GB.dmg / (W.max / 30)))) * om), cores = Math.max(1, Math.round(frac * 30 * om)), xp = 15 + GB.correct * 8;
   S.ls += ls; S.cores += cores;
   gClaimMilestones(W, lines);
   let story = false;
   if (W.hp <= 0 && !W.dead) {
-    W.dead = true; const kg = lsGain(150); S.ls += kg; S.cores += 8; lines.push('👑 Hạ gục quái tuần! +' + kg + ' 💎, +8 Yêu Đan');
+    W.dead = true; const kg = Math.round(lsGain(150) * om), kc = Math.round(8 * om); S.ls += kg; S.cores += kc; lines.push((W.x ? '👑 Hạ gục quái vượt ' + W.x + ' cảnh giới! +' : '👑 Hạ gục quái tuần! +') + kg + ' 💎, +' + kc + ' Yêu Đan');
     if (!S.beast.includes(bs.id)) { S.beast.push(bs.id); story = true; }
   }
   save(); addXP(xp);
@@ -639,6 +660,8 @@ function vFight() {
     ${W.dead ? '<div class="mean ok-t">👑 Đã hạ gục. Quái mới xuất hiện vào thứ Hai.</div>' : cd > 0
       ? `<div class="mean">⏳ Hồi sức: <b id="gcd">${gFmt(cd)}</b></div><div class="row"><button id="gpill" ${S.cdPills > 0 ? '' : 'disabled'}>Dùng Hồi Linh Đan (${S.cdPills})</button><button id="gbuyp" ${S.ls >= GCFG.pillCD ? '' : 'disabled'}>Mua 💎${GCFG.pillCD}</button></div>`
       : `<div class="row"><button class="pri" id="gfight">⚔️ Khiêu chiến (${GCFG.battleSec}s)</button></div>`}
+    ${(() => { const L = gOverList(); if (!L.length) return ''; return `<div style="margin-top:10px;padding:8px;border:1px dashed #d0402f;border-radius:10px;text-align:left"><b>🔥 Vượt cấp khiêu chiến</b> <span class="mut" style="font-size:12px">· cùng ${esc(bs.n)} nhưng ở cảnh giới cao hơn. Sát thương bạn nhận vào luôn <b class="bad-t">×${GCFG.overTaken}</b>; thưởng 💎/Yêu Đan +${Math.round(GCFG.overReward * 100)}% mỗi cảnh giới vượt, đồ rơi theo phẩm của cảnh giới quái (dùng chung thời gian hồi sức)</span>
+      ${L.map(X => `<div class="realm" style="gap:8px"><span style="flex:1"><b>${REALMS[X.ri].h} ${REALMS[X.ri].n}</b> <span class="mut">(+${X.x})</span><div class="bar" style="height:8px;margin:3px 0"><i style="width:${Math.max(0, X.hp / X.max * 100)}%;background:#d0402f"></i></div><span class="mut" style="font-size:12px">HP ${X.hp} / ${X.max} · ATK ${X.atk} ×${GCFG.overTaken}</span></span>${X.dead ? '<span class="ok-t">👑 Đã hạ</span>' : `<button data-over="${X.ri}" ${cd > 0 ? 'disabled' : ''}>⚔️ Vượt cấp</button>`}</div>`).join('')}</div>`; })()}
     <p class="mut" style="text-align:left;margin:8px 0 0">Mỗi trận là một chuỗi câu hỏi từ vựng và ngữ pháp trong ${GCFG.battleSec} giây, mỗi câu đúng được cộng thêm ${GCFG.timeBonus} giây. Đúng thì bạn tấn công (sát thương theo ATK, CRIT, HIT, SPD và trang bị của bạn), sai thì quái phản công. Mẹo: nhấn phím 1–4 để chọn nhanh, Enter để qua câu. Sau trận phải chờ ${GCFG.cooldownH} giờ.</p></div>
   <div class="card" style="text-align:left"><b>Sức chiến đấu: ${gCP(st)}</b> <span class="mut">(HP ${st.hp} · ATK ${st.atk} · DEF ${st.def} · CRIT ${st.crit}% · SPD ${st.spd} · HIT ${st.hit})</span>
     <p class="mut" style="margin:6px 0 0">Trang bị mạnh hơn ở tab Tu tiên → Trang bị. Đồ rơi theo đúng phẩm cảnh giới hiện tại khi đúng liên tiếp ${GCFG.comboDrop} câu; phẩm cao hơn chỉ có từ quái tuần, độ kiếp và rương chuỗi ngày cao.</p></div>
@@ -648,11 +671,12 @@ function vFight() {
   <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">${GBOSS.map(b => { const u = S.beast.includes(b.id); return `<button class="chest" data-b="${b.id}" style="display:block;padding:6px;${u ? '' : 'filter:grayscale(1) brightness(.5)'}"><img src="${GIMG['m_' + b.id + '_card']}" alt="" style="width:100%;border-radius:8px;display:block"><span class="mut">${u ? 'Đọc truyện' : 'Hạ gục để mở khóa'}</span></button>`; }).join('')}</div>
   ${S.hist.length ? `<h3 style="margin:14px 0 6px;text-align:left">Lịch sử các tuần</h3><div class="card" style="padding:6px 10px;text-align:left">${S.hist.slice().reverse().map(h => `<div class="realm"><span style="flex:1">Tuần ${(h.k % 52) + 1}: ${esc(GBOSS[h.boss].n)}</span><span class="mut">${h.dmg} sát thương ${h.dead ? '· 👑 hạ gục' : ''}</span></div>`).join('')}</div>` : ''}
   <p class="mut" style="text-align:left">Lưu ý: app chạy trên máy bạn nên "bảng xếp hạng" chỉ ghi kỷ lục của chính bạn, không so với người khác.</p>`;
-  const f = $('#gfight'); if (f) f.onclick = gStartBattle;
+  const f = $('#gfight'); if (f) f.onclick = () => gStartBattle();
   $('#gult').onclick = vUltGallery;
   const pl = $('#gpill'); if (pl) pl.onclick = () => { S.cdPills--; S.nextBattle = 0; save(); toast('Đã hồi sức hoàn toàn'); vFight(); };
   const bp = $('#gbuyp'); if (bp) bp.onclick = () => { S.ls -= GCFG.pillCD; S.cdPills++; save(); header(); vFight(); };
-  view.onclick = e => { const b = e.target.closest('[data-b]'); if (!b) return; if (S.beast.includes(b.dataset.b)) vBeast(b.dataset.b); else toast('Hãy hạ gục quái này vào tuần nó xuất hiện.'); };
+  view.onclick = e => { const o = e.target.closest('[data-over]'); if (o) { if (confirm('Vượt cấp khiêu chiến ' + REALMS[+o.dataset.over].n + '? Sát thương bạn nhận vào sẽ ×' + GCFG.overTaken + '.')) gStartBattle(+o.dataset.over); return; }
+    const b = e.target.closest('[data-b]'); if (!b) return; if (S.beast.includes(b.dataset.b)) vBeast(b.dataset.b); else toast('Hãy hạ gục quái này vào tuần nó xuất hiện.'); };
   if (cd > 0 && !W.dead) { const t = setInterval(() => { const el = $('#gcd'); if (!el || tab !== 'fight') return clearInterval(t); const c = gCD(); if (c <= 0) { clearInterval(t); vFight(); } else el.textContent = gFmt(c); }, 1000); }
 }
 function vBeast(id) {
