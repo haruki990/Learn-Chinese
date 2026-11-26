@@ -207,6 +207,8 @@ function gStats() {
     Object.keys(it.st).forEach(s => { t[s] = (t[s] || 0) + gStatOf(it, s); });
     if (gFxOn(it)) fx[it.fx] = (fx[it.fx] || 0) + gFxVal(it);
   });
+  const pet = typeof itemOf === 'function' && S.equip ? itemOf(S.equip.pet) : null; // linh thú (Phường thị)
+  if (pet && pet.st) Object.keys(pet.st).forEach(s => { t[s] = GPET_PCT[s] ? t[s] * (1 + pet.st[s] / 100) : (t[s] || 0) + pet.st[s]; });
   Object.keys(t).forEach(s => { t[s] = gRoundStat(s, t[s]); });
   t.fx = fx; return t;
 }

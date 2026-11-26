@@ -3013,11 +3013,11 @@ const ITEMS = META.map(m => ({ id: m.id, cat: 'char', name: m.name, kind: m.kind
   { id: 'fr_gold', cat: 'frame', name: 'Khung kim sắc', price: 260, css: 'linear-gradient(135deg,#ffe28a,#c9962b,#ffe28a)', c: '#e0b84f', img: 'items/fr_gold.webp', hole: 0.574 },
   { id: 'fr_purple', cat: 'frame', name: 'Khung tử điện', price: 400, css: 'linear-gradient(135deg,#e0b8ff,#6a3fc4,#e0b8ff)', c: '#9a6fe0', img: 'items/fr_purple.webp', hole: 0.55 },
   { id: 'fr_dragon', cat: 'frame', name: 'Khung long văn', price: 650, css: 'linear-gradient(135deg,#ffd27a,#d0402f,#ffd27a,#d0402f)', c: '#d0402f', img: 'items/fr_dragon.webp', hole: 0.527 },
-  { id: 'pet_turtle', cat: 'pet', name: 'Linh quy', price: 90, e: '🐢', img: 'items/pet_turtle.webp' },
-  { id: 'pet_fox', cat: 'pet', name: 'Tiểu hồ ly', price: 160, e: '🦊', img: 'items/pet_fox.webp' },
-  { id: 'pet_crane', cat: 'pet', name: 'Tiên hạc', price: 260, e: '🦢', img: 'items/pet_crane.webp' },
-  { id: 'pet_tiger', cat: 'pet', name: 'Bạch hổ con', price: 400, e: '🐯', img: 'items/pet_tiger.webp' },
-  { id: 'pet_dragon', cat: 'pet', name: 'Tiểu thanh long', price: 700, e: '🐉', img: 'items/pet_dragon.webp' },
+  { id: 'pet_turtle', cat: 'pet', name: 'Linh quy', price: 90, e: '🐢', img: 'items/pet_turtle.webp', st: { hp: 12, def: 20 } },
+  { id: 'pet_fox', cat: 'pet', name: 'Tiểu hồ ly', price: 160, e: '🦊', img: 'items/pet_fox.webp', st: { atk: 6, crit: 3 } },
+  { id: 'pet_crane', cat: 'pet', name: 'Tiên hạc', price: 260, e: '🦢', img: 'items/pet_crane.webp', st: { spd: 20, hit: 4, expb: 5 } },
+  { id: 'pet_tiger', cat: 'pet', name: 'Bạch hổ con', price: 400, e: '🐯', img: 'items/pet_tiger.webp', st: { atk: 12, crit: 4 } },
+  { id: 'pet_dragon', cat: 'pet', name: 'Tiểu thanh long', price: 700, e: '🐉', img: 'items/pet_dragon.webp', st: { hp: 15, atk: 15, def: 15, crit: 5, expb: 8 } },
   { id: 'au_cyan', cat: 'aura', name: 'Linh quang', price: 120, c: '#5ad1ff', img: 'items/au_cyan.webp' },
   { id: 'au_gold', cat: 'aura', name: 'Kim quang', price: 260, c: '#ffd24d', img: 'items/au_gold.webp' },
   { id: 'au_purple', cat: 'aura', name: 'Tử khí đông lai', price: 420, c: '#b57bff', img: 'items/au_purple.webp' },
@@ -3029,6 +3029,9 @@ const ITEMS = META.map(m => ({ id: m.id, cat: 'char', name: m.name, kind: m.kind
 ]);
 const CATS = [['char', 'Nhân vật'], ['title', 'Danh hiệu'], ['frame', 'Khung'], ['aura', 'Hào quang'], ['pet', 'Linh thú'], ['use', 'Đan dược & Phù']];
 const itemOf = id => ITEMS.find(i => i.id === id);
+// Linh thú đang mang cộng chỉ số (áp trong gStats ở rpg.js). hp/atk/def/spd tính %, crit/hit/expb cộng thẳng.
+const GPET_PCT = { hp: 1, atk: 1, def: 1, spd: 1 };
+const petStTxt = it => it && it.st ? Object.entries(it.st).map(([k, v]) => (GPET_PCT[k] ? GSTATN[k] + ' +' + v + '%' : GSTATN[k].replace('%', '') + ' +' + v + (k === 'hit' ? '' : '%'))).join(' · ') : '';
 const owned = it => it.price === 0 || !!S.inv[it.id];
 const single = cat => cat === 'char' || cat === 'title'; // luôn có đúng 1 món được chọn
 const isOn = it => it.cat === 'char' ? (S.hero.char || 'kiem') === it.id : it.cat === 'title' ? (S.equip.title || 'tt_0') === it.id : S.equip[it.cat] === it.id;
@@ -3072,6 +3075,7 @@ function vHeroChar() {
     <h3 style="margin:14px 0 0" id="hname">${esc(h.name)}</h3>
     <div class="mut">${ti ? ti.h + ' · ' + ti.name : ''}</div>
     <div class="mut">${esc(cm.name || '')} · ${esc(cm.kind || '')} · Hệ ${gElLabel(h.char || 'kiem')}</div>
+    ${(() => { const pt = itemOf(S.equip.pet); return pt && pt.st ? `<div class="mut">🐾 ${esc(pt.name)}: <b style="color:var(--ac2)">${petStTxt(pt)}</b></div>` : ''; })()}
     <div class="pin" style="font-size:20px;margin-top:6px">${ri.h} ${ri.name}</div>
     <div class="bar g"><i style="width:${ri.into / ri.need * 100}%"></i></div>
     <div class="mut">Tu vi ${ri.max ? 'tối đa' : ri.into + ' / ' + ri.need} · hôm nay ${S.xpDay === today() ? S.xpToday : 0}${GCFG.xpDayLimit ? '/' + GCFG.xpDayCap : ''} · tổng ${S.xp} · 💎 ${S.ls} linh thạch · 🧿 ${S.freezes} Hộ Chuỗi Phù</div></div>
@@ -3084,7 +3088,7 @@ function vHeroChar() {
     const btn = use ? `<button class="buy" data-buy="${it.id}" ${can ? '' : 'disabled'}>Mua 💎${it.price}</button>`
       : own ? (on ? (single(it.cat) ? '<button disabled>Đang dùng</button>' : `<button data-unequip="${it.cat}">Gỡ</button>`) : `<button class="use" data-equip="${it.id}">${single(it.cat) ? 'Chọn' : 'Trang bị'}</button>`)
       : `<button class="buy" data-buy="${it.id}" ${can ? '' : 'disabled'}>Mua 💎${it.price}</button>`;
-    const sub = use ? esc(it.d) : it.cat === 'char' ? esc(it.kind + ' · ' + it.skill) + ' · Hệ ' + gElLabel(it.id) : it.cat === 'title' ? it.h + ' ' + it.p : (own ? 'Đã sở hữu' : it.price + ' linh thạch');
+    const sub = use ? esc(it.d) : it.cat === 'char' ? esc(it.kind + ' · ' + it.skill) + ' · Hệ ' + gElLabel(it.id) : it.cat === 'title' ? it.h + ' ' + it.p : (own ? 'Đã sở hữu' : it.price + ' linh thạch') + (it.st ? ' · <b style="color:var(--ac2)">' + petStTxt(it) + '</b>' : '');
     return `<div class="item">${previewOf(it)}<div class="nm"><b>${esc(it.name)}</b>${on ? ' <span class="ok-t">• đang dùng</span>' : ''}<small>${sub}${!use && own && it.price > 0 && (it.cat === 'char' || it.cat === 'title') ? ' · đã sở hữu' : ''}</small></div>${btn}</div>`;
   }).join('')}
   <h3 style="margin:16px 0 4px;text-align:left">Cảnh giới tu tiên</h3><div class="card" style="padding:6px 10px">${roadmap}</div>
