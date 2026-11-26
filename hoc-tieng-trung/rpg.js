@@ -16,7 +16,7 @@ const GCFG = {
   pillsPerDay: 3,     // số đan dược tối đa dùng mỗi ngày
   bagMax: 80,         // sức chứa hành trang
   pillCD: 60,         // giá Hồi Linh Đan (xóa thời gian chờ)
-  practiceCap: 100,   // số câu luyện tập tự do/ngày được tính thưởng (chống cày)
+  practiceCap: Infinity, // số câu luyện tập tự do/ngày được tính thưởng (Infinity = không giới hạn)
   tribCdMin: 10,      // phút chờ giữa 2 lần thi độ kiếp
   testQ: 20,          // số câu bài test độ kiếp
   testPass: 0.8,      // tỉ lệ đúng tối thiểu để qua độ kiếp

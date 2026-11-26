@@ -2844,13 +2844,13 @@ function runType(o) {
 function resultScreen(ok, total, again, label) {
   const perfect = ok === total && total >= 10;
   if (perfect) { S.ls += lsGain(5); addXP(20); }
-  view.innerHTML = `<div class="card"><div class="han" style="font-size:56px">${perfect ? '🌟' : ok / total >= PASS ? '🎉' : '💪'}</div><div class="mean"><b>${ok}/${total}</b> câu đúng</div><p class="mut">+10 tu vi · +${lsGain(1)} 💎 mỗi câu đúng${perfect ? ' · ✨ Hoàn hảo: +20 tu vi +' + lsGain(5) + ' 💎' : ''}${S.pracDay === today() && S.pracN >= GCFG.practiceCap ? '<br>Hôm nay đã hết thưởng luyện tập (' + GCFG.practiceCap + ' câu). Hãy học bài mới hoặc đánh quái tuần!' : ''}</p></div>
+  view.innerHTML = `<div class="card"><div class="han" style="font-size:56px">${perfect ? '🌟' : ok / total >= PASS ? '🎉' : '💪'}</div><div class="mean"><b>${ok}/${total}</b> câu đúng</div><p class="mut">+10 tu vi · +${lsGain(1)} 💎 mỗi câu đúng${perfect ? ' · ✨ Hoàn hảo: +20 tu vi +' + lsGain(5) + ' 💎' : ''}${isFinite(GCFG.practiceCap) && S.pracDay === today() && S.pracN >= GCFG.practiceCap ? '<br>Hôm nay đã hết thưởng luyện tập (' + GCFG.practiceCap + ' câu). Hãy học bài mới hoặc đánh quái tuần!' : ''}</p></div>
     <div class="row"><button class="pri" id="again">${label}</button><button id="home">Về trang học</button></div>`;
   $('#again').onclick = again; $('#home').onclick = () => go('home');
 }
 
 function vPractice() {
-  view.innerHTML = `<div class="card"><b>Luyện tập tự do</b><p class="mut">Mỗi câu đúng: +10 tu vi, +${lsGain(1)} 💎 (tối đa ${GCFG.practiceCap} câu mỗi ngày). Đúng liên tiếp ${GCFG.comboDrop} câu sẽ rơi 1 trang bị đúng phẩm của cảnh giới hiện tại (combo càng dài càng ít ra phẩm thấp hơn). Phẩm cao hơn chỉ có từ quái tuần, độ kiếp và rương chuỗi ngày cao. Hôm nay đã rơi ${S.dropsDay === today() ? S.dropsToday : 0}/${GCFG.dropsPerDay} món.</p>
+  view.innerHTML = `<div class="card"><b>Luyện tập tự do</b><p class="mut">Mỗi câu đúng: +10 tu vi, +${lsGain(1)} 💎${isFinite(GCFG.practiceCap) ? ' (tối đa ' + GCFG.practiceCap + ' câu mỗi ngày)' : ''}. Đúng liên tiếp ${GCFG.comboDrop} câu sẽ rơi 1 trang bị đúng phẩm của cảnh giới hiện tại (combo càng dài càng ít ra phẩm thấp hơn). Phẩm cao hơn chỉ có từ quái tuần, độ kiếp và rương chuỗi ngày cao. Hôm nay đã rơi ${S.dropsDay === today() ? S.dropsToday : 0}/${GCFG.dropsPerDay} món.</p>
     <div class="row"><button class="pri" id="pq">Trắc nghiệm ${QUIZ_N} câu</button><button id="pt">Gõ pinyin ${TYPE_N} từ</button></div></div>`;
   $('#pq').onclick = vQuizFree; $('#pt').onclick = vTypeFree;
 }
