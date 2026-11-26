@@ -369,7 +369,7 @@ function cpStartFight(st) {
   CP.B = { round: st.round, boss: st.boss, ri: st.ri, atk: bsS.atk, def: bsS.def, st: stt, pmax: stt.hp, php: stt.hp, combo: 0, dmg: 0, correct: 0, wrong: 0, over: false,
     mdmg: net >= 2 ? 1.75 : net === 1 ? 1.5 : net === 0 ? 1 : .8, mtaken: net > 0 ? .85 : net === 0 ? 1 : 1.25, endAt: st.endsAtLocal, total: CP_CFG.sec };
   const B = CP.B;
-  view.innerHTML = gScene(bs, `<div class="card" style="padding:10px">${gArenaHTML(GIMG['m_' + bs.id + '_art'], S.hero.char)}
+  view.innerHTML = gScene(bs, `<div class="card" style="padding:10px">${gArenaHTML(bs.id, S.hero.char)}
     <div style="text-align:left;margin-top:6px"><b>${esc(bs.n)}</b> ${bs.h} <span class="mut">· ${esc(bs.el)} · cảnh giới ${REALMS[st.ri].n}</span>
     <div class="bar" style="height:14px"><i id="cp-bh" style="width:100%;background:#d0402f"></i></div><div class="mut" id="cp-bt"></div><div class="mut" id="cp-ps" style="font-size:12px"></div></div></div>
     <div class="card" style="padding:10px;text-align:left"><div style="display:flex;align-items:center;gap:10px">${bustImg(44)}<div style="flex:1"><b>${esc(S.hero.name)}</b> <span class="mut" id="cp-cb"></span>
@@ -443,7 +443,7 @@ async function cpAnswer(i) {
   $('#cp-log').innerHTML = `${log}<div class="mut" style="margin-top:4px">${q.expl}</div>`;
   const nx = $('#nx'); if (nx) nx.classList.remove('hide');
   const next = () => { if (!CP || !CP.B || CP.B !== B || B.over) return; B.nt = setTimeout(cpNextQ, right ? 1100 : 1700); };
-  if (ult) { B.pauseAt = 1; await gUltPlay(ult, { boss: GIMG['m_' + GBOSS[B.boss].id + '_art'] }); B.pauseAt = 0; }
+  if (ult) { B.pauseAt = 1; await gUltPlay(ult, { boss: gBossSrc(GBOSS[B.boss].id) }); B.pauseAt = 0; }
   next();
 }
 function cpEnd(st) {

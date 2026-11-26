@@ -73,7 +73,12 @@ function gUShape(x, kind, px, py, s, rot, col, a) {
 // ---- nhân vật và mục tiêu ----
 function gUDisc(x, img, px, py, r, ring, tint) {
   x.save(); x.beginPath(); x.arc(px, py, r, 0, 7); x.closePath();
-  if (img && img.complete && img.naturalWidth) { x.save(); x.clip(); const w = img.naturalWidth, h = img.naturalHeight, k = Math.max(2 * r / w, 2 * r / h); x.drawImage(img, px - w * k / 2, py - h * k / 2.6, w * k, h * k); x.restore(); }
+  if (img && img.complete && img.naturalWidth) {
+    x.save(); x.clip(); const w = img.naturalWidth, h = img.naturalHeight, tp = /bosses\//.test(img.src); // ảnh boss chibi nền trong suốt: vừa khung, có nền tối
+    if (tp) { x.fillStyle = '#2a2540'; x.fill(); const k = Math.min(2 * r / w, 2 * r / h) * 1.2; x.drawImage(img, px - w * k / 2, py - h * k / 2, w * k, h * k); }
+    else { const k = Math.max(2 * r / w, 2 * r / h); x.drawImage(img, px - w * k / 2, py - h * k / 2.6, w * k, h * k); }
+    x.restore();
+  }
   else { x.fillStyle = '#3a3550'; x.fill(); }
   if (tint) { x.globalCompositeOperation = 'source-atop'; x.fillStyle = tint; x.beginPath(); x.arc(px, py, r, 0, 7); x.fill(); x.globalCompositeOperation = 'source-over'; }
   x.lineWidth = r * .1; x.strokeStyle = ring; x.beginPath(); x.arc(px, py, r, 0, 7); x.stroke(); x.restore();
@@ -477,7 +482,7 @@ const gUltEl = () => gElOf((S.hero && S.hero.char) || 'kiem');
 
 // ---- màn hình xem trước 14 chiêu cuối ----
 function vUltGallery() {
-  const me = gUltEl(), W = S.week, bs = W ? GBOSS[W.boss] : null, boss = bs ? GIMG['m_' + bs.id + '_art'] : null;
+  const me = gUltEl(), W = S.week, bs = W ? GBOSS[W.boss] : null, boss = bs ? gBossSrc(bs.id) : null;
   view.innerHTML = `<div class="card" style="text-align:left"><h3 style="margin:0 0 4px">🌟 Chiêu cuối 14 hệ</h3>
     <p class="mut" style="margin:0">Trong trận đánh quái tuần, cứ <b>${GULT_COMBO} câu đúng liên tiếp</b> nhân vật sẽ tung chiêu cuối theo hệ của mình: 1 đòn chắc chắn trúng, sát thương ×${GULT_MULT}. Hệ của bạn: <b>${gElLabel(S.hero.char || 'kiem')}</b>. Chạm một chiêu để xem (hiệu ứng dùng ảnh nhân vật hiện tại của bạn).</p></div>
   <div class="ult-grid">${GULT_ORDER.map(k => { const E = GULT[k]; return `<button class="ult-c${k === me ? ' me' : ''}" data-el="${k}" style="--uc:${E.c[0]}"><span class="ue">${GEL[k].e}</span><span class="han" style="font-size:20px">${E.h}</span><small>${E.p}</small><b>${esc(E.n)}</b><small class="mut">Hệ ${GEL[k].n}${GULT_VID[k] ? ' · 🎬 video' : ''}${k === me ? ' · của bạn' : ''}</small></button>`; }).join('')}</div>

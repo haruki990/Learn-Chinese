@@ -458,6 +458,19 @@ function gBars() {
   if (hb) { hb.style.width = Math.max(0, W.hp / W.max * 100) + '%'; $('#gb-bt').textContent = Math.max(0, W.hp) + ' / ' + W.max; }
   if (pb) { pb.style.width = Math.max(0, GB.php / GB.pmax * 100) + '%'; $('#gb-pt').textContent = Math.max(0, Math.round(GB.php)) + ' / ' + GB.pmax; }
 }
+// ---------- ảnh boss: chibi nền trong suốt trong bosses/<id>.webp (quay mặt sang phải); thiếu file thì dùng ảnh cũ nhúng trong game-data.js ----------
+const gBossSrc = id => 'bosses/' + id + '.webp';
+const gBossOld = (id, k) => ((window.GIMG || {})['m_' + id + '_' + (k || 'art')] || '');
+const GELC = { kim: '#e8c35a', moc: '#5fb85f', tho: '#b98a4e', thuy: '#4aa3df', hoa: '#e8563a', loi: '#9b7bff', bang: '#9fe0ff', phong: '#7fd6b0', am: '#6b4a9e', quang: '#ffe9a3', doc: '#8bc34a', khong: '#5b6bd6', thoi: '#c9a0dc', ao: '#e48fd0' };
+// ảnh boss: <img> có dự phòng ảnh cũ khi lỗi
+const gBossImgTag = (id, style) => `<img src="${gBossSrc(id)}" alt="" style="${style || ''}" onerror="this.onerror=null;this.src='${gBossOld(id)}'">`;
+// thẻ boss: nền màu theo hệ + ảnh chibi + tên (thay cho ảnh thẻ cũ)
+function gBossCard(b, opt) {
+  opt = opt || {}; const els = gBossEls(b), c1 = GELC[els[0]] || '#888', c2 = GELC[els[1] || els[0]] || c1;
+  return `<div style="position:relative;border-radius:12px;overflow:hidden;aspect-ratio:${opt.ratio || '4/3'};max-width:${opt.max || '100%'};margin:${opt.margin || '0 auto'};background:radial-gradient(circle at 50% 58%,${c1}55 0%,transparent 62%),linear-gradient(160deg,#1d2440,${c2}66 120%);border:2px solid ${c1}">
+    ${gBossImgTag(b.id, 'position:absolute;inset:6% 4% 18% 4%;width:92%;height:76%;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(0,0,0,.5))')}
+    ${opt.noName ? '' : `<div style="position:absolute;left:0;right:0;bottom:0;padding:4px 6px;background:linear-gradient(transparent,rgba(0,0,0,.75));color:#fff;font-weight:700;font-size:${opt.small ? 13 : 16}px;text-align:center">${esc(b.n)} / ${b.h}</div>`}</div>`;
+}
 // ---------- sân đấu: quái góc trên trái, nhân vật góc trên phải, cử động đơn giản + hiệu ứng trúng đòn ----------
 const GAR_CSS = `
 .ar{position:relative;height:190px;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#1d2440 0%,#3b3560 55%,#5a4a5e 72%,#2d2633 73%,#211c27 100%)}
@@ -466,7 +479,9 @@ const GAR_CSS = `
 .ar-b{left:10px}.ar-p{right:10px}
 .ar-i{width:100%;height:100%;border-radius:12px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.45)}
 .ar-i img{width:100%;height:100%;object-fit:cover;display:block}
-.ar-b .ar-i{animation:arBreath 2.6s ease-in-out infinite;border:2px solid #d0402f}
+.ar-b .ar-i{animation:arBreath 2.6s ease-in-out infinite;box-shadow:none;overflow:visible;border-radius:0}
+.ar-b .ar-i img{object-fit:contain;filter:drop-shadow(0 6px 8px rgba(0,0,0,.55))}
+.ar-b{width:46%;max-width:220px}
 .ar-p .ar-i{animation:arBob 2.1s ease-in-out infinite;border:2px solid var(--ac2,#e0b84f);object-position:top}
 .ar-p .ar-i img{object-position:50% 15%}
 .ar-sh{position:absolute;left:12%;right:12%;bottom:-14px;height:12px;border-radius:50%;background:rgba(0,0,0,.35);filter:blur(3px)}
@@ -514,9 +529,9 @@ const GBGC = { thaothiet: '#120d1d', cungky: '#190c0d', daongot: '#23110d', hond
 const gBgSrc = bs => 'bg/' + bs.id + '.webp';
 const gScene = (bs, inner) => `<div class="gbs" style="--gbg:url('${gBgSrc(bs)}');--gbc:${GBGC[bs.id] || '#0d0c12'}">${inner}</div>`;
 function gPreloadBg(bs) { if (bs && !gPreloadBg[bs.id]) { gPreloadBg[bs.id] = new Image(); gPreloadBg[bs.id].src = gBgSrc(bs); } }
-function gArenaHTML(bossSrc, charId) {
+function gArenaHTML(bossId, charId) {
   if (!document.getElementById('gar-css')) { const s = document.createElement('style'); s.id = 'gar-css'; s.textContent = GAR_CSS; document.head.appendChild(s); }
-  return `<div class="ar" id="ar"><div class="ar-u ar-b" id="ar-b"><div class="ar-sh"></div><div class="ar-i"><img src="${bossSrc}" alt=""></div></div>
+  return `<div class="ar" id="ar"><div class="ar-u ar-b" id="ar-b"><div class="ar-sh"></div><div class="ar-i">${gBossImgTag(bossId)}</div></div>
     <div class="ar-u ar-p" id="ar-p"><div class="ar-sh"></div><div class="ar-i"><img src="${charImg(charId || 'kiem', 'card')}" alt=""></div></div></div>`;
 }
 const gArReplay = (el, cls) => { if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); clearTimeout(el['_t' + cls]); el['_t' + cls] = setTimeout(() => el.classList.remove(cls), 600); };
@@ -555,7 +570,7 @@ function gArenaFx(kind, o) {
 }
 function gDrawBattle() {
   const W = gW(), bs = GBOSS[W.boss];
-  view.innerHTML = gScene(bs, `<div class="card" style="padding:10px">${gArenaHTML(GIMG['m_' + bs.id + '_art'], S.hero.char)}
+  view.innerHTML = gScene(bs, `<div class="card" style="padding:10px">${gArenaHTML(bs.id, S.hero.char)}
     <div style="text-align:left;margin-top:6px"><b>${esc(bs.n)}</b> ${bs.h} <span class="mut">· ${esc(bs.el)} · ${REALMS[W.ri].n}</span>${W.x ? ` <span class="bad-t" style="font-weight:700">⚠️ Vượt ${W.x} cảnh giới · nhận sát thương ×${GCFG.overTaken}</span>` : ''}
     <div class="bar" style="height:14px"><i id="gb-bh" style="width:100%;background:#d0402f"></i></div><div class="mut" id="gb-bt"></div>
     <div class="mut">${esc(bs.abn)}</div><div class="${GB.mu.cls}" style="font-size:13px">${gElChips(GB.mu.els)} vs ${gElLabel(S.hero.char || 'kiem')}: ${GB.mu.txt}</div></div></div>
@@ -629,7 +644,7 @@ function gAnswer(i) {
   if (!ult) return next();
   // chiêu cuối: dừng đồng hồ từ lúc tung chiêu đến khi câu hỏi mới hiện ra
   GB.pauseAt = Date.now(); const tm = $('#gb-tm'); if (tm) tm.textContent = '⏸';
-  gUltPlay(ult, { boss: GIMG['m_' + bs.id + '_art'] }).then(() => { if (GB && !GB.over) next(); });
+  gUltPlay(ult, { boss: gBossSrc(bs.id) }).then(() => { if (GB && !GB.over) next(); });
 }
 function gClaimMilestones(W, lines) {
   [[.25, 20, 0], [.5, 40, 0], [.75, 80, 1], [1, 200, 2]].forEach(([thr, base, bonus]) => {
@@ -677,7 +692,7 @@ function vFight() {
   const ms = [.25, .5, .75, 1].map(t => `<span class="chip" style="${W.claimed.includes(t) ? 'background:var(--ac2);color:#fff' : ''}">${W.claimed.includes(t) ? '✓' : '🔒'} ${t * 100}%</span>`).join(' ');
   view.innerHTML = `
   <div class="card" style="padding:10px"><div class="mut" style="text-align:left">Quái tuần ${(W.k % 52) + 1} · cảnh giới ${REALMS[W.ri].h} ${REALMS[W.ri].n} · còn ${gDaysLeft()} ngày</div>
-    <img src="${GIMG['m_' + bs.id + '_card']}" alt="" style="width:100%;max-width:340px;border-radius:12px;display:block;margin:6px auto">
+    <div style="margin:6px 0">${gBossCard(bs, { max: '340px' })}</div>
     <div style="text-align:left"><b>${esc(bs.n)}</b> <span style="font-size:20px">${bs.h}</span> <span class="mut">${bs.p} · ${esc(bs.el)}</span>
     <div class="bar" style="height:14px"><i style="width:${pct}%;background:#d0402f"></i></div>
     <div class="mut">HP ${W.hp} / ${W.max} · Sát thương của bạn: <b>${W.dmg}</b> · Số trận: ${W.battles}</div>
@@ -693,7 +708,7 @@ function vFight() {
   <div class="card" style="text-align:left"><b>🌟 Chiêu cuối:</b> ${GEL[gUltEl()].e} ${GULT[gUltEl()].h} ${esc(GULT[gUltEl()].n)} <span class="mut">· tung ra khi đúng liên tiếp ${GULT_COMBO} câu trong trận (×${GULT_MULT} sát thương)</span>
     <div class="row" style="margin-top:6px"><button id="gult">🎬 Xem chiêu cuối 14 hệ</button></div></div>
   <h3 style="margin:14px 0 6px;text-align:left">📜 Sơn Hải Chí <span class="mut" style="font-size:14px">(${S.beast.length}/${GBOSS.length} đã mở)</span></h3>
-  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">${GBOSS.map(b => { const u = S.beast.includes(b.id); return `<button class="chest" data-b="${b.id}" style="display:block;padding:6px;${u ? '' : 'filter:grayscale(1) brightness(.5)'}"><img src="${GIMG['m_' + b.id + '_card']}" alt="" style="width:100%;border-radius:8px;display:block"><span class="mut">${u ? 'Đọc truyện' : 'Hạ gục để mở khóa'}</span></button>`; }).join('')}</div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">${GBOSS.map(b => { const u = S.beast.includes(b.id); return `<button class="chest" data-b="${b.id}" style="display:block;padding:6px;${u ? '' : 'filter:grayscale(1) brightness(.5)'}">${gBossCard(b, { small: true })}<span class="mut">${u ? 'Đọc truyện' : 'Hạ gục để mở khóa'}</span></button>`; }).join('')}</div>
   ${S.hist.length ? `<h3 style="margin:14px 0 6px;text-align:left">Lịch sử các tuần</h3><div class="card" style="padding:6px 10px;text-align:left">${S.hist.slice().reverse().map(h => `<div class="realm"><span style="flex:1">Tuần ${(h.k % 52) + 1}: ${esc(GBOSS[h.boss].n)}</span><span class="mut">${h.dmg} sát thương ${h.dead ? '· 👑 hạ gục' : ''}</span></div>`).join('')}</div>` : ''}
   <p class="mut" style="text-align:left">Lưu ý: app chạy trên máy bạn nên "bảng xếp hạng" chỉ ghi kỷ lục của chính bạn, không so với người khác.</p>`;
   const f = $('#gfight'); if (f) f.onclick = () => gStartBattle();
@@ -706,7 +721,7 @@ function vFight() {
 }
 function vBeast(id) {
   const b = GBOSS.find(x => x.id === id);
-  view.innerHTML = `<div class="card story"><div class="mut">Sơn Hải Chí</div><img src="${GIMG['m_' + id + '_art']}" alt="" style="width:100%;max-width:300px;border-radius:12px;display:block;margin:8px auto">
+  view.innerHTML = `<div class="card story"><div class="mut">Sơn Hải Chí</div><div style="margin:8px 0">${gBossCard(b, { max: '320px', noName: true })}</div>
     <div class="hz">${b.h}</div><div class="pin" style="font-size:20px">${b.p}</div><h3 style="margin:6px 0">${esc(b.n)}</h3><div class="mut">${esc(b.el)}</div>
     <p>${esc(b.s)}</p><div class="idiom">⚔️ <b>Kỹ năng trong trận:</b> ${esc(b.abn)}</div></div><div class="row"><button class="pri" id="bk">← Quay lại</button></div>`;
   $('#bk').onclick = () => go('fight');
