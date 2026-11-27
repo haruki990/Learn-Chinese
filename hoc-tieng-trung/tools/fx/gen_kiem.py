@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
-"""Vẽ sprite sheet hiệu ứng đòn đánh 6 khung (PNG RGBA trong suốt) cho nhân vật Kiếm.
+"""Vẽ sprite sheet hiệu ứng đòn đánh (PNG RGBA trong suốt) cho nhân vật Kiếm.
 
 Đòn bay từ PHẢI sang TRÁI (nhân vật đứng phải, quái đứng trái).
-Chạy:  python tools/fx/gen_kiem.py   ->  fx/kiem.png (6 ô ngang, mỗi ô CW x CH)
+Mọi chi tiết là hàm của thời gian t (0..1) nên có thể xuất bao nhiêu khung cũng được:
+  python tools/fx/gen_kiem.py        -> fx/kiem.webp + kiem.png (N khung, lưới COLS cột; game dùng .webp)
+  python tools/fx/gen_kiem.py 6      -> fx/kiem-6.png  (6 ô ngang, đúng bố cục của prompt)
 Chỉ cần numpy + Pillow.
 """
 import math, os, random
 import numpy as np
 from PIL import Image, ImageDraw
 
-CW, CH = 720, 300          # kích thước 1 ô (2.4:1 như sân đấu)
-SS = 2                     # vẽ siêu mẫu x2 rồi thu nhỏ để mịn
-W, H = CW * SS, CH * SS
-OUT = os.path.join(os.path.dirname(__file__), '..', '..', 'fx', 'kiem.png')
+CW, CH = 600, 250          # kích thước 1 ô xuất ra (2.4:1 như sân đấu)
+# toạ độ vẽ theo hệ 720x300; vẽ siêu mẫu x2 so với ô xuất rồi thu nhỏ để mịn
+SS = 2 * CW / 720
+W, H = int(720 * SS), int(300 * SS)
+N, COLS = 24, 6            # 24 khung, lưới 6 cột x 4 hàng
+FX_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'fx')
 
 # màu phát sáng (tuyến tính, sẽ được nén bằng 1-exp)
 WHITE = np.array([1.0, 1.0, 1.0])
@@ -125,7 +129,7 @@ def rune_ring(lay, cx, cy, r, k, rot, n=24):
         a = rot + i * 2 * math.pi / n
         x0, y0 = cx + math.cos(a) * r * .88, cy + math.sin(a) * r * .88
         x1, y1 = cx + math.cos(a) * r * .98, cy + math.sin(a) * r * .98
-        lay.d.line([P(x0, y0), P(x1, y1)], fill=k * (1 if i % 3 == 0 else .6), width=2 * SS if i % 3 == 0 else SS)
+        lay.d.line([P(x0, y0), P(x1, y1)], fill=k * (1 if i % 3 == 0 else .6), width=int(2 * SS) if i % 3 == 0 else max(1, int(SS)))
 
 
 def compose(core, body, soft):
@@ -148,178 +152,210 @@ def compose(core, body, soft):
     return im.resize((CW, CH), Image.LANCZOS)
 
 
-# ---------------- 6 khung ----------------
-def formation(core, body, soft, rnd, rot, tight, k, trail_arc=0.0, point_left=0.0):
-    """trận kiếm xoay tròn: 3 vòng kiếm. point_left 0..1 = xoay mũi kiếm từ tiếp tuyến sang chĩa trái"""
+
+# ---------------- hoạt ảnh liên tục theo t ----------------
+def sm(a, b, t):
+    """smoothstep 0->1 khi t đi từ a tới b"""
+    if b == a:
+        return 1.0 if t >= b else 0.0
+    x = min(1.0, max(0.0, (t - a) / (b - a)))
+    return x * x * (3 - 2 * x)
+
+
+def env(t, a, b, c, d):
+    """lên từ a->b, giữ, xuống c->d"""
+    return sm(a, b, t) * (1 - sm(c, d, t))
+
+
+def lerp(a, b, x):
+    return a + (b - a) * x
+
+
+class Seeds:
+    """thuộc tính ngẫu nhiên cố định cho mọi khung -> chuyển động liền mạch"""
+    def __init__(self, rnd):
+        r = rnd.random
+        self.spiral = [(r() * 2 * math.pi, 40 + r() * 110, .35 + r() * .4, .9 + r() * 1.2, r() * .25) for _ in range(150)]
+        self.flyers = [((r() - .5) * 210, .36 + r() * .2, 18 + r() * 16, 1.2 + r() * .6, .6 + r() * .4, 900 + r() * 500) for _ in range(70)]
+        self.escort = [((r() - .5) * 230, r(), 14 + r() * 18, 1 + r() * .6, .5 + r() * .5, (r() - .5) * .08) for _ in range(80)]
+        self.sparks = [(r() * 2 * math.pi, r(), .7 + r(), r()) for _ in range(90)]
+        self.rays = [(i * 2 * math.pi / 44 + r() * .1, 65 + r() * 60) for i in range(44)]
+        self.bigrays = [(r() * 2 * math.pi, 100 + r() * 25) for _ in range(14)]
+        self.frags = [(r() * 2 * math.pi, .35 + r() * .65, 1.6 + r() * 1.6, r()) for _ in range(46)]
+        self.dust = [(r() * 2 * math.pi, .2 + r() * .8, .25 + r() * .45, r() < .3, r()) for _ in range(100)]
+        self.jit = [r() for _ in range(200)]
+
+
+def formation(core, body, soft, S, rot, tight, k, trail_arc=0.0, point_left=0.0, appear=1.0):
+    """trận kiếm 3 vòng. point_left 0..1 xoay mũi từ tiếp tuyến sang chĩa trái; appear 0..1 số kiếm đã hiện"""
     cx, cy = ORIGIN
     rings = [(104 * tight, 22, 40, 4.2), (72 * tight, 16, 32, 3.6), (42 * tight, 10, 24, 3.0)]
+    j = 0
     for ri, (R, n, L, w) in enumerate(rings):
-        sp = (1 if ri % 2 == 0 else -1)
+        sp = 1 if ri % 2 == 0 else -1
         for i in range(n):
+            j += 1
+            vis = sm(S.jit[j] * .7, S.jit[j] * .7 + .3, appear)
+            if vis <= 0.01:
+                continue
             a = rot * sp + i * 2 * math.pi / n
             x, y = cx + math.cos(a) * R, cy + math.sin(a) * R * .92
             tang = a + sp * math.pi / 2
-            # nội suy góc ngắn nhất từ tiếp tuyến -> pi
             d = (math.pi - tang + math.pi) % (2 * math.pi) - math.pi
             ang = tang + d * point_left
-            if trail_arc > 0:  # vệt cung phía sau mỗi kiếm thể hiện chuyển động xoay
+            kk = k * vis * (0.75 + 0.25 * S.jit[j + 60])
+            if trail_arc > 0:
                 steps = 6
                 for s in range(steps):
                     a2 = a - sp * trail_arc * (s + 1) / steps
-                    x2, y2 = cx + math.cos(a2) * R, cy + math.sin(a2) * R * .92
-                    dot(soft, x2, y2, w * (1 - s / steps) * 1.1, k * .55 * (1 - s / steps))
-            draw_sword(core, body, x, y, L, ang, w * .55, k * (0.75 + 0.25 * rnd.random()))
+                    dot(soft, cx + math.cos(a2) * R, cy + math.sin(a2) * R * .92, w * (1 - s / steps) * 1.1, kk * .5 * (1 - s / steps))
+            draw_sword(core, body, x, y, L * (.6 + .4 * vis), ang, w * .55, kk)
 
 
-def frame1(rnd):  # tụ khí bên phải
+def render(t, S):
     core, body, soft = Layer(), Layer(), Layer()
     cx, cy = ORIGIN
-    # hạt sáng xoáy vào tâm
-    for i in range(170):
-        a = rnd.random() * 2 * math.pi
-        r = 34 + rnd.random() * 105
-        x, y = cx + math.cos(a) * r, cy + math.sin(a) * r * .9
-        tail = 0.35 + rnd.random() * .4
-        a2 = a - tail
-        r2 = r * 1.18
-        streak(soft, x, y, cx + math.cos(a2) * r2, cy + math.sin(a2) * r2 * .9, 1.4, 0.2, .9, 0, seg=5)
-        dot(core, x, y, 0.9 + rnd.random() * 1.2, .7)
-    rune_ring(body, cx, cy, 70, .35, 0.2, 18)
-    dot(soft, cx, cy, 26, .9)
-    dot(body, cx, cy, 11, 1)
-    dot(core, cx, cy, 6, 1.2)
-    # vài thanh kiếm mờ bắt đầu hiện ra
-    for i in range(10):
-        a = i * 2 * math.pi / 10 + .3
-        draw_sword(core, body, cx + math.cos(a) * 92, cy + math.sin(a) * 84, 34, a + math.pi / 2, 2.2, .45)
+    ix, iy = IMPACT
+
+    # 1) tụ khí: hạt xoáy vào tâm
+    g = env(t, 0, .04, .2, .34)
+    if g > 0:
+        for (a0, r0, tail, rr, dl) in S.spiral:
+            p = sm(dl, dl + .3, t)                 # tiến trình hút vào của hạt này
+            if p >= 1:
+                continue
+            a = a0 + p * 2.2
+            r = r0 * (1 - p * .85)
+            x, y = cx + math.cos(a) * r, cy + math.sin(a) * r * .9
+            a2, r2 = a - tail, r * 1.18
+            kk = g * (1 - p) ** .5
+            streak(soft, x, y, cx + math.cos(a2) * r2, cy + math.sin(a2) * r2 * .9, 1.4, .2, .9 * kk, 0, seg=5)
+            dot(core, x, y, rr, .7 * kk)
+
+    # lõi sáng ở tâm trận
+    c = env(t, 0, .2, .4, .55)
+    if c > 0:
+        pulse = 1 + .12 * math.sin(t * 60)
+        dot(soft, cx, cy, (14 + 16 * c) * pulse, .85 * c)
+        dot(body, cx, cy, (6 + 7 * c) * pulse, c)
+        dot(core, cx, cy, (3 + 5 * c) * pulse, 1.25 * c)
+
+    # 2) trận kiếm xoay
+    f = env(t, .06, .22, .5, .62)
+    if f > 0:
+        rot = t * 9.0
+        rune_ring(body, cx, cy, 128, .5 * f, rot * .3, 36)
+        rune_ring(soft, cx, cy, 88, .4 * f, -rot * .45, 24)
+        pl = sm(.33, .45, t)
+        formation(core, body, soft, S, rot, lerp(.8, 1.0, sm(.06, .25, t)) - .05 * pl, f, trail_arc=.5 * (1 - pl) + .1,
+                  point_left=pl, appear=sm(.04, .26, t))
+        for (a, rr, sz, ph) in S.sparks[:60]:
+            r = rr * 125
+            dot(core, cx + math.cos(a + t * 4) * r, cy + math.sin(a + t * 4) * r * .9, sz, .55 * f * (0.5 + .5 * math.sin(ph * 6 + t * 30)))
+
+    # 3) kiếm bay vụt sang trái
+    for (dy, t0, L, w, k, v) in S.flyers:
+        if t < t0:
+            continue
+        dt = t - t0
+        x = cx - 60 - dt * v
+        if x < -40:
+            continue
+        kk = k * (1 - sm(.6, .75, t))
+        if kk <= 0:
+            continue
+        tl = min(40 + dt * v * .45, 200)
+        streak(soft, x + L / 2, cy + dy, x + L / 2 + tl, cy + dy, 1.6, .2, .9 * kk, 0, seg=6)
+        draw_sword(core, body, x, cy + dy, L, math.pi, w, kk)
+
+    # 4) kiếm khí khổng lồ: thành hình ở trận, lao sang trái, cắm vào quái
+    gs = env(t, .36, .48, .72, .84)
+    if gs > 0:
+        L = lerp(200, 400, sm(.36, .55, t))
+        tipx = lerp(cx - L * .55, ix + 10, sm(.46, .7, t) ** 1.6)
+        gx = tipx + L / 2
+        streak(soft, gx + L / 2 - 30, cy, min(712, gx + L / 2 + 260), cy, 16, 3, .75 * gs, 0, seg=14)
+        for dyy in (-34, 34):
+            streak(body, gx, cy + dyy * .5, min(712, gx + L / 2 + 240), cy + dyy, 2.2, .3, .65 * gs, 0, seg=10)
+        mv = sm(.46, .52, t) * (1 - sm(.68, .74, t))
+        if mv > 0:
+            for jx, ox in enumerate((60, 120, 190)):
+                ring(body, tipx + ox, cy, 16 + jx * 9, 46 + jx * 22, 2.2 - jx * .5, (.8 - jx * .2) * mv * gs, 100, 260)
+        draw_sword(core, body, gx, cy, L, math.pi, lerp(9, 17, sm(.36, .55, t)), gs * lerp(.55, 1, sm(.36, .5, t)))
+    # bầy kiếm hộ tống
+    e = env(t, .46, .52, .7, .78)
+    if e > 0:
+        for (dy, ph, L, w, k, da) in S.escort:
+            x = 700 - ((ph * 520 + (t - .46) * 1900) % 560)
+            streak(soft, x + L / 2, cy + dy, x + L / 2 + 70, cy + dy, 1.4, .2, k * e, 0, seg=5)
+            draw_sword(core, body, x, cy + dy, L, math.pi + da, w, k * e)
+
+    # 5) nổ ở quái
+    x5 = env(t, .68, .71, .76, .9)
+    if x5 > 0:
+        gr = sm(.68, .8, t)                          # nổ lan ra
+        for (a, r1) in S.rays:
+            r = r1 * (.5 + .7 * gr)
+            streak(soft, ix + math.cos(a) * 18, iy + math.sin(a) * 18, ix + math.cos(a) * r, iy + math.sin(a) * r * .9, 5, .4, x5, 0, seg=6)
+        for (a, r1) in S.bigrays:
+            r = r1 * (.5 + .7 * gr)
+            streak(body, ix, iy, ix + math.cos(a) * r, iy + math.sin(a) * r * .9, 3, .2, x5, 0, seg=8)
+        dot(soft, ix, iy, 40 + 40 * x5, x5)
+        dot(body, ix, iy, 24 + 22 * x5, x5)
+        dot(core, ix, iy, 16 + 18 * x5, 1.4 * x5)
+    sw = env(t, .69, .72, .82, 1.0)
+    if sw > 0:
+        rr = sm(.69, 1.0, t)
+        ring(body, ix, iy, 60 + 90 * rr, 54 + 80 * rr, 3 * (1 - rr) + .8, .9 * sw)
+        ring(soft, ix, iy, 40 + 70 * rr, 36 + 62 * rr, 6 * (1 - rr) + 1, .7 * sw)
+        ring(body, ix, iy, 30 + 30 * rr, 80 + 60 * rr, 2, .55 * sw * (1 - rr), 60, 300)
+    # mảnh lưỡi kiếm văng ra rồi rơi
+    fr = env(t, .69, .73, .85, 1.0)
+    if fr > 0:
+        pf = sm(.69, 1.0, t)
+        for (a, sp, sz, ph) in S.frags:
+            r = 30 + sp * 150 * pf ** .6
+            x, y = ix + math.cos(a) * r, iy + math.sin(a) * r * .88 + 30 * pf * pf
+            diamond(body, x, y, sz, .9 * fr, a + ph * pf * 3, 3.2)
+            streak(soft, x, y, x - math.cos(a) * 22 * (1 - pf), y - math.sin(a) * 20 * (1 - pf), 1.2, .1, .7 * fr, 0, seg=4)
+    # 6) bụi sáng tan dần, trôi lên
+    d6 = env(t, .74, .84, .9, 1.0)
+    if d6 > 0:
+        pd = sm(.74, 1.0, t)
+        for (a, rr, k, isd, ph) in S.dust:
+            r = 20 + rr * 140 * (.4 + .6 * pd)
+            x, y = ix + math.cos(a) * r, iy + math.sin(a) * r * .85 - 28 * pd * ph
+            tw = .6 + .4 * math.sin(ph * 9 + t * 40)
+            if isd:
+                diamond(body, x, y, 1.2 + ph, k * d6 * tw, a, 3)
+            else:
+                dot(core, x, y, .6 + ph * 1.1, k * d6 * tw)
     return compose(core, body, soft)
 
 
-def frame2(rnd):  # trận kiếm hình thành, xoay tròn
-    core, body, soft = Layer(), Layer(), Layer()
-    cx, cy = ORIGIN
-    rune_ring(body, cx, cy, 128, .5, .6, 36)
-    rune_ring(soft, cx, cy, 88, .4, -.4, 24)
-    formation(core, body, soft, rnd, .5, 1.0, 1.0, trail_arc=.55)
-    dot(soft, cx, cy, 26, .8)
-    dot(body, cx, cy, 12, 1)
-    dot(core, cx, cy, 8, 1.3)
-    for i in range(80):
-        a = rnd.random() * 2 * math.pi; r = rnd.random() * 125
-        dot(core, cx + math.cos(a) * r, cy + math.sin(a) * r * .9, .8 + rnd.random(), .6)
-    return compose(core, body, soft)
-
-
-def frame3(rnd):  # kiếm phóng ra sang trái
-    core, body, soft = Layer(), Layer(), Layer()
-    cx, cy = ORIGIN
-    rune_ring(soft, cx, cy, 128, .3, 1.0, 36)
-    formation(core, body, soft, rnd, .9, .95, .85, trail_arc=.25, point_left=.85)
-    # thanh kiếm khổng lồ bắt đầu thành hình
-    streak(soft, cx + 50, cy, cx + 140, cy, 12, 2, .6, 0, seg=10)
-    draw_sword(core, body, cx - 30, cy, 210, math.pi, 9, .55)
-    # kiếm bay vụt trước
-    for i in range(46):
-        y = cy + (rnd.random() - .5) * 200
-        x = cx - 140 - rnd.random() * 260
-        L = 18 + rnd.random() * 16
-        streak(soft, x + L / 2, y, x + L / 2 + 60 + rnd.random() * 140, y, 1.6, .2, .9, 0, seg=6)
-        draw_sword(core, body, x, y, L, math.pi, 1.2 + rnd.random() * .6, .9)
-    return compose(core, body, soft)
-
-
-def frame4(rnd):  # kiếm khí khổng lồ lao sang trái
-    core, body, soft = Layer(), Layer(), Layer()
-    tipx, cy = 150, 150
-    L = 400
-    gx = tipx + L / 2
-    # vệt kiếm khí phía sau
-    streak(soft, gx + L / 2 - 30, cy, 712, cy, 16, 3, .75, 0, seg=16)
-    streak(soft, tipx + 40, cy, gx + L / 2, cy, 30, 22, .35, .3, seg=4)
-    for dy in (-34, 34):
-        streak(body, gx, cy + dy * .5, 700, cy + dy, 2.2, .3, .7, 0, seg=12)
-    # vòng sóng xung kích quanh mũi kiếm
-    for j, ox in enumerate((60, 120, 190)):
-        ring(body, tipx + ox, cy, 16 + j * 9, 46 + j * 22, 2.2 - j * .5, .8 - j * .2, 100, 260)
-    draw_sword(core, body, gx, cy, L, math.pi, 17, 1.0)
-    # bầy kiếm nhỏ bay kèm
-    for i in range(90):
-        y = cy + (rnd.random() - .5) * 230
-        x = 170 + rnd.random() * 470
-        Ls = 14 + rnd.random() * 18
-        k = .5 + rnd.random() * .5
-        streak(soft, x + Ls / 2, y, x + Ls / 2 + 40 + rnd.random() * 120, y, 1.4, .2, k, 0, seg=5)
-        draw_sword(core, body, x, y, Ls, math.pi + (rnd.random() - .5) * .08, 1 + rnd.random() * .6, k)
-    # tàn dư trận kiếm bên phải
-    rune_ring(soft, ORIGIN[0] + 30, ORIGIN[1], 110, .22, 1.4, 30)
-    for i in range(60):
-        dot(core, tipx + rnd.random() * 520, cy + (rnd.random() - .5) * 240, .7 + rnd.random(), .6)
-    return compose(core, body, soft)
-
-
-def frame5(rnd):  # nổ tung bên trái
-    core, body, soft = Layer(), Layer(), Layer()
-    cx, cy = IMPACT
-    # tia nổ toả tròn
-    for i in range(44):
-        a = i * 2 * math.pi / 44 + rnd.random() * .1
-        r1 = 65 + rnd.random() * 60
-        streak(soft, cx + math.cos(a) * 18, cy + math.sin(a) * 18, cx + math.cos(a) * r1, cy + math.sin(a) * r1 * .9, 5, .4, 1, 0, seg=6)
-    for i in range(14):
-        a = rnd.random() * 2 * math.pi
-        r1 = 100 + rnd.random() * 25
-        streak(body, cx, cy, cx + math.cos(a) * r1, cy + math.sin(a) * r1 * .9, 3, .2, 1, 0, seg=8)
-    ring(body, cx, cy, 120, 108, 3, .9)
-    ring(soft, cx, cy, 96, 84, 6, .7)
-    ring(body, cx, cy, 52, 128, 2, .6, 60, 300)   # vành sóng dọc
-    dot(soft, cx, cy, 70, 1.0)
-    dot(body, cx, cy, 42, 1.0)
-    dot(core, cx, cy, 30, 1.4)
-    # mảnh lưỡi kiếm văng
-    for i in range(40):
-        a = rnd.random() * 2 * math.pi
-        r = 40 + rnd.random() * 100
-        x, y = cx + math.cos(a) * r, cy + math.sin(a) * r * .88
-        diamond(body, x, y, 1.6 + rnd.random() * 1.6, .9, a, 3.2)
-        streak(soft, x, y, x - math.cos(a) * 22, y - math.sin(a) * 20, 1.2, .1, .7, 0, seg=4)
-    # đuôi kiếm khí còn lại phía sau
-    streak(soft, cx + 40, cy, 470, cy, 14, 1, .6, 0, seg=12)
-    draw_sword(core, body, cx + 120, cy, 240, math.pi, 12, .55)
-    return compose(core, body, soft)
-
-
-def frame6(rnd):  # hạt sáng tan dần
-    core, body, soft = Layer(), Layer(), Layer()
-    cx, cy = IMPACT
-    ring(soft, cx, cy, 132, 122, 2.5, .3)
-    ring(body, cx, cy, 140, 130, 1, .2)
-    for i in range(110):
-        a = rnd.random() * 2 * math.pi
-        r = 20 + rnd.random() * 130
-        x, y = cx + math.cos(a) * r, cy + math.sin(a) * r * .85 - rnd.random() * 18
-        k = .25 + rnd.random() * .45
-        if rnd.random() < .3:
-            diamond(body, x, y, 1.2 + rnd.random(), k, a, 3)
-        else:
-            dot(core, x, y, .6 + rnd.random() * 1.1, k)
-            streak(soft, x, y, x, y + 6 + rnd.random() * 10, 1, .1, k * .6, 0, seg=3)
-    # vài kiếm nhỏ mờ rơi lại
-    for i in range(6):
-        x = cx + 30 + rnd.random() * 200; y = cy + (rnd.random() - .5) * 150
-        draw_sword(core, body, x, y, 18, math.pi + (rnd.random() - .5) * .6, 1.1, .3)
-    return compose(core, body, soft)
-
-
-def main():
+def build(n, cols, out):
     rnd = random.Random(7)
-    frames = [f(rnd) for f in (frame1, frame2, frame3, frame4, frame5, frame6)]
-    sheet = Image.new('RGBA', (CW * 6, CH), (0, 0, 0, 0))
-    for i, f in enumerate(frames):
-        sheet.paste(f, (i * CW, 0))
-    os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    sheet.save(OUT, optimize=True)
-    print('saved', os.path.abspath(OUT), sheet.size)
+    S = Seeds(rnd)
+    rows = (n + cols - 1) // cols
+    sheet = Image.new('RGBA', (CW * cols, CH * rows), (0, 0, 0, 0))
+    for i in range(n):
+        t = .02 + .96 * i / (n - 1) if n > 1 else 0
+        if n == 6:   # 6 ô: lấy đúng 6 thời điểm tiêu biểu của prompt
+            t = [.14, .3, .44, .58, .72, .9][i]
+        sheet.paste(render(t, S), ((i % cols) * CW, (i // cols) * CH))
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    if out.endswith('.webp'):
+        sheet.save(out, quality=86, method=6)   # bản dùng trong game (nhẹ hơn PNG ~3 lần, vẫn có alpha)
+        sheet.save(out[:-5] + '.png', optimize=True)
+    else:
+        sheet.save(out, optimize=True)
+    print('saved', os.path.abspath(out), sheet.size, n, 'frames')
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    if len(sys.argv) > 1:
+        n = int(sys.argv[1])
+        build(n, n if n <= 8 else COLS, os.path.join(FX_DIR, 'kiem-%d.png' % n))
+    else:
+        build(N, COLS, os.path.join(FX_DIR, 'kiem.webp'))

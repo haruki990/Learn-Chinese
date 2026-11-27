@@ -495,7 +495,7 @@ const GAR_CSS = `
 .ar-n{position:absolute;font-weight:800;font-size:22px;color:#fff;text-shadow:0 2px 0 #000,0 0 8px rgba(0,0,0,.7);pointer-events:none;animation:arFloat .95s ease-out forwards;white-space:nowrap;text-align:center;line-height:1.05;z-index:3}
 .ar-n.bad{color:#ff5a4f}.ar-n.crit{font-size:30px;color:#ffd23f}.ar-n.info{font-size:17px;color:#cfe3ff}
 .ar-sl{position:absolute;width:120px;height:8px;border-radius:8px;background:linear-gradient(90deg,transparent,#fff,#ffe27a,transparent);box-shadow:0 0 12px #ffe27a;transform:rotate(-35deg) scaleX(0);animation:arSlash .35s ease-out forwards;z-index:2}
-.ar-fx{position:absolute;inset:0;z-index:0;pointer-events:none;background:0 0/600% 100% no-repeat}
+.ar-fx{position:absolute;inset:0;z-index:0;pointer-events:none;background-repeat:no-repeat}
 .ar-cl{position:absolute;width:12px;height:110px;border-radius:10px;background:linear-gradient(180deg,transparent,#ff2d2d,#8b0000,transparent);box-shadow:0 0 14px #ff2d2d;transform:skewX(-22deg) scaleY(0);transform-origin:top;animation:arClaw .38s ease-out forwards;z-index:2}
 .ar-shield{position:absolute;border-radius:50%;border:3px solid #9fd8ff;background:radial-gradient(rgba(159,216,255,.05),rgba(159,216,255,.35));box-shadow:0 0 18px #9fd8ff;animation:arShield .6s ease-out forwards;z-index:2}
 .ar-vig{position:fixed;inset:0;pointer-events:none;z-index:9998;box-shadow:inset 0 0 120px 40px rgba(220,20,20,.75);animation:arVig .55s ease-out forwards}
@@ -542,20 +542,34 @@ function gArSpawn(html, x, y, ms) { // x, y: % trong sân đấu
   const d = document.createElement('div'); d.innerHTML = html; const e = d.firstChild;
   e.style.left = x + '%'; e.style.top = y + '%'; ar.appendChild(e); setTimeout(() => e.remove(), ms || 1000);
 }
-// hoạt ảnh đòn đánh thường theo nhân vật: sprite sheet 6 ô ngang PNG trong suốt (fx/<id>.png, tạo bằng tools/fx/gen_<id>.py)
-// ô 1–2 tụ khí bên phải, 3–4 bay sang trái, 5 nổ ở quái, 6 tan. ms = thời gian từng ô
-const GASH = { kiem: { src: 'fx/kiem.png', ms: [90, 110, 90, 90, 160, 200] } };
+// hoạt ảnh đòn đánh thường theo nhân vật: sprite sheet PNG/WebP trong suốt (fx/<id>.*, tạo bằng tools/fx/gen_<id>.py)
+// n khung xếp lưới cols cột (hàng tự tính), chạy theo đồng hồ thật (requestAnimationFrame) nên không khựng.
+// fps: tốc độ đều; hoặc ms: [thời gian từng khung] (vd sheet 6 ô vẽ bằng AI). hit: khung quái bắt đầu trúng đòn (nổ)
+const GASH = { kiem: { src: 'fx/kiem.webp', n: 24, cols: 6, fps: 30, hit: 16 } };
 const gAshOf = () => GASH[(S.hero && S.hero.char) || 'kiem'];
 function gPreloadAsh() { const a = gAshOf(); if (a && !a.img) { a.img = new Image(); a.img.src = a.src; } }
 function gAtkSheet(ar) {
   const a = gAshOf(); if (!a) return null;
   gPreloadAsh();
+  const n = a.n || 6, cols = a.cols || n, rows = Math.ceil(n / cols);
+  const ms = a.ms || Array(n).fill(1000 / (a.fps || 30)), ends = [];
+  ms.reduce((s, m, i) => (ends[i] = s + m), 0);
   const e = document.createElement('div'); e.className = 'ar-fx';
-  e.style.backgroundImage = `url('${a.src}')`; ar.insertBefore(e, document.getElementById('ar-p')); // sau lưng nhân vật, trước mặt quái
-  let i = 0, t = 0;
-  const step = () => { if (i >= 6) return e.remove(); e.style.backgroundPosition = (i * 20) + '% 0'; t = a.ms[i++]; setTimeout(step, t); };
-  step();
-  return { hitAt: a.ms.slice(0, 4).reduce((x, y) => x + y, 0) };
+  e.style.backgroundImage = `url('${a.src}')`; e.style.backgroundSize = `${cols * 100}% ${rows * 100}%`;
+  ar.insertBefore(e, document.getElementById('ar-p')); // sau lưng nhân vật, trước mặt quái
+  const show = i => { const c = i % cols, r = Math.floor(i / cols);
+    e.style.backgroundPosition = `${cols > 1 ? c / (cols - 1) * 100 : 0}% ${rows > 1 ? r / (rows - 1) * 100 : 0}%`; };
+  let cur = -1; const t0 = performance.now();
+  const tick = now => {
+    if (!e.isConnected) return;
+    const dt = now - t0; let i = cur < 0 ? 0 : cur; while (i < n && dt >= ends[i]) i++;
+    if (i >= n) return e.remove();
+    if (i !== cur) { cur = i; show(i); }
+    requestAnimationFrame(tick);
+  };
+  show(0); cur = 0; requestAnimationFrame(tick);
+  const hit = a.hit != null ? a.hit : Math.round(n * 2 / 3);
+  return { hitAt: hit ? ends[hit - 1] : 0 };
 }
 // kind: 'atk' (mình đánh trúng), 'miss' (mình đánh trượt), 'hurt' (quái gây sát thương khi trả lời sai), 'block' (đỡ được), 'dot' (độc)
 function gArenaFx(kind, o) {
