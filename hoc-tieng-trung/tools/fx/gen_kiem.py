@@ -11,11 +11,11 @@ import math, os, random
 import numpy as np
 from PIL import Image, ImageDraw
 
-CW, CH = 600, 250          # kích thước 1 ô xuất ra (2.4:1 như sân đấu)
+CW, CH = 480, 200          # kích thước 1 ô xuất ra (2.4:1 như sân đấu)
 # toạ độ vẽ theo hệ 720x300; vẽ siêu mẫu x2 so với ô xuất rồi thu nhỏ để mịn
 SS = 2 * CW / 720
 W, H = int(720 * SS), int(300 * SS)
-N, COLS = 24, 6            # 24 khung, lưới 6 cột x 4 hàng
+N, COLS = 72, 8            # 72 khung (3 giây ở 24 khung/giây), lưới 8 cột x 9 hàng
 FX_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'fx')
 
 # màu phát sáng (tuyến tính, sẽ được nén bằng 1-exp)
@@ -235,7 +235,7 @@ def render(t, S):
     # lõi sáng ở tâm trận
     c = env(t, 0, .2, .4, .55)
     if c > 0:
-        pulse = 1 + .12 * math.sin(t * 60)
+        pulse = 1 + .12 * math.sin(t * 140)
         dot(soft, cx, cy, (14 + 16 * c) * pulse, .85 * c)
         dot(body, cx, cy, (6 + 7 * c) * pulse, c)
         dot(core, cx, cy, (3 + 5 * c) * pulse, 1.25 * c)
@@ -243,7 +243,7 @@ def render(t, S):
     # 2) trận kiếm xoay
     f = env(t, .06, .22, .5, .62)
     if f > 0:
-        rot = t * 9.0
+        rot = t * 16.0
         rune_ring(body, cx, cy, 128, .5 * f, rot * .3, 36)
         rune_ring(soft, cx, cy, 88, .4 * f, -rot * .45, 24)
         pl = sm(.33, .45, t)
@@ -251,7 +251,7 @@ def render(t, S):
                   point_left=pl, appear=sm(.04, .26, t))
         for (a, rr, sz, ph) in S.sparks[:60]:
             r = rr * 125
-            dot(core, cx + math.cos(a + t * 4) * r, cy + math.sin(a + t * 4) * r * .9, sz, .55 * f * (0.5 + .5 * math.sin(ph * 6 + t * 30)))
+            dot(core, cx + math.cos(a + t * 7) * r, cy + math.sin(a + t * 7) * r * .9, sz, .55 * f * (0.5 + .5 * math.sin(ph * 6 + t * 80)))
 
     # 3) kiếm bay vụt sang trái
     for (dy, t0, L, w, k, v) in S.flyers:
@@ -286,7 +286,7 @@ def render(t, S):
     e = env(t, .46, .52, .7, .78)
     if e > 0:
         for (dy, ph, L, w, k, da) in S.escort:
-            x = 700 - ((ph * 520 + (t - .46) * 1900) % 560)
+            x = 700 - ((ph * 520 + (t - .46) * 2600) % 560)
             streak(soft, x + L / 2, cy + dy, x + L / 2 + 70, cy + dy, 1.4, .2, k * e, 0, seg=5)
             draw_sword(core, body, x, cy + dy, L, math.pi + da, w, k * e)
 
@@ -325,7 +325,7 @@ def render(t, S):
         for (a, rr, k, isd, ph) in S.dust:
             r = 20 + rr * 140 * (.4 + .6 * pd)
             x, y = ix + math.cos(a) * r, iy + math.sin(a) * r * .85 - 28 * pd * ph
-            tw = .6 + .4 * math.sin(ph * 9 + t * 40)
+            tw = .6 + .4 * math.sin(ph * 9 + t * 100)
             if isd:
                 diamond(body, x, y, 1.2 + ph, k * d6 * tw, a, 3)
             else:
@@ -345,7 +345,7 @@ def build(n, cols, out):
         sheet.paste(render(t, S), ((i % cols) * CW, (i // cols) * CH))
     os.makedirs(os.path.dirname(out), exist_ok=True)
     if out.endswith('.webp'):
-        sheet.save(out, quality=86, method=6)   # bản dùng trong game (nhẹ hơn PNG ~3 lần, vẫn có alpha)
+        sheet.save(out, quality=80, method=6)   # bản dùng trong game (nhẹ hơn PNG ~3 lần, vẫn có alpha)
         sheet.save(out[:-5] + '.png', optimize=True)
     else:
         sheet.save(out, optimize=True)

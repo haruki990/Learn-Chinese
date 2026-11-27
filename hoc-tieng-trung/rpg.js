@@ -545,7 +545,7 @@ function gArSpawn(html, x, y, ms) { // x, y: % trong sân đấu
 // hoạt ảnh đòn đánh thường theo nhân vật: sprite sheet PNG/WebP trong suốt (fx/<id>.*, tạo bằng tools/fx/gen_<id>.py)
 // n khung xếp lưới cols cột (hàng tự tính), chạy theo đồng hồ thật (requestAnimationFrame) nên không khựng.
 // fps: tốc độ đều; hoặc ms: [thời gian từng khung] (vd sheet 6 ô vẽ bằng AI). hit: khung quái bắt đầu trúng đòn (nổ)
-const GASH = { kiem: { src: 'fx/kiem.webp', n: 24, cols: 6, fps: 30, hit: 16 } };
+const GASH = { kiem: { src: 'fx/kiem.webp', n: 72, cols: 8, fps: 24, hit: 50 } };
 const gAshOf = () => GASH[(S.hero && S.hero.char) || 'kiem'];
 function gPreloadAsh() { const a = gAshOf(); if (a && !a.img) { a.img = new Image(); a.img.src = a.src; } }
 function gAtkSheet(ar) {
@@ -569,7 +569,7 @@ function gAtkSheet(ar) {
   };
   show(0); cur = 0; requestAnimationFrame(tick);
   const hit = a.hit != null ? a.hit : Math.round(n * 2 / 3);
-  return { hitAt: hit ? ends[hit - 1] : 0 };
+  return { hitAt: hit ? ends[hit - 1] : 0, dur: ends[n - 1] };
 }
 // kind: 'atk' (mình đánh trúng), 'miss' (mình đánh trượt), 'hurt' (quái gây sát thương khi trả lời sai), 'block' (đỡ được), 'dot' (độc)
 function gArenaFx(kind, o) {
@@ -583,6 +583,7 @@ function gArenaFx(kind, o) {
       if (!sh) gArSpawn('<div class="ar-sl"></div>', 6, 38, 400); if (o.crit) { gArSpawn('<div class="ar-sl" style="transform:rotate(30deg)"></div>', 8, 30, 400); gArReplay(ar, 'quake'); }
       gArSpawn(`<div class="ar-n ${o.crit ? 'crit' : ''}">${o.crit ? '<small style="font-size:15px">CHÍ MẠNG</small><br>' : ''}-${o.dmg}</div>`, 25, 20);
     }, sh ? sh.hitAt : 160);
+    return sh;
   } else if (kind === 'miss') {
     gArReplay(P, 'lunge'); setTimeout(() => { gArReplay(B, 'dodge'); gArSpawn('<div class="ar-n info">Trượt!</div>', 24, 22); }, 160);
   } else if (kind === 'hurt' || kind === 'block') {
@@ -628,7 +629,7 @@ function gAnswer(i) {
   const btns = [...document.querySelectorAll('#gb-o .opt')];
   btns[i].classList.add(right ? 'ok' : 'no'); const okIdx = q.opts.findIndex(o => o.ok); btns[okIdx].classList.add('ok');
   if (q.speakOnAnswer && q.word) speak(q.word);
-  let log = '', ult = null;
+  let log = '', ult = null, fxs = null;
   const dr = rpgOnAnswer(right);
   if (dr) GB.drops.push(dr);
   if (right) {
@@ -644,7 +645,7 @@ function gAnswer(i) {
       const uh = gHit(), ud = Math.round((uh.miss ? Math.max(1, GB.st.atk * GB.mu.dmg - W.def * .5) : uh.dmg) * GULT_MULT * (window.fxUltMul ? fxUltMul() : 1)), ue = gUltEl();
       total += ud; ult = ue; log = `🌟 <b>Chiêu cuối ${GULT[ue].h} ${esc(GULT[ue].n)}</b>: ${ud} sát thương<br>` + log;
     }
-    if (total && !ult) gArenaFx('atk', { dmg: total, crit: h.crit });
+    if (total && !ult) fxs = gArenaFx('atk', { dmg: total, crit: h.crit });
     if (total) {
       W.hp = Math.max(0, W.hp - total); W.dmg += total; GB.dmg += total;
       if (GB.st.fx.vamp) { const hl = Math.round(total * GB.st.fx.vamp / 100); GB.php = Math.min(GB.pmax, GB.php + hl); if (hl) log += ` · hồi ${hl} HP`; }
@@ -659,7 +660,8 @@ function gAnswer(i) {
     if (bs.ab === 'time') { GB.endAt -= 4000; log += ' · -4 giây'; }
     if (bs.ab === 'poison') { GB.poison = Math.min(5, GB.poison + 1); log += ` · trúng độc x${GB.poison}`; }
   }
-  gBars();
+  // có hoạt ảnh chiêu riêng: thanh máu quái tụt đúng lúc kiếm khí nổ
+  if (fxs) { setTimeout(() => { if (GB && !GB.over) gBars(); }, fxs.hitAt); } else gBars();
   $('#gb-log').innerHTML = `${log}<div class="mut" style="margin-top:4px">${q.expl}</div>${dr ? gDropHTML(dr) : ''}`;
   // sang câu tiếp: tự động sau 1,1 giây (sai: 1,7 giây) hoặc ngay khi bấm Enter (GB.goNext)
   const goQ = () => {
@@ -669,10 +671,16 @@ function gAnswer(i) {
     gNextQ();
   };
   const next = () => {
-    if (W.hp <= 0) return setTimeout(() => gEndBattle('win'), 900);
+    if (W.hp <= 0) return setTimeout(() => gEndBattle('win'), 900 + (fxs ? fxs.hitAt : 0));
     if (GB.php <= 0) return setTimeout(() => gEndBattle('dead'), 900);
     GB.goNext = goQ; GB.nt = setTimeout(goQ, right ? 1100 : 1700);
   };
+  if (fxs) { // hoạt ảnh chiêu dài (vd Kiếm 3 giây): dừng đồng hồ, câu tiếp hiện khi chiêu xong (Enter để bỏ qua)
+    GB.pauseAt = Date.now(); const tm = $('#gb-tm'); if (tm) tm.textContent = '⏸';
+    if (W.hp <= 0) return next();
+    GB.goNext = goQ; GB.nt = setTimeout(goQ, Math.max(1100, fxs.dur - 250));
+    return;
+  }
   if (!ult) return next();
   // chiêu cuối: dừng đồng hồ từ lúc tung chiêu đến khi câu hỏi mới hiện ra
   GB.pauseAt = Date.now(); const tm = $('#gb-tm'); if (tm) tm.textContent = '⏸';
