@@ -545,7 +545,9 @@ function gArSpawn(html, x, y, ms) { // x, y: % trong sân đấu
 // hoạt ảnh đòn đánh thường theo nhân vật: sprite sheet PNG/WebP trong suốt (fx/<id>.*, tạo bằng tools/fx/gen_<id>.py)
 // n khung xếp lưới cols cột (hàng tự tính), chạy theo đồng hồ thật (requestAnimationFrame) nên không khựng.
 // fps: tốc độ đều; hoặc ms: [thời gian từng khung] (vd sheet 6 ô vẽ bằng AI). hit: khung quái bắt đầu trúng đòn (nổ)
-const GASH = { kiem: { src: 'fx/kiem.webp', n: 72, cols: 8, fps: 24, hit: 50 } };
+const GASH = {};
+['kiem', 'hoa', 'thuy', 'moc', 'dia', 'loi', 'bang', 'phong', 'hon', 'quang', 'doc', 'khong', 'thoi', 'kimcuong', 'dan', 'khi', 'tran', 'thu', 'am', 'co', 'nho', 'hoa2']
+  .forEach(id => { GASH[id] = { src: 'fx/' + id + '.webp', n: 72, cols: 8, fps: 24, hit: 50 }; }); // chỉ tải sheet của nhân vật đang dùng
 const gAshOf = () => GASH[(S.hero && S.hero.char) || 'kiem'];
 function gPreloadAsh() { const a = gAshOf(); if (a && !a.img) { a.img = new Image(); a.img.src = a.src; } }
 function gAtkSheet(ar) {
