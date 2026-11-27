@@ -103,7 +103,7 @@ img[src*="chars/"]{background:radial-gradient(circle at 50% 42%,#5a5288 0%,#2a26
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@600;700&display=swap">
-<link rel="stylesheet" href="theme.css?v=20261127a">
+<link rel="stylesheet" href="theme.css?v=20261127b">
 </head>
 <body>
 <div class="wrap">
@@ -131,9 +131,9 @@ img[src*="chars/"]{background:radial-gradient(circle at 50% 42%,#5a5288 0%,#2a26
 <script src="audio-data.js"></script>
 <script src="avatars-data.js"></script>
 <script src="game-data.js"></script>
-<script src="rpg-data.js?v=20261127a"></script>
-<script src="rpg.js?v=20261127a"></script>
-<script src="ult-fx.js?v=20261127a"></script>
+<script src="rpg-data.js?v=20261127b"></script>
+<script src="rpg.js?v=20261127b"></script>
+<script src="ult-fx.js?v=20261127b"></script>
 <script>
 // Báo lỗi dễ hiểu nếu các file đi kèm không tải được (ví dụ xem trước dạng data: trong khung trình duyệt của Claude)
 window.addEventListener("DOMContentLoaded", function () {
@@ -3030,10 +3030,10 @@ const ITEMS = META.map(m => ({ id: m.id, cat: 'char', name: m.name, kind: m.kind
   { id: 'au_gold', cat: 'aura', name: 'Kim quang', price: 260, c: '#ffd24d', img: 'items/au_gold.webp', st: { expb: 3, luck: 2 } },
   { id: 'au_purple', cat: 'aura', name: 'Tử khí đông lai', price: 420, c: '#b57bff', img: 'items/au_purple.webp', st: { expb: 4, luck: 3, hit: 2 } },
   { id: 'au_red', cat: 'aura', name: 'Xích viêm', price: 560, c: '#ff6a3d', img: 'items/au_red.webp', st: { expb: 5, luck: 3, crit: 2 } },
-  { id: 'pill_s', cat: 'use', kind: 'pill', name: 'Tụ Khí Đan', price: 25, xp: 30, e: '💊', d: '+30 tu vi (tính vào giới hạn ngày)' },
-  { id: 'pill_m', cat: 'use', kind: 'pill', name: 'Trúc Cơ Đan', price: 80, xp: 100, e: '🟣', d: '+100 tu vi (tính vào giới hạn ngày)' },
-  { id: 'pill_l', cat: 'use', kind: 'pill', name: 'Kim Đan', price: 250, xp: 250, e: '🔶', d: '+250 tu vi (tính vào giới hạn ngày)' },
-  { id: 'charm', cat: 'use', kind: 'charm', name: 'Hộ Chuỗi Phù', price: 100, e: '🧿', d: 'Tự giữ chuỗi nếu lỡ 1 ngày (giữ tối đa 2)' }
+  { id: 'pill_s', cat: 'use', img: 'items/pill_s.webp', kind: 'pill', name: 'Tụ Khí Đan', price: 25, xp: 30, e: '💊', d: '+30 tu vi (tính vào giới hạn ngày)' },
+  { id: 'pill_m', cat: 'use', img: 'items/pill_m.webp', kind: 'pill', name: 'Trúc Cơ Đan', price: 80, xp: 100, e: '🟣', d: '+100 tu vi (tính vào giới hạn ngày)' },
+  { id: 'pill_l', cat: 'use', img: 'items/pill_l.webp', kind: 'pill', name: 'Kim Đan', price: 250, xp: 250, e: '🔶', d: '+250 tu vi (tính vào giới hạn ngày)' },
+  { id: 'charm', cat: 'use', img: 'items/charm.webp', kind: 'charm', name: 'Hộ Chuỗi Phù', price: 100, e: '🧿', d: 'Tự giữ chuỗi nếu lỡ 1 ngày (giữ tối đa 2)' }
 ]);
 const CATS = [['char', 'Nhân vật'], ['title', 'Danh hiệu'], ['frame', 'Khung'], ['aura', 'Hào quang'], ['pet', 'Linh thú'], ['use', 'Đan dược & Phù']];
 const itemOf = id => ITEMS.find(i => i.id === id);
@@ -3146,11 +3146,11 @@ applyFreeze();
 render();
 if (S.refunded) { toast('Đã hoàn ' + S.refunded + ' 💎 cho đồ trang phục cũ, hãy dùng để mua nhân vật mới!'); S.refunded = 0; save(); }
 </script>
-<script src="features.js?v=20261127a"></script>
+<script src="features.js?v=20261127b"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="cloud.js?v=20261127a"></script>
-<script src="sect.js?v=20261127a"></script>
+<script src="cloud.js?v=20261127b"></script>
+<script src="sect.js?v=20261127b"></script>
 </body>
 </html>

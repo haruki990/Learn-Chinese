@@ -496,7 +496,7 @@ const BITEMS = [
   { id: 'bi_guard', k: 'guard', e: '🛡️', name: 'Kim Chung Tráo', price: 45, d: 'Trong trận: lần sai kế tiếp không mất HP, giữ liên kích' },
   { id: 'bi_power', k: 'power', e: '🔥', name: 'Bạo Kích Đan', price: 50, d: 'Trong trận: đòn đúng kế tiếp chắc chắn trúng, sát thương ×2' }
 ];
-BITEMS.forEach(b => ITEMS.push({ id: b.id, cat: 'use', kind: 'bitem', name: b.name, price: b.price, e: b.e, d: b.d }));
+BITEMS.forEach(b => ITEMS.push({ id: b.id, cat: 'use', kind: 'bitem', name: b.name, price: b.price, e: b.e, img: 'items/' + b.id + '.webp', d: b.d }));
 const biInv = () => { if (!S.bitems || typeof S.bitems !== 'object') S.bitems = {}; return S.bitems; };
 const fx_buyItem = buyItem;
 buyItem = function (id) {
@@ -516,7 +516,7 @@ function biMount(host, B, mode) {
   if (!list.length) return;
   host.insertAdjacentHTML('beforeend', `<div class="bi-bar" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:8px">${list.map(b => {
     const used = B.biUsed[b.k] || 0, off = used >= BI_MAX || (mode === 'coop' && b.k === 'freeze');
-    return `<button data-bi="${b.k}" title="${esc(b.d)}" ${off ? 'disabled' : ''} style="padding:4px 9px;font-size:13px;border-radius:99px">${b.e} ${esc(b.name)} ×${inv[b.id]}</button>`;
+    return `<button data-bi="${b.k}" title="${esc(b.d)}" ${off ? 'disabled' : ''} style="padding:4px 9px;font-size:13px;border-radius:99px;display:inline-flex;align-items:center;gap:4px"><img src="items/${b.id}.webp" alt="" style="width:22px;height:22px;object-fit:contain"> ${esc(b.name)} ×${inv[b.id]}</button>`;
   }).join('')}</div>`);
   host.querySelector('.bi-bar').onclick = e => { const b = e.target.closest('[data-bi]'); if (b && !b.disabled) biUse(b.dataset.bi, B, mode, host); };
 }
