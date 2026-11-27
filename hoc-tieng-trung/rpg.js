@@ -495,6 +495,7 @@ const GAR_CSS = `
 .ar-n{position:absolute;font-weight:800;font-size:22px;color:#fff;text-shadow:0 2px 0 #000,0 0 8px rgba(0,0,0,.7);pointer-events:none;animation:arFloat .95s ease-out forwards;white-space:nowrap;text-align:center;line-height:1.05;z-index:3}
 .ar-n.bad{color:#ff5a4f}.ar-n.crit{font-size:30px;color:#ffd23f}.ar-n.info{font-size:17px;color:#cfe3ff}
 .ar-sl{position:absolute;width:120px;height:8px;border-radius:8px;background:linear-gradient(90deg,transparent,#fff,#ffe27a,transparent);box-shadow:0 0 12px #ffe27a;transform:rotate(-35deg) scaleX(0);animation:arSlash .35s ease-out forwards;z-index:2}
+.ar-fx{position:absolute;inset:0;z-index:0;pointer-events:none;background-repeat:no-repeat}
 .ar-cl{position:absolute;width:12px;height:110px;border-radius:10px;background:linear-gradient(180deg,transparent,#ff2d2d,#8b0000,transparent);box-shadow:0 0 14px #ff2d2d;transform:skewX(-22deg) scaleY(0);transform-origin:top;animation:arClaw .38s ease-out forwards;z-index:2}
 .ar-shield{position:absolute;border-radius:50%;border:3px solid #9fd8ff;background:radial-gradient(rgba(159,216,255,.05),rgba(159,216,255,.35));box-shadow:0 0 18px #9fd8ff;animation:arShield .6s ease-out forwards;z-index:2}
 .ar-vig{position:fixed;inset:0;pointer-events:none;z-index:9998;box-shadow:inset 0 0 120px 40px rgba(220,20,20,.75);animation:arVig .55s ease-out forwards}
@@ -541,17 +542,50 @@ function gArSpawn(html, x, y, ms) { // x, y: % trong sân đấu
   const d = document.createElement('div'); d.innerHTML = html; const e = d.firstChild;
   e.style.left = x + '%'; e.style.top = y + '%'; ar.appendChild(e); setTimeout(() => e.remove(), ms || 1000);
 }
+// hoạt ảnh đòn đánh thường theo nhân vật: sprite sheet PNG/WebP trong suốt (fx/<id>.*, tạo bằng tools/fx/gen_<id>.py)
+// n khung xếp lưới cols cột (hàng tự tính), chạy theo đồng hồ thật (requestAnimationFrame) nên không khựng.
+// fps: tốc độ đều; hoặc ms: [thời gian từng khung] (vd sheet 6 ô vẽ bằng AI). hit: khung quái bắt đầu trúng đòn (nổ)
+const GASH = {};
+['kiem', 'hoa', 'thuy', 'moc', 'dia', 'loi', 'bang', 'phong', 'hon', 'quang', 'doc', 'khong', 'thoi', 'kimcuong', 'dan', 'khi', 'tran', 'thu', 'am', 'co', 'nho', 'hoa2']
+  .forEach(id => { GASH[id] = { src: 'fx/' + id + '.webp', n: 72, cols: 8, fps: 24, hit: 50 }; }); // chỉ tải sheet của nhân vật đang dùng
+const gAshOf = () => GASH[(S.hero && S.hero.char) || 'kiem'];
+function gPreloadAsh() { const a = gAshOf(); if (a && !a.img) { a.img = new Image(); a.img.src = a.src; } }
+function gAtkSheet(ar) {
+  const a = gAshOf(); if (!a) return null;
+  gPreloadAsh();
+  const n = a.n || 6, cols = a.cols || n, rows = Math.ceil(n / cols);
+  const ms = a.ms || Array(n).fill(1000 / (a.fps || 30)), ends = [];
+  ms.reduce((s, m, i) => (ends[i] = s + m), 0);
+  const e = document.createElement('div'); e.className = 'ar-fx';
+  e.style.backgroundImage = `url('${a.src}')`; e.style.backgroundSize = `${cols * 100}% ${rows * 100}%`;
+  ar.insertBefore(e, document.getElementById('ar-p')); // sau lưng nhân vật, trước mặt quái
+  const show = i => { const c = i % cols, r = Math.floor(i / cols);
+    e.style.backgroundPosition = `${cols > 1 ? c / (cols - 1) * 100 : 0}% ${rows > 1 ? r / (rows - 1) * 100 : 0}%`; };
+  let cur = -1; const t0 = performance.now();
+  const tick = now => {
+    if (!e.isConnected) return;
+    const dt = now - t0; let i = cur < 0 ? 0 : cur; while (i < n && dt >= ends[i]) i++;
+    if (i >= n) return e.remove();
+    if (i !== cur) { cur = i; show(i); }
+    requestAnimationFrame(tick);
+  };
+  show(0); cur = 0; requestAnimationFrame(tick);
+  const hit = a.hit != null ? a.hit : Math.round(n * 2 / 3);
+  return { hitAt: hit ? ends[hit - 1] : 0, dur: ends[n - 1] };
+}
 // kind: 'atk' (mình đánh trúng), 'miss' (mình đánh trượt), 'hurt' (quái gây sát thương khi trả lời sai), 'block' (đỡ được), 'dot' (độc)
 function gArenaFx(kind, o) {
   o = o || {}; const ar = document.getElementById('ar'); if (!ar) return;
   const P = document.getElementById('ar-p'), B = document.getElementById('ar-b');
   if (kind === 'atk') {
     gArReplay(P, 'lunge');
+    const sh = gAtkSheet(ar); // nhân vật có hoạt ảnh chiêu riêng (fx/<id>.png): quái trúng đòn đúng lúc nổ
     setTimeout(() => {
       gArReplay(B, 'hit');
-      gArSpawn('<div class="ar-sl"></div>', 6, 38, 400); if (o.crit) { gArSpawn('<div class="ar-sl" style="transform:rotate(30deg)"></div>', 8, 30, 400); gArReplay(ar, 'quake'); }
+      if (!sh) gArSpawn('<div class="ar-sl"></div>', 6, 38, 400); if (o.crit) { gArSpawn('<div class="ar-sl" style="transform:rotate(30deg)"></div>', 8, 30, 400); gArReplay(ar, 'quake'); }
       gArSpawn(`<div class="ar-n ${o.crit ? 'crit' : ''}">${o.crit ? '<small style="font-size:15px">CHÍ MẠNG</small><br>' : ''}-${o.dmg}</div>`, 25, 20);
-    }, 160);
+    }, sh ? sh.hitAt : 160);
+    return sh;
   } else if (kind === 'miss') {
     gArReplay(P, 'lunge'); setTimeout(() => { gArReplay(B, 'dodge'); gArSpawn('<div class="ar-n info">Trượt!</div>', 24, 22); }, 160);
   } else if (kind === 'hurt' || kind === 'block') {
@@ -597,7 +631,7 @@ function gAnswer(i) {
   const btns = [...document.querySelectorAll('#gb-o .opt')];
   btns[i].classList.add(right ? 'ok' : 'no'); const okIdx = q.opts.findIndex(o => o.ok); btns[okIdx].classList.add('ok');
   if (q.speakOnAnswer && q.word) speak(q.word);
-  let log = '', ult = null;
+  let log = '', ult = null, fxs = null;
   const dr = rpgOnAnswer(right);
   if (dr) GB.drops.push(dr);
   if (right) {
@@ -613,7 +647,7 @@ function gAnswer(i) {
       const uh = gHit(), ud = Math.round((uh.miss ? Math.max(1, GB.st.atk * GB.mu.dmg - W.def * .5) : uh.dmg) * GULT_MULT * (window.fxUltMul ? fxUltMul() : 1)), ue = gUltEl();
       total += ud; ult = ue; log = `🌟 <b>Chiêu cuối ${GULT[ue].h} ${esc(GULT[ue].n)}</b>: ${ud} sát thương<br>` + log;
     }
-    if (total && !ult) gArenaFx('atk', { dmg: total, crit: h.crit });
+    if (total && !ult) fxs = gArenaFx('atk', { dmg: total, crit: h.crit });
     if (total) {
       W.hp = Math.max(0, W.hp - total); W.dmg += total; GB.dmg += total;
       if (GB.st.fx.vamp) { const hl = Math.round(total * GB.st.fx.vamp / 100); GB.php = Math.min(GB.pmax, GB.php + hl); if (hl) log += ` · hồi ${hl} HP`; }
@@ -628,7 +662,8 @@ function gAnswer(i) {
     if (bs.ab === 'time') { GB.endAt -= 4000; log += ' · -4 giây'; }
     if (bs.ab === 'poison') { GB.poison = Math.min(5, GB.poison + 1); log += ` · trúng độc x${GB.poison}`; }
   }
-  gBars();
+  // có hoạt ảnh chiêu riêng: thanh máu quái tụt đúng lúc kiếm khí nổ
+  if (fxs) { setTimeout(() => { if (GB && !GB.over) gBars(); }, fxs.hitAt); } else gBars();
   $('#gb-log').innerHTML = `${log}<div class="mut" style="margin-top:4px">${q.expl}</div>${dr ? gDropHTML(dr) : ''}`;
   // sang câu tiếp: tự động sau 1,1 giây (sai: 1,7 giây) hoặc ngay khi bấm Enter (GB.goNext)
   const goQ = () => {
@@ -638,10 +673,16 @@ function gAnswer(i) {
     gNextQ();
   };
   const next = () => {
-    if (W.hp <= 0) return setTimeout(() => gEndBattle('win'), 900);
+    if (W.hp <= 0) return setTimeout(() => gEndBattle('win'), 900 + (fxs ? fxs.hitAt : 0));
     if (GB.php <= 0) return setTimeout(() => gEndBattle('dead'), 900);
     GB.goNext = goQ; GB.nt = setTimeout(goQ, right ? 1100 : 1700);
   };
+  if (fxs) { // hoạt ảnh chiêu dài (vd Kiếm 3 giây): dừng đồng hồ, câu tiếp hiện khi chiêu xong (Enter để bỏ qua)
+    GB.pauseAt = Date.now(); const tm = $('#gb-tm'); if (tm) tm.textContent = '⏸';
+    if (W.hp <= 0) return next();
+    GB.goNext = goQ; GB.nt = setTimeout(goQ, Math.max(1100, fxs.dur - 250));
+    return;
+  }
   if (!ult) return next();
   // chiêu cuối: dừng đồng hồ từ lúc tung chiêu đến khi câu hỏi mới hiện ra
   GB.pauseAt = Date.now(); const tm = $('#gb-tm'); if (tm) tm.textContent = '⏸';
@@ -689,7 +730,7 @@ window.addEventListener('pagehide', () => { try { gLeave(); } catch (e) {} });
 // ---------- màn hình chiến đấu ----------
 function vFight() {
   const W = gEnsureWeek(), bs = GBOSS[W.boss], st = gStats(), cd = gCD(), pct = Math.max(0, W.hp / W.max * 100);
-  gPreloadBg(bs);
+  gPreloadBg(bs); gPreloadAsh();
   const ms = [.25, .5, .75, 1].map(t => `<span class="chip" style="${W.claimed.includes(t) ? 'background:var(--ac2);color:#fff' : ''}">${W.claimed.includes(t) ? '✓' : '🔒'} ${t * 100}%</span>`).join(' ');
   view.innerHTML = `
   <div class="card" style="padding:10px"><div class="mut" style="text-align:left">Quái tuần ${(W.k % 52) + 1} · cảnh giới ${REALMS[W.ri].h} ${REALMS[W.ri].n} · còn ${gDaysLeft()} ngày</div>
